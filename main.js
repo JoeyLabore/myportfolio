@@ -141,7 +141,8 @@
   let timeline = 0; // current position along an infinite loop
   let targetTimeline = 0; // eased target along the loop
   const ZOOM_MAX = 1.6; // scale at the end of a segment
-  const TIMELINE_PER_WHEEL = 0.0008; // sensitivity (higher = faster)
+  const TIMELINE_PER_WHEEL = 0.0008; // sensitivity for wheel/trackpad (higher = faster)
+  const TOUCH_DRAG_MULTIPLIER = 2.4; // extra sensitivity applied only to touch/drag (was 1.8)
   const START_SCALE = 0.001; // scale for non-current images (as small as possible)
   const NEXT_MIN_VISIBLE = START_SCALE; // no minimum bump; start tiny
   const CONTINUE_GROWTH = 0.55; // extra growth for previous image during handoff (increased)
@@ -438,18 +439,108 @@
       }
     });
 
-    // Touch
+    // Touch (refined for mobile: ignore nav, allow horizontal card scroll)
     let touchStartY = null;
+    let touchStartX = null;
+    let touchStartTarget = null;
+    let ignoreTouchForTimeline = false;
+    // Momentum state
+    let velY = 0; // low-pass filtered velocity (in px per event)
+    let lastTouchTs = 0;
+    let accumDX = 0;
+    let accumDY = 0;
+    let inertiaRAF = null;
+    const stopInertia = () => { if (inertiaRAF) { cancelAnimationFrame(inertiaRAF); inertiaRAF = null; } };
+
     window.addEventListener("touchstart", (e) => {
-      if (e.touches[0]) touchStartY = e.touches[0].clientY;
+      const t = e.touches[0];
+      if (!t) return;
+      touchStartY = t.clientY;
+      touchStartX = t.clientX;
+      touchStartTarget = e.target;
+      lastTouchTs = performance.now ? performance.now() : Date.now();
+      velY = 0;
+      accumDX = 0;
+      accumDY = 0;
+      // Stop any ongoing inertia when a new gesture starts
+      stopInertia();
+      // If starting on nav, never advance the background timeline
+      if (touchStartTarget && touchStartTarget.closest && touchStartTarget.closest('.nav-bar')) {
+        ignoreTouchForTimeline = true;
+      } else {
+        ignoreTouchForTimeline = false;
+      }
     }, { passive: true });
+
     window.addEventListener("touchmove", (e) => {
-      if (touchStartY == null) return;
-      const y = e.touches[0]?.clientY ?? touchStartY;
-      const delta = touchStartY - y;
-      onDelta(delta);
+      const t = e.touches[0];
+      if (!t || touchStartY == null || touchStartX == null) return;
+
+      // If gesture started on nav, ignore entirely
+      if (ignoreTouchForTimeline) return;
+
+      const y = t.clientY;
+      const x = t.clientX;
+      const dy = touchStartY - y;
+      const dx = touchStartX - x;
+      accumDX += dx;
+      accumDY += dy;
+      // Update low-pass velocity estimate
+      velY = 0.85 * velY + 0.15 * dy;
+
+      // If gesture originates within the horizontal card scroller, allow native pan-x
+      const inScroller = !!(touchStartTarget && touchStartTarget.closest && touchStartTarget.closest('.paragraph-containers'));
+      if (inScroller) {
+        // If the movement is predominantly horizontal, do not drive the background
+        if (Math.abs(dx) >= Math.abs(dy)) {
+          // Let the scroller handle it; also stop the background handler from fighting
+          return; // do not preventDefault to keep native momentum scrolling
+        }
+        // If predominantly vertical inside scroller, treat as background gesture
+        // fall through to onDelta
+      }
+
+      onDelta(dy * TOUCH_DRAG_MULTIPLIER);
+      // Prevent the browser from also attempting to scroll the page when we consume the gesture
+      e.preventDefault();
       touchStartY = y;
+      touchStartX = x;
     }, { passive: false });
+
+    // Momentum/inertia on touch end
+    window.addEventListener("touchend", () => {
+      if (touchStartY == null || touchStartX == null) return;
+      // If gesture was ignored (started on nav), skip inertia
+      if (ignoreTouchForTimeline) { touchStartY = touchStartX = null; return; }
+
+      const inScroller = !!(touchStartTarget && touchStartTarget.closest && touchStartTarget.closest('.paragraph-containers'));
+      // Determine dominant axis of the gesture overall
+      const horizDominant = Math.abs(accumDX) >= Math.abs(accumDY);
+      if (inScroller && horizDominant) {
+        // Horizontal swipe over scroller: no background inertia
+        touchStartY = touchStartX = null; return;
+      }
+
+      // Start inertia with the last filtered velocity
+      let v = velY * TOUCH_DRAG_MULTIPLIER; // px per frame-ish
+      const friction = 0.92; // decay per frame
+      const minV = 0.05; // stop threshold
+      stopInertia();
+      const step = () => {
+        // Apply to timeline
+        onDelta(v);
+        v *= friction;
+        if (Math.abs(v) > minV) {
+          inertiaRAF = requestAnimationFrame(step);
+        } else {
+          stopInertia();
+        }
+      };
+      if (Math.abs(v) > minV) inertiaRAF = requestAnimationFrame(step);
+
+      // Reset start markers
+      touchStartY = touchStartX = null;
+    }, { passive: true });
 
     // --- Horizontal drag/scroll for card row (desktop) ---
     // Enable click-drag to scroll the card strip on desktop and override wheel while hovering it.
