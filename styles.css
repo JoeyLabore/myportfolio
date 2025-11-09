@@ -1,0 +1,605 @@
+/* Design tokens from Figma */
+:root {
+  /* Colors */
+  --color-logo-primary: #0f0f0f; /* logo/primary */
+  --color-typography-heading: #0f0f0f; /* typography/heading */
+  --color-surface-primary: #f2f2f2; /* surface/primary */
+  --color-stroke-divider: #cccccc; /* stroke/divider */
+
+  /* Spacing (px) */
+  --space-none: 0px; /* gap/spacing-none */
+  --space-xs: 8px;  /* gap/spacing-xs */
+  --space-s: 16px;  /* gap/spacing-s */
+  --space-m: 24px;  /* gap/spacing-m */
+  --space-lg: 32px; /* gap/spacing-lg */
+
+  /* Typography */
+  --font-family-manrope: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-size-xs: 14px; /* font/size/xs */
+  --font-size-s: 16px;  /* font/size/s */
+  --font-weight-regular: 400; /* font/weight/regular */
+  --font-weight-semiBold: 600; /* font/weight/semi-bold */
+  --line-height-base: 1.6; /* paragraph line-height */
+
+  /* Stroke */
+  --stroke-s: 1px; /* stroke/stroke-s */
+
+  /* Radius */
+  --radius-none: 0px; /* corner-radius/radius-none */
+  
+  /* Theming */
+  --fg-color: #ffffff; /* default foreground color (will be updated by JS) */
+}
+
+/* Base reset-ish */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: transparent; /* allow background sequence to be visible */
+  color: var(--fg-color);
+  font-family: var(--font-family-manrope);
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-base);
+  overflow-y: hidden; /* no vertical scrolling */
+  overflow-x: auto;  /* allow horizontal scroll when cards exceed width */
+}
+img { display: block; max-width: 100%; height: auto; }
+p { margin: 0; }
+
+/* Layout */
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: transparent; /* allow background sequence to show through */
+  position: relative;
+  z-index: 1; /* ensure content sits above background */
+}
+
+/* Fullscreen background sequence */
+#bg-sequence {
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* behind content */
+  pointer-events: none;
+  overflow: hidden;
+  background-image: none; /* no static background image */
+  background-size: contain; /* keep original aspect ratio */
+  background-position: center;
+  background-color: #000; /* solid backdrop prevents white flash behind layers */
+}
+.preloading #bg-sequence {
+  visibility: hidden;
+}
+/* Hide the UI until preloading finishes so all media are ready */
+.preloading .page {
+  visibility: hidden;
+}
+.preloading .nav-bar {
+  /* ensure nav starts off-screen so the slide-in is visible */
+  transform: translate3d(0, -100%, 0);
+}
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* keep original aspect ratio */
+  object-position: center;
+  transform-origin: center center;
+  backface-visibility: hidden; /* avoid flicker on large transforms */
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0); /* ensure GPU compositing */
+  transition: opacity 200ms linear; /* smooth crossfade */
+  will-change: transform, opacity;
+}
+
+/* First image should fill the viewport so no background shows initially */
+.bg-layer.bg-first {
+  object-fit: cover;
+}
+
+/* Nav Bar (matches Figma: px=32, py=16, divider bottom 1px) */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* spread logo + 3 menu items similar to design */
+  padding: var(--space-m) var(--space-m); /* 24px top/bottom and left/right */
+  padding-right: 40px; /* custom right padding */
+  border-bottom: none;
+  /* Glass effect container with darker tint */
+  background: rgba(0, 0, 0, 0.38);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(4px) saturate(140%);
+  border: none;
+  border-radius: 16px;
+  margin: var(--space-s);
+  box-shadow: none;
+  background-clip: padding-box;
+  position: relative;
+  z-index: 2;
+  /* Ensure blend mode doesn't affect nav readability */
+  mix-blend-mode: normal;
+  /* allow slide-in animation from top */
+  transform: translateY(0);
+  transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.nav-logo {
+  width: 24px; /* matches size-[24px] */
+  height: 24px;
+  overflow: clip;
+}
+.nav-logo img { width: 100%; height: 100%; filter: none; }
+/* Neutralize previous theme-based inversion; we'll use blend modes for contrast */
+.theme-light .nav-logo img { filter: none; }
+.nav-item {
+  background: transparent; /* plain text */
+  color: inherit;
+  font-family: var(--font-family-manrope);
+  font-weight: var(--font-weight-regular);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-base);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 0; /* no container padding */
+  display: inline-block; /* allow transform for hover lift without affecting line box */
+  height: auto;
+  border-radius: 0;
+  cursor: pointer;
+  position: relative; /* for underline pseudo-element */
+  transform: translateY(0);
+  transition: transform 160ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* States */
+.nav-item:hover {
+  text-decoration: none; /* neutralize hover */
+}
+.nav-item:hover { transform: translateY(-2px); }
+
+/* Animated underline */
+.nav-item::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px; /* slight offset below baseline */
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 160ms cubic-bezier(0.2, 0.7, 0.2, 1), height 120ms ease;
+}
+.nav-item:hover::after,
+.nav-item:focus-visible::after {
+  transform: scaleX(1);
+}
+.nav-item:active::after {
+  height: 4px; /* increase thickness by 2px on click */
+}
+.nav-item:active {
+  opacity: 1; /* neutralize pressed */
+  text-decoration: none;
+}
+.nav-item:focus-visible {
+  outline: var(--stroke-s) solid currentColor; /* match visible text color */
+  outline-offset: 2px;
+}
+
+/* Main */
+.main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* align to right edge per previous layout */
+  justify-content: flex-end; /* push content to bottom */
+  padding: var(--space-s);
+  gap: var(--space-lg);
+}
+
+.text-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  color: inherit;
+  width: 100%;
+  max-width: 326px; /* fills width up to 326px */
+}
+.text-label {
+  /* Match nav-item typography */
+  font-family: var(--font-family-manrope);
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-regular);
+}
+.text-body {
+  /* Match nav-item typography */
+  font-family: var(--font-family-manrope);
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-regular);
+}
+
+/* Subtle text shadow for readability over busy/dark backgrounds */
+/* Default case: white text over darker backgrounds */
+.nav-item,
+.text-label,
+.text-body,
+.paragraph-detail__inner p,
+.paragraph-detail__inner li,
+.project-overview li {
+  /* Subtler shadow for cleaner look over glass */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+/* Theme-aware override when foreground switches to black on light backgrounds */
+.theme-light .nav-item,
+.theme-light .text-label,
+.theme-light .text-body,
+.theme-light .paragraph-detail__inner p,
+.theme-light .paragraph-detail__inner li,
+.theme-light .project-overview li {
+  /* Subtler white shadow for light theme */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35);
+}
+
+/* Project Overview list inside cards */
+.project-overview {
+  margin-top: var(--space-xs);
+  padding-left: 1.1rem; /* modest indent for bullets */
+}
+.project-overview li {
+  font-family: var(--font-family-manrope);
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-base);
+  margin-bottom: 6px;
+}
+.project-overview li:last-child { margin-bottom: 0; }
+.project-overview strong { font-weight: var(--font-weight-semiBold); }
+
+/* Emphasis utility for Problem & Solution content */
+.text-body.emphasize p:not(.text-label) {
+  font-weight: var(--font-weight-regular) !important;
+}
+/* Also apply when emphasis is added to the injected detail container */
+.paragraph-detail__inner.emphasize p:not(.text-label) {
+  font-weight: var(--font-weight-regular) !important;
+}
+/* Labels inside emphasized sections should be semi-bold */
+.text-body.emphasize .text-label,
+.paragraph-detail__inner.emphasize .text-label {
+  font-weight: var(--font-weight-semiBold) !important;
+}
+
+/* Ensure paragraph text (not labels) uses 160% line-height in cards and details */
+.text-body p:not(.text-label),
+.paragraph-detail__inner p:not(.text-label) {
+  font-size: var(--font-size-xs);
+  line-height: 160%;
+}
+
+/* Spacing between labels and the immediate paragraph text on all cards */
+.paragraph .text-label + p,
+.paragraph-detail__inner .text-label + p {
+  margin-top: 12px;
+}
+
+/* Normalize all in-card content to 14px (cards and expanded detail) */
+.paragraph .text-label,
+.paragraph .text-body,
+.paragraph .text-body *,
+.paragraph-detail__inner .text-label,
+.paragraph-detail__inner p,
+.paragraph-detail__inner li {
+  font-size: var(--font-size-xs);
+}
+.paragraph .project-overview li,
+.paragraph-detail__inner .project-overview li {
+  font-size: var(--font-size-xs);
+}
+
+/* Preserve category title size (top label in each card) */
+.paragraph > .text-label {
+  font-size: var(--font-size-s);
+}
+
+.paragraph-containers {
+  display: flex;
+  gap: var(--space-s);
+  width: 100%;
+  align-items: flex-end; /* keep columns bottom-aligned; no stretching */
+  overflow-anchor: none; /* reduce scroll jumps when content expands */
+  flex-wrap: nowrap; /* keep cards on one row */
+  overflow: visible; /* do not clip cards; page handles horizontal scroll */
+}
+.paragraph-containers > .paragraph-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* rely on .paragraph-detail margin-top for spacing */
+  flex: 1 1 240px; /* fill available width, but base at 240px */
+  min-width: 240px; /* match card min-width to prevent visual overlap */
+  justify-content: flex-end; /* push card/detail to bottom of the column */
+  contain: layout; /* avoid paint containment to prevent hover lift clipping */
+}
+.paragraph {
+  flex: 0 0 auto; /* size to content so opening detail won't stretch siblings */
+  min-width: 240px; /* ensure minimum card width */
+  width: 100%; /* card fills its column width */
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* remove extra spacing under label when body is hidden */
+  /* Glass effect card with darker tint */
+  background: rgba(0, 0, 0, 0.38);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: none;
+  border-radius: 16px;
+  padding: var(--space-m);
+  box-shadow: none;
+  background-clip: padding-box;
+  position: relative;
+  z-index: 1;
+  mix-blend-mode: normal;
+  cursor: pointer; /* indicate interactable */
+  /* Hover lift setup */
+  transform: translateY(0);
+  transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+
+/* Card interaction: neutralize hover/pressed while retaining focus-visible */
+.paragraph:hover .text-label { text-decoration: none; }
+.paragraph:active { opacity: 1; }
+.paragraph:active .text-label { text-decoration: none; }
+.paragraph:focus-visible {
+  outline: var(--stroke-s) solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Hover lift effect */
+.paragraph:hover {
+  /* Neutralize hover by default to avoid sticky hover on touch */
+  transform: translateY(0);
+  z-index: 1;
+}
+
+/* Intro animation states for category title cards */
+.paragraph.intro-hidden {
+  transform: translate3d(0, 100vh, 0); /* start below the viewport */
+}
+.paragraph.intro-visible {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Ensure hover lift still applies after intro becomes visible */
+.paragraph.intro-visible:hover {
+  transform: translateY(0);
+}
+
+/* Enable hover lift only on devices that actually support hover (e.g., desktop) */
+@media (hover: hover) and (pointer: fine) {
+  .paragraph:hover {
+    transform: translateY(-4px);
+    z-index: 3; /* lift above siblings to avoid visual clipping/overlap */
+  }
+  .paragraph.intro-visible:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* Exit animation: slide cards out of view when background tapped with all closed */
+.paragraph.exit-out {
+  transform: translate3d(0, 100vh, 0);
+  pointer-events: none; /* avoid hover conflicts during exit */
+}
+
+/* Small line on top when collapsed */
+.paragraph::before {
+  content: none;
+  display: none;
+}
+
+/* Never show body text inside the base cards (detail is shown separately) */
+.paragraph .text-body { display: none !important; }
+
+/* Detail card appears below the selected card within same column */
+.paragraph-col .paragraph-detail {
+  margin-top: 0; /* will animate to 16px when open */
+  /* Move heavy effects to inner to reduce repaint area during height anim */
+  color: inherit;
+  overflow: hidden;
+  height: 0; /* wrapper reserves space only by height */
+  opacity: 0;
+  transform: translateY(8px);
+  transition: height 320ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 240ms ease, transform 240ms ease, margin-top 240ms ease;
+  will-change: height, opacity, transform, backdrop-filter;
+  overflow-anchor: none; /* prevent scroll anchoring on this changing element */
+  /* Ensure backdrop-filter is visible across browsers by applying on wrapper as well */
+  background-color: rgba(0, 0, 0, 0.001); /* minimal alpha to trigger backdrop */
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border-radius: 16px; /* clip blur to rounded corners */
+}
+.paragraph-col .paragraph-detail.open {
+  /* Height will be set inline by JS to scrollHeight and then to auto */
+  margin-top: var(--space-s);
+  opacity: 1;
+  transform: translateY(0);
+  position: relative; /* create stacking context for pseudo layers */
+  z-index: 3; /* lift above sibling cards so blur is visually prominent */
+}
+
+/* Inner content container that does not affect layout height directly */
+.paragraph-detail__inner {
+  padding: var(--space-m);
+  background: transparent; /* avoid double tint; use ::before for tint */
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: none;
+  border-radius: 16px;
+  box-shadow: none;
+  background-clip: padding-box;
+  mix-blend-mode: normal;
+  position: relative;
+  z-index: 1;
+  will-change: backdrop-filter;
+}
+/* Dedicated blur/tint layer to ensure effect renders across browsers */
+.paragraph-detail__inner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(0, 0, 0, 0.38); /* match category card tint */
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  z-index: 0;
+  pointer-events: none;
+}
+.paragraph-detail__inner > * { position: relative; z-index: 1; }
+
+/* Impact detail: grid of 3 separate metric cards */
+.paragraph-detail__inner .detail-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-s);
+}
+.paragraph-detail__inner .detail-card {
+  background: rgba(0, 0, 0, 0.38); /* match category card tint */
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: none;
+  border-radius: 16px;
+  padding: var(--space-m);
+  background-clip: padding-box;
+  will-change: backdrop-filter;
+}
+.paragraph-detail__inner .detail-card .text-label {
+  font-family: var(--font-family-manrope);
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-regular);
+}
+.paragraph-detail__inner .detail-card .text-body {
+  font-family: var(--font-family-manrope);
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-regular);
+  opacity: 0.9;
+}
+@media (max-width: 900px) {
+  .paragraph-detail__inner .detail-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paragraph-col .paragraph-detail { transition: none; }
+  .paragraph { transition: none; }
+  .paragraph:hover { transform: none; }
+  .nav-item { transition: none; }
+  .nav-item:hover { transform: none; }
+  .nav-item::after { transition: none; }
+  .paragraph.intro-hidden, .paragraph.intro-visible { transform: none; }
+}
+
+/* Ensure text inside cards stays readable over the frosted background */
+.paragraph * { mix-blend-mode: normal; }
+
+/* Responsive niceties (optional) */
+@media (max-width: 900px) {
+  .nav-bar { gap: var(--space-s); }
+  .paragraph-containers { flex-direction: row; }
+  .text-container { max-width: none; align-self: stretch; }
+  .main { align-items: stretch; }
+}
+
+/* Keep nav content readable on the glass panel */
+.nav-bar, .nav-bar * { mix-blend-mode: normal; }
+
+/* Intro animation states for top nav */
+.nav-bar.intro-top-hidden {
+  transform: translate3d(0, -100vh, 0);
+}
+.nav-bar.intro-top-visible {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Exit animation: slide nav out when background tapped with all closed */
+.nav-bar.exit-out {
+  transform: translate3d(0, -100vh, 0);
+  pointer-events: none;
+}
+
+/* Global exit state to ensure highest precedence */
+.ui-exited .nav-bar {
+  transform: translate3d(0, -100vh, 0);
+  pointer-events: none;
+}
+.ui-exited .paragraph {
+  transform: translate3d(0, 100vh, 0);
+  pointer-events: none;
+}
+
+/* When exiting via click, make disappearance instant (no animation) */
+.ui-exited .nav-bar,
+.ui-exited .paragraph {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-bar { transition: none; }
+  .nav-bar.intro-top-hidden, .nav-bar.intro-top-visible { transform: none; }
+}
+
+/* Below 1050px: mobile/tablet layout with edge padding and horizontal card scroll */
+@media (max-width: 1050px) {
+  /* Top/bottom/left/right margins for nav, and edge padding for main content */
+  .nav-bar {
+    margin: var(--space-xs); /* 8px around nav */
+    border-radius: 16px; /* restore default rounded look */
+  }
+  .main {
+    padding: var(--space-xs); /* 8px on all sides */
+    gap: 0; /* keep tight vertical rhythm */
+    align-items: stretch; /* make content span full width */
+  }
+
+  /* Constrain page-level horizontal scroll and move it to the cards row */
+  body {
+    overflow-x: hidden; /* prevent full-page horizontal scroll */
+    overflow-y: auto;   /* allow vertical scrolling if needed */
+  }
+
+  /* Horizontal side scroll for cards with edge bleed (free-flowing, no snap) */
+  .paragraph-containers {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: none; /* disable sticky snapping */
+    /* Counter the 8px page padding so cards hit the screen edge on all sides */
+    margin-left: calc(-1 * var(--space-xs));
+    margin-right: calc(-1 * var(--space-xs));
+    margin-top: calc(-1 * var(--space-xs));
+    margin-bottom: calc(-1 * var(--space-xs));
+    padding-left: var(--space-xs);
+    padding-right: var(--space-xs);
+    padding-top: var(--space-xs);
+    padding-bottom: var(--space-xs);
+    gap: var(--space-xs); /* 8px space between cards */
+    width: auto; /* allow natural width with negative margins */
+    scroll-padding-left: 0; /* no snap padding */
+    scroll-padding-right: 0; /* no snap padding */
+  }
+  /* Hide scrollbar indicators on mobile */
+  .paragraph-containers::-webkit-scrollbar { display: none; }
+  .paragraph-containers { scrollbar-width: none; }
+
+  /* Size columns so one card largely fills viewport and next peeks (bleed) */
+  .paragraph-containers > .paragraph-col {
+    /* Clamp width between 240px and 400px, preferring 88% of viewport segment */
+    flex: 0 0 clamp(240px, 88%, 400px);
+    min-width: clamp(240px, 88%, 400px);
+  }
+
+  /* Ensure cards do not snap */
+  .paragraph { scroll-snap-align: none; }
+}
