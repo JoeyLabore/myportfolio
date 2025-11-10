@@ -47,6 +47,10 @@
   .bg-layer[data-src$="2.jpg"] {
     object-position: 60% center !important;
   }
+  /* Reframe 12.jpg: nudge slightly left for better centering */
+  .bg-layer[data-src$="12.jpg"] {
+    object-position: 45% center !important;
+  }
   .nav-bar,
   .nav-bar.intro-top-hidden,
   .nav-bar.intro-top-visible,
@@ -652,4 +656,8 @@ p { margin: 0; }
 
   /* Ensure cards do not snap */
   .paragraph { scroll-snap-align: none; }
+
+  /* Child cards within a category: force 8px vertical spacing between stacked details */
+  .paragraph-col .paragraph-detail.open { margin-top: var(--space-xs); }
+  .paragraph-col .paragraph-detail + .paragraph-detail { margin-top: var(--space-xs); }
 }

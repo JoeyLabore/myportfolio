@@ -605,21 +605,23 @@
         window.addEventListener('mouseup', endDrag, { passive: true });
         scroller.addEventListener('mouseleave', endDrag, { passive: true });
 
-        // Intercept wheel over the card row to scroll horizontally instead of advancing background
+        // Intercept wheel over the card row ONLY on mobile (<=1050px)
         scroller.addEventListener('wheel', (e) => {
+          const isMobile = window.matchMedia && window.matchMedia('(max-width: 1050px)').matches;
+          if (!isMobile) {
+            // Desktop: allow background timeline to scroll even when hovering cards
+            return; // do not stop propagation or prevent default
+          }
           const el = getScrollEl();
           // Prefer horizontal delta when available; fall back to vertical mapped to horizontal
           const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
           el.scrollLeft += delta;
-          // Prevent background timeline wheel handler
+          // Prevent background timeline wheel handler on mobile
           e.stopPropagation();
           e.preventDefault();
         }, { passive: false });
 
-        // Optional: improve cursor feedback while dragging
-        scroller.style.cursor = 'grab';
-        scroller.addEventListener('mousedown', () => { scroller.style.cursor = 'grabbing'; });
-        window.addEventListener('mouseup', () => { scroller.style.cursor = 'grab'; });
+        // Remove cursor styling so no grab/grabbing cursor appears
       }
     } catch (_) {
       /* no-op if drag-to-scroll setup fails */
@@ -1015,9 +1017,13 @@
       const insideDetail = e.target.closest('.paragraph-detail');
       const insideNav = e.target.closest('.nav-bar');
       if (insideCard || insideDetail) return;
-      // Hard lock: below or equal to 600px, never exit UI
+      // Hard lock: below or equal to 600px, never exit UI, but still allow background tap to close any open categories
       const lockSmall = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
       if (lockSmall) {
+        // Close any open categories first
+        if (openCards && openCards.size > 0) {
+          Array.from(openCards).forEach((c) => closeDetailFor(c));
+        }
         // Ensure any accidental exit classes are cleared immediately
         document.documentElement.classList.remove('ui-exited');
         const nav = document.querySelector('.nav-bar');
