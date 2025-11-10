@@ -94,6 +94,7 @@
     // Build media layers with preloaded elements to avoid flicker
     results.forEach((res, i) => {
       const el = res.el;
+      const srcPath = files[i] || '';
       // For videos, set attributes before attaching
       if (res.type === "video") {
         el.muted = true;
@@ -102,6 +103,17 @@
         el.autoplay = true;
       }
       el.className = "bg-layer";
+      // Expose original src for targeting in CSS if needed
+      try { el.dataset.src = srcPath; } catch (_) {}
+      // Mark media that should keep object-fit: contain on small screens
+      if (/(^|\/)3\.png$/i.test(srcPath)
+        || /(\/)5\.png$/i.test(srcPath)
+        || /(\/)8\.png$/i.test(srcPath)
+        || /(\/)11\.png$/i.test(srcPath)
+        || /(^|\/)12\.5\.mp4$/i.test(srcPath)
+        || /(^|\/)20\.mp4$/i.test(srcPath)) {
+        el.classList.add('keep-contain');
+      }
       el.style.opacity = "1";
       if (i === 0) {
         el.classList.add('bg-first');
@@ -402,6 +414,15 @@
       document.documentElement.classList.remove('ui-exited');
       introCards.forEach((el) => el.classList.remove('exit-out'));
       introCards.forEach((el) => el.classList.add('intro-hidden'));
+      // Force UI to be visible on small screens (<=600px)
+      try {
+        const smallScreen = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+        if (smallScreen) {
+          const nav = document.querySelector('.nav-bar');
+          if (nav) nav.classList.remove('exit-out');
+          document.documentElement.classList.remove('ui-exited');
+        }
+      } catch (_) {}
       if (!prefersReduced) {
         const BASE_DELAY = 900; // ms before first card (after nav starts)
         const STEP = 260; // ms between cards (slower)
@@ -977,7 +998,9 @@
         if (zone !== lastZone) {
           lastZone = zone;
           if ((zone === 'top' || zone === 'bottom')) {
-            if (revealUI) revealUI();
+            // Avoid triggering reveal/hide logic checks when locked on small screens
+            const lockedSmall = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+            if (!lockedSmall && revealUI) revealUI();
           }
         }
       }, { passive: true });
@@ -992,6 +1015,16 @@
       const insideDetail = e.target.closest('.paragraph-detail');
       const insideNav = e.target.closest('.nav-bar');
       if (insideCard || insideDetail) return;
+      // Hard lock: below or equal to 600px, never exit UI
+      const lockSmall = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+      if (lockSmall) {
+        // Ensure any accidental exit classes are cleared immediately
+        document.documentElement.classList.remove('ui-exited');
+        const nav = document.querySelector('.nav-bar');
+        if (nav) nav.classList.remove('exit-out');
+        document.querySelectorAll('.paragraph').forEach((el) => el.classList.remove('exit-out'));
+        return;
+      }
       // If UI is exited, clicking background should bring it back
       if (document.documentElement.classList.contains('ui-exited') && !insideNav) {
         e.preventDefault();
@@ -1006,6 +1039,9 @@
       requestAnimationFrame(() => {
         // If there were any open categories, we only collapse them and STOP here.
         if (hadAnyOpen) return;
+        // Do not allow nav/menu to disappear on small screens (<=600px)
+        const canExitUI = !(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
+        if (!canExitUI) return;
         if (openCards.size === 0 && !insideNav) {
           document.documentElement.classList.add('ui-exited');
           const nav = document.querySelector('.nav-bar');
@@ -1026,4 +1062,17 @@
 
     // Note: outside-click closing is disabled to allow multiple open at once.
   }
+
+  // Global safety: when resizing to <=600px, immediately clear exit state/classes
+  window.addEventListener('resize', () => {
+    try {
+      const small = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+      if (small) {
+        document.documentElement.classList.remove('ui-exited');
+        const nav = document.querySelector('.nav-bar');
+        if (nav) nav.classList.remove('exit-out');
+        document.querySelectorAll('.paragraph').forEach((el) => el.classList.remove('exit-out'));
+      }
+    } catch (_) {}
+  }, { passive: true });
 })();

@@ -31,6 +31,49 @@
   --fg-color: #ffffff; /* default foreground color (will be updated by JS) */
 }
 
+/* Below 600px: never allow the nav to disappear */
+@media (max-width: 600px) {
+  /* Make all background layers fill the viewport in portrait */
+  #bg-sequence { background-color: #000; }
+  .bg-layer {
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
+  /* Keep selected frames as 'contain' to preserve original composition */
+  .bg-layer.keep-contain {
+    object-fit: contain !important;
+  }
+  /* Reframe 2.jpg so it crops more from the left to center the subject */
+  .bg-layer[data-src$="2.jpg"] {
+    object-position: 60% center !important;
+  }
+  .nav-bar,
+  .nav-bar.intro-top-hidden,
+  .nav-bar.intro-top-visible,
+  .nav-bar.exit-out,
+  .ui-exited .nav-bar {
+    transform: translate3d(0, 0, 0) !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+  }
+  .paragraph,
+  .paragraph.intro-hidden,
+  .paragraph.intro-visible,
+  .paragraph.exit-out,
+  .ui-exited .paragraph {
+    transform: translate3d(0, 0, 0) !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+  }
+  .paragraph-detail,
+  .paragraph-detail.open,
+  .ui-exited .paragraph-detail {
+    transform: translate3d(0, 0, 0) !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+
 /* Base reset-ish */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
