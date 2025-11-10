@@ -142,7 +142,7 @@
   let targetTimeline = 0; // eased target along the loop
   const ZOOM_MAX = 1.6; // scale at the end of a segment
   const TIMELINE_PER_WHEEL = 0.0008; // sensitivity for wheel/trackpad (higher = faster)
-  const TOUCH_DRAG_MULTIPLIER = 2.4; // extra sensitivity applied only to touch/drag (was 1.8)
+  const TOUCH_DRAG_MULTIPLIER = 3.0; // extra sensitivity applied only to touch/drag
   const START_SCALE = 0.001; // scale for non-current images (as small as possible)
   const NEXT_MIN_VISIBLE = START_SCALE; // no minimum bump; start tiny
   const CONTINUE_GROWTH = 0.55; // extra growth for previous image during handoff (increased)
