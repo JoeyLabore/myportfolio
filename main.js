@@ -5,7 +5,30 @@
   // Profiling toggle: set to true to show live performance stats
   const ENABLE_PROFILING = false;
 
-  const files = [
+  // First-load markers: cookie + localStorage + Service Worker registration
+  try {
+    // LocalStorage flag
+    if (!localStorage.getItem('jg_first_visit')) {
+      localStorage.setItem('jg_first_visit', String(Date.now()));
+    }
+    // Cookie (1 year)
+    document.cookie = `jg_first_visit=1; max-age=${60 * 60 * 24 * 365}; path=/; SameSite=Lax`;
+    // Service worker registration for offline/runtime caching
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+    }
+  } catch (_) { /* ignore storage/sw errors */ }
+
+  // Detect mobile/lite contexts for performance tuning
+  const IS_SMALL_SCREEN = (() => {
+    try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch { return false; }
+  })();
+  const SAVE_DATA = (() => {
+    try { return !!(navigator.connection && navigator.connection.saveData); } catch { return false; }
+  })();
+  const LITE_MODE = IS_SMALL_SCREEN || SAVE_DATA;
+
+  const ALL_FILES = [
     // Ordered to match assets/nestbank folder including videos
     // Sequence follows numeric filenames, with fractional steps like 4.5, 12.5, 16
     "./assets/nestbank/1.jpg",
@@ -26,6 +49,9 @@
     "./assets/nestbank/19.jpg",
     "./assets/nestbank/8.png",
   ];
+
+  // Keep ALL assets (images and videos), per requirement. We'll optimize how we load/play them instead.
+  const files = ALL_FILES;
 
   const root = document.getElementById("bg-sequence");
   if (!root) {
@@ -343,7 +369,22 @@
 
   document.documentElement.classList.add("preloading");
 
-  Promise.all(files.map(preloadFile)).then((results) => {
+  // Limit concurrent preloads to reduce peak memory on mobile
+  async function preloadInBatches(list, concurrency) {
+    const out = new Array(list.length);
+    let idx = 0;
+    const workers = new Array(Math.min(concurrency, list.length)).fill(0).map(async () => {
+      while (idx < list.length) {
+        const myIndex = idx++;
+        const src = list[myIndex];
+        out[myIndex] = await preloadFile(src);
+      }
+    });
+    await Promise.all(workers);
+    return out;
+  }
+
+  preloadInBatches(files, LITE_MODE ? 2 : 5).then((results) => {
     // Build media layers with preloaded elements to avoid flicker
     results.forEach((res, i) => {
       const el = res.el;
@@ -353,7 +394,9 @@
         el.muted = true;
         el.loop = true;
         el.playsInline = true;
-        el.autoplay = true;
+        // Always use metadata preload and control play/pause from render() so it autoplays programmatically
+        try { el.preload = 'metadata'; } catch (_) {}
+        el.autoplay = false; // programmatic autoplay handled in render()
       }
       el.className = "bg-layer";
       // Expose original src for targeting in CSS if needed
@@ -381,10 +424,7 @@
         el.style.visibility = "visible"; // keep visible at all times
       }
       root.appendChild(el);
-      // Nudge autoplay for videos after in-DOM to satisfy some browsers
-      if (res.type === "video") {
-        try { el.play().catch(() => {}); } catch (_) {}
-      }
+      // Do not autoplay here; render() will decide which videos to play
       layers.push(el);
     });
 
@@ -413,6 +453,9 @@
   const CONTINUE_GROWTH = 0.55; // extra growth for previous image during handoff (increased)
   const POST_SWITCH_MIN = 0.2; // stronger boost to targetZoom after a forward switch
   const SECOND_INITIAL = START_SCALE; // second image also starts tiny
+
+  // In lite mode, reduce zoom span to cut GPU work slightly
+  const ZOOM_MAX_EFFECTIVE = LITE_MODE ? Math.min(1.4, ZOOM_MAX) : ZOOM_MAX;
 
   let pending = false;
   let wheelAccum = 0;
@@ -533,7 +576,7 @@
     });
 
     // Current image scale 1..ZOOM_MAX across progress 0..1
-    const currScale = 1 + progress * (ZOOM_MAX - 1);
+    const currScale = 1 + progress * (ZOOM_MAX_EFFECTIVE - 1);
     curr.style.transform = `scale(${currScale})`;
     curr.style.zIndex = 2;
 
@@ -543,10 +586,24 @@
     next.style.zIndex = 3; // on top during handoff
 
     // Previous image continues to grow slightly behind the new current
-    const prevScale = ZOOM_MAX + progress * CONTINUE_GROWTH;
+    const prevScale = ZOOM_MAX_EFFECTIVE + progress * CONTINUE_GROWTH;
     prev.style.transform = `scale(${prevScale})`;
     // keep prev behind current
     prev.style.zIndex = 1;
+
+    // Video play/pause management: play current and next, pause others (autoplay programmatically)
+    try {
+      const shouldBePlaying = new Set([idx, nextIdx]);
+      for (let i = 0; i < layers.length; i++) {
+        const el = layers[i];
+        if (!el || el.tagName !== 'VIDEO') continue;
+        if (shouldBePlaying.has(i)) {
+          if (el.paused) { try { el.play().catch(() => {}); } catch (_) {} }
+        } else {
+          if (!el.paused) { try { el.pause(); } catch (_) {} }
+        }
+      }
+    } catch (_) { /* ignore video state errors */ }
 
     // The image two steps behind should not snap to tiny immediately.
     // Hold it large for a portion of the segment, then decay to small later.
