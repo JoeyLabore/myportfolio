@@ -63,6 +63,7 @@
       navs.forEach((nav) => {
         nav.classList.add('intro-top-hidden');
       });
+      
       if (!prefersReduced) {
         const BASE_DELAY = 600;
         const STEP = 180; // stagger between nav cards
@@ -429,14 +430,34 @@
     });
 
     // Warm GPU/upload/decoders across key positions before revealing
-    warmUpAll();
+    // On small screens, skip warm-up to avoid memory spikes (will load on demand)
+    if (!IS_SMALL_SCREEN) {
+      warmUpAll();
+    }
 
     // One frame to settle, then reveal the UI and start
     requestAnimationFrame(() => {
       document.documentElement.classList.remove("preloading");
       start();
     });
+  }).catch(() => {
+    // Fallback: if preloading failed, still try to start the experience
+    try {
+      document.documentElement.classList.remove('preloading');
+      start();
+    } catch (_) {}
   });
+
+  // Safety: if something stalls (mobile resume, network hiccup), force start after timeout
+  try {
+    const FORCE_START_MS = 5000;
+    setTimeout(() => {
+      if (document.documentElement.classList.contains('preloading')) {
+        document.documentElement.classList.remove('preloading');
+        try { start(); } catch (_) {}
+      }
+    }, FORCE_START_MS);
+  } catch (_) {}
 
   // Continuous timeline-based engine (no discrete switches)
   // Continuous infinite timeline (circular). floor(timeline % L) selects current index.
@@ -447,7 +468,7 @@
   let targetTimeline = 0; // eased target along the loop
   const ZOOM_MAX = 1.6; // scale at the end of a segment
   const TIMELINE_PER_WHEEL = 0.0008; // sensitivity for wheel/trackpad (higher = faster)
-  const TOUCH_DRAG_MULTIPLIER = 3.0; // extra sensitivity applied only to touch/drag
+  const TOUCH_DRAG_MULTIPLIER = IS_SMALL_SCREEN ? 2.2 : 3.0; // reduce sensitivity on small screens
   const START_SCALE = 0.001; // scale for non-current images (as small as possible)
   const NEXT_MIN_VISIBLE = START_SCALE; // no minimum bump; start tiny
   const CONTINUE_GROWTH = 0.55; // extra growth for previous image during handoff (increased)
@@ -458,6 +479,7 @@
   const ZOOM_MAX_EFFECTIVE = LITE_MODE ? Math.min(1.4, ZOOM_MAX) : ZOOM_MAX;
 
   let pending = false;
+  let playVideosAfter = 0; // ms timestamp to defer video playback after fast scroll
   let wheelAccum = 0;
   const SMOOTHING = 0.12; // easing factor for timeline
   const VISIBILITY_THRESHOLD = 0.005; // reveal sooner to avoid pop-in
@@ -569,8 +591,22 @@
     const prev = layers[prevIdx];
 
     // Reset all layers to a consistent baseline first to avoid stale transforms
-    layers.forEach((layer) => {
-      layer.style.visibility = "visible"; // never hide
+    // Only keep a small window of layers visible to reduce GPU/memory pressure on mobile
+    const ACTIVE_RADIUS = IS_SMALL_SCREEN ? 1 : 3;
+    const activeSet = new Set();
+    for (let r = -ACTIVE_RADIUS; r <= ACTIVE_RADIUS; r++) {
+      activeSet.add((idx + r + layers.length) % layers.length);
+    }
+    layers.forEach((layer, i) => {
+      const isActive = activeSet.has(i);
+      // Toggle display instead of removing from DOM to minimize layout churn
+      if (isActive) {
+        layer.style.display = '';
+        layer.style.visibility = 'visible';
+      } else {
+        layer.style.display = 'none';
+        layer.style.visibility = 'hidden';
+      }
       layer.style.transform = `scale(${START_SCALE})`;
       layer.style.zIndex = 1;
     });
@@ -591,13 +627,32 @@
     // keep prev behind current
     prev.style.zIndex = 1;
 
-    // Video play/pause management: play current and next, pause others (autoplay programmatically)
+    // Video play/pause management (autoplay programmatically)
     try {
+      const now = performance.now ? performance.now() : Date.now();
       const shouldBePlaying = new Set([idx, nextIdx]);
       for (let i = 0; i < layers.length; i++) {
         const el = layers[i];
         if (!el || el.tagName !== 'VIDEO') continue;
-        if (shouldBePlaying.has(i)) {
+        // Determine if the video is actually visible in the viewport
+        let isVisible = false;
+        try {
+          const r = el.getBoundingClientRect();
+          const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+          const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+          const horizontally = r.right > 0 && r.left < vw;
+          const vertically = r.bottom > 0 && r.top < vh;
+          isVisible = horizontally && vertically && r.width > 0 && r.height > 0 && el.style.display !== 'none' && el.style.visibility !== 'hidden';
+        } catch (_) { /* ignore */ }
+
+        if (now < playVideosAfter && !isVisible) {
+          // During rapid scroll, pause non-visible videos immediately
+          if (!el.paused) { try { el.pause(); } catch (_) {} }
+          continue;
+        }
+
+        // Rule: if a video is visible at all, it must play
+        if (isVisible || shouldBePlaying.has(i)) {
           if (el.paused) { try { el.play().catch(() => {}); } catch (_) {} }
         } else {
           if (!el.paused) { try { el.pause(); } catch (_) {} }
@@ -671,7 +726,12 @@
 
   function onDelta(deltaY) {
     // Positive deltaY moves forward along the infinite loop
-    targetTimeline += deltaY * TIMELINE_PER_WHEEL;
+    // Clamp per-event delta to avoid huge jumps that spike decoders
+    const MAX_EVENT_DELTA = IS_SMALL_SCREEN ? 220 : 360;
+    const d = Math.max(-MAX_EVENT_DELTA, Math.min(MAX_EVENT_DELTA, deltaY));
+    targetTimeline += d * TIMELINE_PER_WHEEL;
+    // Defer video playback slightly during rapid scrolling
+    playVideosAfter = (performance.now ? performance.now() : Date.now()) + (IS_SMALL_SCREEN ? 140 : 80);
     queueRender();
   }
 
@@ -686,7 +746,10 @@
     if (Math.abs(delta) > MAX) delta = MAX * Math.sign(delta);
     return delta;
   }
+  let __started = false;
   function start() {
+    if (__started) { return; }
+    __started = true;
     // Initialize timeline so default view shows 2nd image with 60% into next (3rd)
     timeline = INITIAL_INDEX + INITIAL_PROGRESS;
     targetTimeline = timeline;
