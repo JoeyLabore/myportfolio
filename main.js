@@ -5,7 +5,7 @@
   // Profiling toggle: set to true to show live performance stats
   const ENABLE_PROFILING = false;
 
-  // First-load markers: cookie + localStorage + Service Worker registration
+  // First-load markers: cookie + localStorage; REMOVE service worker and its caches
   try {
     // LocalStorage flag
     if (!localStorage.getItem('jg_first_visit')) {
@@ -13,9 +13,21 @@
     }
     // Cookie (1 year)
     document.cookie = `jg_first_visit=1; max-age=${60 * 60 * 24 * 365}; path=/; SameSite=Lax`;
-    // Service worker registration for offline/runtime caching
+    // Unregister any existing service workers and clear SW-managed caches
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((r) => r.unregister().catch(() => {}));
+      }).catch(() => {});
+    }
+    if (typeof caches !== 'undefined') {
+      caches.keys().then((keys) => {
+        keys.forEach((k) => {
+          // Remove our app caches to avoid stale shell conflicts
+          if (/^jg-(?:runtime|shell)-/.test(k)) {
+            caches.delete(k).catch(() => {});
+          }
+        });
+      }).catch(() => {});
     }
   } catch (_) { /* ignore storage/sw errors */ }
 
