@@ -2,7 +2,7 @@
 /* Cache strategy: cache-first for static assets (images/videos/fonts/css/js),
    network-first for HTML. Keeps all assets available while reducing bandwidth on mobile. */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const RUNTIME_CACHE = `jg-runtime-${CACHE_VERSION}`;
 const SHELL_CACHE = `jg-shell-${CACHE_VERSION}`;
 
@@ -18,7 +18,9 @@ const SHELL_ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_ASSETS)).then(() => self.skipWaiting())
+    caches.open(SHELL_CACHE)
+      .then((cache) => cache.addAll(SHELL_ASSETS))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -47,6 +49,13 @@ async function trimCache(cacheName, maxItems) {
   }
 }
 
+// Enable navigation preload for faster HTML responses (when supported)
+self.addEventListener('activate', (event) => {
+  if (self.registration.navigationPreload) {
+    event.waitUntil(self.registration.navigationPreload.enable());
+  }
+});
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return; // only cache GET
@@ -59,9 +68,13 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       (async () => {
         try {
-          const net = await fetch(request);
+          // Prefer a fresh network response; avoid caching layers for HTML
+          const preloaded = event.preloadResponse ? await event.preloadResponse : null;
+          const net = preloaded || await fetch(request, { cache: 'no-store' });
           const cache = await caches.open(SHELL_CACHE);
-          cache.put(request, net.clone());
+          if (net && net.ok && net.type === 'basic') {
+            cache.put(request, net.clone());
+          }
           return net;
         } catch (err) {
           const cache = await caches.open(SHELL_CACHE);
@@ -84,12 +97,19 @@ self.addEventListener('fetch', (event) => {
       (async () => {
         const cache = await caches.open(RUNTIME_CACHE);
         const cached = await cache.match(request);
-        if (cached) return cached;
+        if (cached) {
+          // Stale-while-revalidate: update in background, but return cached immediately
+          fetch(request, { credentials: 'same-origin' })
+            .then((net) => { if (net && net.ok) cache.put(request, net.clone()); })
+            .catch(() => {});
+          return cached;
+        }
         try {
           const net = await fetch(request, { credentials: 'same-origin' });
-          // Put a clone in cache and trim size in background
-          cache.put(request, net.clone());
-          trimCache(RUNTIME_CACHE, 120).catch(() => {});
+          if (net && net.ok) {
+            cache.put(request, net.clone());
+            trimCache(RUNTIME_CACHE, 120).catch(() => {});
+          }
           return net;
         } catch (err) {
           // Fallback to shell cache if available
