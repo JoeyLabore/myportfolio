@@ -329,20 +329,22 @@
         const v = document.createElement("video");
         v.src = src;
         v.preload = "auto";
-        const done = () => { clearTimeout(timeoutId); resolve({ type: "video", el: v }); };
+        let timeoutId;
+        const done = () => { if (timeoutId) clearTimeout(timeoutId); resolve({ type: "video", el: v }); };
         // Consider any of these sufficient
         v.addEventListener("canplaythrough", done, { once: true });
         v.addEventListener("loadeddata", done, { once: true });
         v.addEventListener("loadedmetadata", done, { once: true });
         v.load();
         // Fallback timeout so we don't block the UI forever
-        const timeoutId = setTimeout(done, 7000);
+        timeoutId = setTimeout(done, 7000);
       } else {
         const img = new Image();
         img.src = src;
         img.decoding = "async";
+        let timeoutId;
         const done = async () => {
-          clearTimeout(timeoutId);
+          if (timeoutId) clearTimeout(timeoutId);
           try {
             if (img.decode) await img.decode();
           } catch (_) { /* ignore decode errors, show anyway */ }
@@ -352,7 +354,7 @@
         img.addEventListener("load", () => { void done(); }, { once: true });
         img.addEventListener("error", done, { once: true });
         // Fallback timeout
-        const timeoutId = setTimeout(() => { void done(); }, 5000);
+        timeoutId = setTimeout(() => { void done(); }, 5000);
       }
     });
   }
