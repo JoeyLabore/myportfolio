@@ -28,7 +28,260 @@
   ];
 
   const root = document.getElementById("bg-sequence");
-  if (!root) return;
+  if (!root) {
+    // No background sequence on this page (e.g., home). Still run the nav intro animation.
+    try {
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const navs = Array.from(document.querySelectorAll('.nav-bar'));
+      navs.forEach((n) => n.classList.remove('exit-out'));
+      navs.forEach((nav) => {
+        nav.classList.add('intro-top-hidden');
+      });
+      if (!prefersReduced) {
+        const BASE_DELAY = 600;
+        const STEP = 180; // stagger between nav cards
+        navs.forEach((nav, i) => {
+          setTimeout(() => {
+            nav.classList.remove('intro-top-hidden');
+            nav.classList.add('intro-top-visible');
+          }, BASE_DELAY + i * STEP);
+        });
+      } else {
+        navs.forEach((nav) => {
+          nav.classList.remove('intro-top-hidden');
+          nav.classList.add('intro-top-visible');
+        });
+      }
+
+      // Minimal home interactivity: selectable tiles that expand when focused/selected
+      (function setupTiles() {
+        const tiles = Array.from(document.querySelectorAll('.tile-grid .tile'));
+        if (!tiles.length) return;
+        // Make tiles focusable and clickable
+        tiles.forEach((tile) => {
+          tile.setAttribute('tabindex', '0');
+          tile.setAttribute('role', 'button');
+          tile.setAttribute('aria-pressed', 'false');
+        });
+
+        // Intro animation: slide tiles in from the left with a small stagger
+        try {
+          const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (!prefersReduced) {
+            tiles.forEach((tile) => tile.classList.add('intro-hidden'));
+            const BASE_DELAY = 200; // ms delay before first tile
+            const STEP = 70; // ms between tiles
+            tiles.forEach((tile, i) => {
+              setTimeout(() => {
+                tile.classList.remove('intro-hidden');
+                tile.classList.add('intro-visible'); // keep this class to avoid reverse flash
+              }, BASE_DELAY + i * STEP);
+            });
+          }
+        } catch (_) { /* ignore animation errors */ }
+        const selectTile = (tile) => {
+          // Clear any hover-proxy state when a selection occurs
+          tiles.forEach((t) => t.classList.remove('hover-proxy'));
+          tiles.forEach((t) => {
+            if (t === tile) {
+              t.classList.add('selected');
+              t.setAttribute('aria-pressed', 'true');
+            } else {
+              t.classList.remove('selected');
+              t.setAttribute('aria-pressed', 'false');
+            }
+          });
+        };
+        // Click/keyboard to select; if first tile is already selected (expanded), navigate to case study
+        tiles.forEach((tile, idx) => {
+          tile.addEventListener('click', () => {
+            // If first tile and already expanded, navigate to NestBank
+            if (idx === 0 && tile.classList.contains('selected')) {
+              window.location.href = './nestbank.html';
+              return;
+            }
+            selectTile(tile);
+          });
+          tile.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              if (idx === 0 && tile.classList.contains('selected')) {
+                window.location.href = './nestbank.html';
+                return;
+              }
+              selectTile(tile);
+            }
+          });
+        });
+        // Default to first tile selected on load
+        selectTile(tiles[0]);
+
+        // Hover-proxy: when cursor is in the gaps between tiles, slightly expand the nearest tile
+        try {
+          const grid = document.querySelector('.tile-grid');
+          if (grid) {
+            let lastProxy = null;
+            const clearProxy = () => {
+              if (lastProxy) { lastProxy.classList.remove('hover-proxy'); lastProxy = null; }
+              // Ensure no stale proxies remain
+              tiles.forEach((t) => t.classList.remove('hover-proxy'));
+            };
+            const updateProxy = (clientX, clientY) => {
+              // Find the nearest tile center to the cursor
+              let best = null;
+              let bestD = Infinity;
+              for (const t of tiles) {
+                const r = t.getBoundingClientRect();
+                const cx = r.left + r.width / 2;
+                const cy = r.top + r.height / 2;
+                const dx = clientX - cx;
+                const dy = clientY - cy;
+                const d = dx * dx + dy * dy;
+                if (d < bestD) { bestD = d; best = t; }
+              }
+              // Apply proxy class to best tile if not selected
+              if (best && !best.classList.contains('selected')) {
+                if (lastProxy !== best) {
+                  tiles.forEach((t) => t.classList.remove('hover-proxy'));
+                  best.classList.add('hover-proxy');
+                  lastProxy = best;
+                }
+              } else {
+                clearProxy();
+              }
+            };
+            grid.addEventListener('mousemove', (e) => {
+              // If the actual target is a tile, let native :hover handle it and clear proxy
+              const t = e.target.closest && e.target.closest('.tile');
+              if (t) {
+                clearProxy();
+                return;
+              }
+              updateProxy(e.clientX, e.clientY);
+            });
+            grid.addEventListener('mouseleave', () => {
+              clearProxy();
+            });
+          }
+        } catch (_) { /* ignore hover-proxy errors */ }
+      })();
+
+      // Home: Tabs (All, Product, Branding)
+      (function setupTabs() {
+        const tabList = document.querySelector('[role="tablist"]');
+        if (!tabList) return;
+        // Use user's existing nav-item styling for tabs
+        const tabs = Array.from(tabList.querySelectorAll('.nav-item[role="tab"]'));
+        if (!tabs.length) return;
+
+        const setActive = (idx) => {
+          tabs.forEach((t, i) => {
+            const active = i === idx;
+            t.classList.toggle('active', active);
+            t.setAttribute('aria-selected', active ? 'true' : 'false');
+            t.tabIndex = active ? 0 : -1;
+          });
+          // TODO: If/when filtering is desired, trigger it here based on tabs[idx].textContent
+        };
+
+        // Initialize: ensure only one active (default to first if none)
+        let current = tabs.findIndex((t) => t.classList.contains('active'));
+        if (current < 0) current = 0;
+        setActive(current);
+
+        // Click activation
+        tabs.forEach((t, i) => {
+          t.addEventListener('click', (e) => {
+            e.preventDefault();
+            current = i;
+            setActive(current);
+            t.focus();
+          });
+        });
+
+        // Keyboard navigation: ArrowLeft/ArrowRight, Home/End
+        tabList.addEventListener('keydown', (e) => {
+          const key = e.key;
+          if (key === 'ArrowRight' || key === 'ArrowLeft' || key === 'Home' || key === 'End') {
+            e.preventDefault();
+            const last = tabs.length - 1;
+            if (key === 'ArrowRight') current = current === last ? 0 : current + 1;
+            if (key === 'ArrowLeft') current = current === 0 ? last : current - 1;
+            if (key === 'Home') current = 0;
+            if (key === 'End') current = last;
+            setActive(current);
+            tabs[current].focus();
+          }
+        });
+      })();
+
+      // Make split nav cards clickable on home page too (if present)
+      (function setupHomeSplitNav() {
+        try {
+          const split = document.querySelector('.nav-split');
+          if (!split) return;
+          // If this split is being used as a tablist on the home page, do not attach link behaviors
+          if (split.getAttribute('role') === 'tablist') return;
+          const left = split.querySelector('.nav-left');
+          const right = split.querySelector('.nav-right');
+          if (left) {
+            left.setAttribute('tabindex', '0');
+            left.setAttribute('role', 'link');
+            left.addEventListener('click', () => { window.location.href = './index.html'; });
+            left.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = './index.html'; } });
+          }
+          if (right) {
+            right.setAttribute('tabindex', '0');
+            right.setAttribute('role', 'link');
+            const to = 'https://www.linkedin.com/in/josephgreenwood/';
+            right.addEventListener('click', () => { try { window.open(to, '_blank', 'noopener,noreferrer'); } catch (_) { window.location.href = to; } });
+            right.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); try { window.open(to, '_blank', 'noopener,noreferrer'); } catch (_) { window.location.href = to; } } });
+          }
+        } catch (_) {}
+      })();
+    } catch (_) { /* ignore animation errors on minimal page */ }
+    return;
+  }
+
+  // Case study page (bg-sequence present): make split nav cards clickable
+  (function setupCaseStudyNav() {
+    try {
+      const split = document.querySelector('.nav-split');
+      if (!split) return; // only on case study page
+
+      const left = split.querySelector('.nav-left');
+      const right = split.querySelector('.nav-right');
+
+      if (left) {
+        left.setAttribute('tabindex', '0');
+        left.setAttribute('role', 'link');
+        left.addEventListener('click', () => {
+          window.location.href = './index.html';
+        });
+        left.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            window.location.href = './index.html';
+          }
+        });
+      }
+
+      if (right) {
+        right.setAttribute('tabindex', '0');
+        right.setAttribute('role', 'link');
+        const to = 'https://www.linkedin.com/in/josephgreenwood/';
+        right.addEventListener('click', () => {
+          try { window.open(to, '_blank', 'noopener,noreferrer'); } catch (_) { window.location.href = to; }
+        });
+        right.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            try { window.open(to, '_blank', 'noopener,noreferrer'); } catch (_) { window.location.href = to; }
+          }
+        });
+      }
+    } catch (_) { /* ignore */ }
+  })();
 
   // --- Preload all media before initializing ---
   function preloadFile(src) {
@@ -391,22 +644,24 @@
     try {
       const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // Top nav intro
-      const nav = document.querySelector('.nav-bar');
-      // Ensure any prior exit state is cleared on load
-      if (nav) nav.classList.remove('exit-out');
-      if (nav) {
-        nav.classList.add('intro-top-hidden');
-        if (!prefersReduced) {
-          // small delay so it starts first
+      // Top nav intro (support multiple nav bars, staggered like home page)
+      const navs = Array.from(document.querySelectorAll('.nav-bar'));
+      navs.forEach(n => n.classList.remove('exit-out'));
+      navs.forEach(n => n.classList.add('intro-top-hidden'));
+      if (!prefersReduced) {
+        const BASE_DELAY = 600;
+        const STEP = 180; // stagger between nav cards
+        navs.forEach((n, i) => {
           setTimeout(() => {
-            nav.classList.remove('intro-top-hidden');
-            nav.classList.add('intro-top-visible');
-          }, 600);
-        } else {
-          nav.classList.remove('intro-top-hidden');
-          nav.classList.add('intro-top-visible');
-        }
+            n.classList.remove('intro-top-hidden');
+            n.classList.add('intro-top-visible');
+          }, BASE_DELAY + i * STEP);
+        });
+      } else {
+        navs.forEach(n => {
+          n.classList.remove('intro-top-hidden');
+          n.classList.add('intro-top-visible');
+        });
       }
 
       const introCards = document.querySelectorAll('.paragraph');
