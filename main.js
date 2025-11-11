@@ -130,6 +130,21 @@
               t.setAttribute('aria-pressed', 'false');
             }
           });
+          // Home page background color when specific tiles are selected
+          try {
+            const idx = tiles.indexOf(tile);
+            // Clear all home bg classes, then apply based on index
+            document.body.classList.remove('home-bg-nestbank');
+            document.body.classList.remove('home-bg-medigo');
+            document.body.classList.remove('home-bg-logofolio');
+            if (idx === 0) {
+              document.body.classList.add('home-bg-nestbank');
+            } else if (idx === 1) {
+              document.body.classList.add('home-bg-medigo');
+            } else if (idx === 2) {
+              document.body.classList.add('home-bg-logofolio');
+            }
+          } catch (_) { /* ignore */ }
         };
         // Click/keyboard to select; if first tile is already selected (expanded), navigate to case study
         tiles.forEach((tile, idx) => {
@@ -141,6 +156,32 @@
             }
             selectTile(tile);
           });
+
+          // Mouse tilt effect only for hover-capable pointers and only when tile is selected
+          try {
+            const supportsHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+            if (supportsHover) {
+              const MAX_TILT = 1; // degrees (ultra subtle)
+              const onMove = (e) => {
+                if (!tile.classList.contains('selected')) return; // only tilt expanded tile
+                const r = tile.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width;  // 0..1
+                const y = (e.clientY - r.top) / r.height;  // 0..1
+                const dx = (x - 0.5) * 2; // -1..1
+                const dy = (y - 0.5) * 2; // -1..1
+                const tiltY = (dx * MAX_TILT).toFixed(2) + 'deg';      // left/right => rotateY
+                const tiltX = (-dy * MAX_TILT).toFixed(2) + 'deg';     // up/down => rotateX (invert for natural feel)
+                tile.style.setProperty('--tiltX', tiltX);
+                tile.style.setProperty('--tiltY', tiltY);
+              };
+              const onLeave = () => {
+                tile.style.setProperty('--tiltX', '0deg');
+                tile.style.setProperty('--tiltY', '0deg');
+              };
+              tile.addEventListener('mousemove', onMove);
+              tile.addEventListener('mouseleave', onLeave);
+            }
+          } catch (_) { /* ignore tilt errors */ }
           tile.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();

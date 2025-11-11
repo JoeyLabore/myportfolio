@@ -138,6 +138,28 @@ body {
   overflow-y: hidden; /* no vertical scrolling */
   overflow-x: auto;  /* allow horizontal scroll when cards exceed width */
 }
+/* Home: when the first tile is expanded/selected, tint background */
+body.home-bg-nestbank {
+  background: #FFAFEB;
+}
+/* Ensure the full-viewport media layer adopts the tint as well */
+body.home-bg-nestbank #bg-sequence {
+  background-color: #FFAFEB;
+}
+/* Home: when the second tile is expanded/selected, tint background for Medigo */
+body.home-bg-medigo {
+  background: #006EDB;
+}
+body.home-bg-medigo #bg-sequence {
+  background-color: #006EDB;
+}
+/* Home: when the third tile is expanded/selected, tint background for Logofolio */
+body.home-bg-logofolio {
+  background: #333333;
+}
+body.home-bg-logofolio #bg-sequence {
+  background-color: #333333;
+}
 img { display: block; max-width: 100%; height: auto; }
 p { margin: 0; }
 
@@ -444,13 +466,31 @@ p { margin: 0; }
   backdrop-filter: none;
   opacity: 1; /* text visible by default */
   pointer-events: auto; /* clickable by default */
-  transition: background-color 180ms ease; /* smooth fade */
+  transition: background-color 180ms ease, padding-right 160ms ease; /* smooth fade + pad grow */
   will-change: background-color;
+}
+/* Inline arrow icon (Material CallMade) default state: hidden/subtle */
+.nav-split .nav-right .nav-item .icon-arrow {
+  display: inline-block;
+  margin-left: 0;            /* no reserved gap by default */
+  width: 0;                  /* take no horizontal space */
+  opacity: 0;                /* visually hidden */
+  transform: translateX(0);  /* no offset at rest */
+  transition: opacity 160ms ease, transform 160ms ease, width 160ms ease, margin-left 160ms ease;
+}
+/* Reveal arrow on hover or keyboard focus */
+.nav-split .nav-right:hover .nav-item .icon-arrow,
+.nav-split .nav-right .nav-item:focus-visible .icon-arrow {
+  width: 16px;        /* expand to natural width */
+  margin-left: 8px;   /* add gap next to text */
+  opacity: 1;         /* show icon */
+  transform: translateX(2px); /* subtle slide-in */
 }
 .nav-split .nav-right:hover .nav-item,
 .nav-split .nav-right .nav-item:focus-visible {
   background-color: rgba(0, 0, 0, 0.24) !important; /* ensure hover takes precedence over base */
   /* keep text visible, only reveal the pill background */
+  padding-right: 16px; /* expand right padding when icon appears */
 }
 /* Pressed state: slightly darker than hover */
 .nav-split .nav-right .nav-item:active {
@@ -500,33 +540,54 @@ p { margin: 0; }
   align-self: stretch; /* ensure each tile fills the tile-grid height */
   border-radius: 16px;
   flex: 1 1 0;
-  transition: flex 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition: flex 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 220ms ease;
   cursor: pointer;
   transform-origin: center;
   /* Compose slide + scale via CSS vars so states don't overwrite each other */
   --slideX: 0;
-  transform: translateX(var(--slideX));
+  --tiltX: 0deg; /* mouse tilt (X-axis rotation in deg) */
+  --tiltY: 0deg; /* mouse tilt (Y-axis rotation in deg) */
+  /* Intro animation controls */
+  --introY: 8px;          /* start slightly below (reduced to avoid overlap) */
+  --introOpacity: 0;      /* start invisible */
+  opacity: var(--introOpacity);
+  transform: translateX(var(--slideX)) translateY(var(--introY));
 }
-/* Ensure home tiles start off-screen by default to avoid reverse flash (only when motion allowed) */
-@media (prefers-reduced-motion: no-preference) {
-  .page[data-name="home page"] .tile-grid .tile {
-    --slideX: -120vw;
-  }
-  /* Ensure the intro-visible state overrides the base off-screen transform */
-  .page[data-name="home page"] .tile-grid .tile.intro-visible {
-    --slideX: 0;
-  }
+/* Home: first tile shows NestBank thumbnail */
+.page[data-name="home page"] .tile-grid .tile:first-child {
+  background-image: url('./assets/thumbnails/nestbank.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
+/* Home: second tile shows Medigo thumbnail */
+.page[data-name="home page"] .tile-grid .tile:nth-child(2) {
+  background-image: url('./assets/thumbnails/medigo.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Home: third tile shows Logofolio thumbnail */
+.page[data-name="home page"] .tile-grid .tile:nth-child(3) {
+  background-image: url('./assets/thumbnails/logofolio.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Intro states: fade + slight slide-up to avoid overlapping other tiles */
 .tile-grid .tile.intro-hidden {
-  /* Retained for safety; same as base state */
-  --slideX: -120vw;
+  --introY: 16px;
+  --introOpacity: 0;
 }
 .tile-grid .tile.intro-visible {
-  --slideX: 0;
+  --introY: 0px;
+  --introOpacity: 1;
 }
 .tile-grid .tile.selected {
   flex: 16 1 0; /* very wide when selected */
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15) inset;
+  /* Add subtle 3D perspective and tilt only for selected tile */
+  transform: translateX(var(--slideX)) translateY(var(--introY)) perspective(800px) rotateX(var(--tiltX)) rotateY(var(--tiltY));
 }
 .tile-grid .tile:not(.selected):hover {
   /* Slightly widen collapsed tiles on hover using flex so gaps respond */
