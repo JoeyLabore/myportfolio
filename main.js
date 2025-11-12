@@ -96,6 +96,10 @@
       (function setupTiles() {
         const tiles = Array.from(document.querySelectorAll('.tile-grid .tile'));
         if (!tiles.length) return;
+        // Optional: home tile 4 video (Orion) and tile 7 video (Kinti)
+        let orionVideo = null;
+        let kintiVideo = null;
+
         // Make tiles focusable and clickable
         tiles.forEach((tile) => {
           tile.setAttribute('tabindex', '0');
@@ -118,6 +122,54 @@
             });
           }
         } catch (_) { /* ignore animation errors */ }
+        // Lazy-init the Orion video and attach to the 4th tile (index 3)
+        function ensureOrionVideo() {
+          if (orionVideo || tiles.length < 4) return;
+          const t4 = tiles[3];
+          if (!t4) return;
+          const v = document.createElement('video');
+          v.src = './assets/thumbnails/orion.mp4';
+          v.muted = true;
+          v.loop = true;
+          v.playsInline = true;
+          try { v.preload = 'metadata'; } catch (_) {}
+          v.autoplay = false;
+          v.setAttribute('aria-hidden', 'true');
+          // Nudge to first frame so a poster-like frame is visible while paused
+          const onMeta = () => {
+            try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
+          };
+          v.addEventListener('loadedmetadata', onMeta, { once: true });
+          // Insert as the only content for the tile
+          try {
+            t4.innerHTML = '';
+          } catch (_) {}
+          t4.appendChild(v);
+          orionVideo = v;
+        }
+
+        // Lazy-init the Kinti video and attach to the 7th tile (index 6)
+        function ensureKintiVideo() {
+          if (kintiVideo || tiles.length < 7) return;
+          const t7 = tiles[6];
+          if (!t7) return;
+          const v = document.createElement('video');
+          v.src = './assets/thumbnails/kinti.mp4';
+          v.muted = true;
+          v.loop = true;
+          v.playsInline = true;
+          try { v.preload = 'metadata'; } catch (_) {}
+          v.autoplay = false;
+          v.setAttribute('aria-hidden', 'true');
+          const onMeta = () => {
+            try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
+          };
+          v.addEventListener('loadedmetadata', onMeta, { once: true });
+          try { t7.innerHTML = ''; } catch (_) {}
+          t7.appendChild(v);
+          kintiVideo = v;
+        }
+
         const selectTile = (tile) => {
           // Clear any hover-proxy state when a selection occurs
           tiles.forEach((t) => t.classList.remove('hover-proxy'));
@@ -137,13 +189,51 @@
             document.body.classList.remove('home-bg-nestbank');
             document.body.classList.remove('home-bg-medigo');
             document.body.classList.remove('home-bg-logofolio');
+            document.body.classList.remove('home-bg-orion');
+            document.body.classList.remove('home-bg-tom');
+            document.body.classList.remove('home-bg-kinti');
+            document.body.classList.remove('home-bg-kakakoala');
             if (idx === 0) {
               document.body.classList.add('home-bg-nestbank');
             } else if (idx === 1) {
               document.body.classList.add('home-bg-medigo');
             } else if (idx === 2) {
               document.body.classList.add('home-bg-logofolio');
+            } else if (idx === 3) {
+              document.body.classList.add('home-bg-orion');
+            } else if (idx === 4) {
+              document.body.classList.add('home-bg-tom');
+            } else if (idx === 6) {
+              document.body.classList.add('home-bg-kinti');
+            } else if (idx === 7) {
+              document.body.classList.add('home-bg-kakakoala');
             }
+            // Manage Orion video playback for 4th tile
+            try {
+              if (!orionVideo && tiles.length >= 4) ensureOrionVideo();
+              if (orionVideo) {
+                const isOrionSelected = idx === 3;
+                if (isOrionSelected) {
+                  if (orionVideo.paused) { try { orionVideo.play().catch(() => {}); } catch (_) {} }
+                } else {
+                  if (!orionVideo.paused) { try { orionVideo.pause(); } catch (_) {} }
+                  // Reset to initial visible frame
+                  try { orionVideo.currentTime = Math.max(0.01, orionVideo.currentTime); } catch (_) {}
+                }
+              }
+              // Manage Kinti video playback for 7th tile
+              if (!kintiVideo && tiles.length >= 7) ensureKintiVideo();
+              if (kintiVideo) {
+                const isKintiSelected = idx === 6;
+                if (isKintiSelected) {
+                  if (kintiVideo.paused) { try { kintiVideo.play().catch(() => {}); } catch (_) {} }
+                } else {
+                  if (!kintiVideo.paused) { try { kintiVideo.pause(); } catch (_) {} }
+                  // Reset to initial visible frame
+                  try { kintiVideo.currentTime = Math.max(0.01, kintiVideo.currentTime); } catch (_) {}
+                }
+              }
+            } catch (_) { /* ignore video control errors */ }
           } catch (_) { /* ignore */ }
         };
         // Click/keyboard to select; if first tile is already selected (expanded), navigate to case study
@@ -193,6 +283,9 @@
             }
           });
         });
+        // Initialize video elements before first selection so paused frames are visible
+        try { ensureOrionVideo(); } catch (_) {}
+        try { ensureKintiVideo(); } catch (_) {}
         // Default to first tile selected on load
         selectTile(tiles[0]);
 

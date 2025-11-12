@@ -160,6 +160,34 @@ body.home-bg-logofolio {
 body.home-bg-logofolio #bg-sequence {
   background-color: #333333;
 }
+/* Home: when the fourth tile is expanded/selected, tint background for Orion */
+body.home-bg-orion {
+  background: #99D0F3;
+}
+body.home-bg-orion #bg-sequence {
+  background-color: #99D0F3;
+}
+/* Home: when the fifth tile is expanded/selected, tint background for Tom */
+body.home-bg-tom {
+  background: #E7B53E;
+}
+body.home-bg-tom #bg-sequence {
+  background-color: #E7B53E;
+}
+/* Home: when the seventh tile is expanded/selected, tint background for Kinti */
+body.home-bg-kinti {
+  background: #6B7B52;
+}
+body.home-bg-kinti #bg-sequence {
+  background-color: #6B7B52;
+}
+/* Home: when the eighth tile is expanded/selected, tint background for Kakakoala */
+body.home-bg-kakakoala {
+  background: #FF6B3B;
+}
+body.home-bg-kakakoala #bg-sequence {
+  background-color: #FF6B3B;
+}
 img { display: block; max-width: 100%; height: auto; }
 p { margin: 0; }
 
@@ -252,8 +280,8 @@ p { margin: 0; }
 
 /* Split nav: two independent sticky bars (left: logo, right: link) */
 .nav-split {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* left takes available, middle auto, right available */
   align-items: flex-start;
   gap: var(--space-xs);
 }
@@ -267,9 +295,8 @@ p { margin: 0; }
 /* Allow tabs to size naturally so parent height is not affected */
 .page[data-name="home page"] .nav-split .nav-middle .tabs { height: 100%; }
 /* Home: center the single LinkedIn nav card */
-.page[data-name="home page"] .nav-split {
-  justify-content: center;
-}
+/* With grid layout, the middle column is centered inherently; no need to center the whole group */
+/* No explicit centering needed for the whole group when using grid */
 .nav-split .nav-bar {
   /* Match original nav margins on all sides */
   margin: var(--space-s);
@@ -280,10 +307,19 @@ p { margin: 0; }
   height: var(--nav-card-height);
 }
 .nav-split .nav-left {
+  grid-column: 1;
   justify-content: flex-start;
+  justify-self: start;
 }
 .nav-split .nav-right {
+  grid-column: 3;
   justify-content: flex-end;
+  justify-self: end;
+}
+/* Ensure the middle tabs stay perfectly centered regardless of side widths */
+.nav-split .nav-middle {
+  grid-column: 2;
+  justify-self: center;
 }
 .nav-logo {
   width: 24px; /* matches size-[24px] */
@@ -539,6 +575,7 @@ p { margin: 0; }
   height: auto; /* allow align-items:stretch to set height */
   align-self: stretch; /* ensure each tile fills the tile-grid height */
   border-radius: 16px;
+  overflow: hidden; /* clip inner video to rounded corners; avoids black fringe */
   flex: 1 1 0;
   transition: flex 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 220ms ease;
   cursor: pointer;
@@ -552,6 +589,15 @@ p { margin: 0; }
   --introOpacity: 0;      /* start invisible */
   opacity: var(--introOpacity);
   transform: translateX(var(--slideX)) translateY(var(--introY));
+}
+/* Ensure any video inside a tile fills the tile and respects rounded corners */
+.tile-grid .tile > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit; /* match tile radius exactly */
+  background: transparent;
 }
 /* Home: first tile shows NestBank thumbnail */
 .page[data-name="home page"] .tile-grid .tile:first-child {
@@ -574,6 +620,28 @@ p { margin: 0; }
   background-position: center;
   background-repeat: no-repeat;
 }
+/* Home: fifth tile shows Tom thumbnail */
+.page[data-name="home page"] .tile-grid .tile:nth-child(5) {
+  background-image: url('./assets/thumbnails/tom.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Home: seventh tile hosts a video; use transparent background to avoid any edge showing */
+.page[data-name="home page"] .tile-grid .tile:nth-child(7) {
+  background: transparent;
+}
+/* Home: eighth tile shows Kakakoala thumbnail */
+.page[data-name="home page"] .tile-grid .tile:nth-child(8) {
+  background-image: url('./assets/thumbnails/kakakoala.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Home: fourth tile hosts a video; use transparent background to avoid any edge showing */
+.page[data-name="home page"] .tile-grid .tile:nth-child(4) {
+  background: transparent;
+}
 /* Intro states: fade + slight slide-up to avoid overlapping other tiles */
 .tile-grid .tile.intro-hidden {
   --introY: 16px;
@@ -585,7 +653,7 @@ p { margin: 0; }
 }
 .tile-grid .tile.selected {
   flex: 16 1 0; /* very wide when selected */
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15) inset;
+  box-shadow: none; /* remove inset outline effect */
   /* Add subtle 3D perspective and tilt only for selected tile */
   transform: translateX(var(--slideX)) translateY(var(--introY)) perspective(800px) rotateX(var(--tiltX)) rotateY(var(--tiltY));
 }
@@ -598,13 +666,13 @@ p { margin: 0; }
   flex: 1.2 1 0;
 }
 .tile-grid .tile:not(.selected):focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+  outline: none; /* remove focus outline */
+  outline-offset: 0;
   flex: 1.2 1 0;
 }
 .tile-grid .tile:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+  outline: none; /* remove focus outline */
+  outline-offset: 0;
 }
 
 .text-container {
@@ -760,8 +828,8 @@ p { margin: 0; }
 .paragraph:active { opacity: 1; }
 .paragraph:active .text-label { text-decoration: none; }
 .paragraph:focus-visible {
-  outline: var(--stroke-s) solid currentColor;
-  outline-offset: 2px;
+  outline: none; /* remove focus outline on case study cards */
+  outline-offset: 0;
 }
 
 /* Hover lift effect */
