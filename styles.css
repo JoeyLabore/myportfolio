@@ -44,6 +44,15 @@
 
 /* Below 600px: never allow the nav to disappear */
 @media (max-width: 600px) {
+  /* Allow vertical scrolling on small screens */
+  body {
+    overflow-y: auto !important;
+    overflow-x: hidden; /* prevent accidental horizontal scroll when stacked */
+    /* Hide scrollbar visuals while preserving scroll */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;    /* Firefox */
+  }
+  body::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
   /* Make all background layers fill the viewport in portrait */
   #bg-sequence { background-color: #000; }
   .bg-layer {
@@ -103,6 +112,7 @@
   /* Home page (index): stack rectangles vertically instead of horizontally */
   .page[data-name="home page"] {
     min-height: 100vh;          /* ensure full viewport height */
+    height: auto !important;    /* allow page to grow beyond viewport height */
     display: flex;
     flex-direction: column;     /* allow main to grow */
   }
@@ -113,15 +123,22 @@
   }
   .page[data-name="home page"] .main .tile-grid {
     flex-direction: column !important;
-    height: 100% !important; /* fill the available space */
-    flex: 1 1 auto; /* consume remaining height */
+    height: auto !important; /* allow grid to grow beyond viewport height */
+    flex: 0 0 auto; /* size to content so page can scroll */
   }
   .page[data-name="home page"] .tile-grid .tile {
-    height: auto !important; /* height controlled by flex */
-    flex: 1 1 0 !important; /* share height equally by default */
+    height: auto !important; /* height controlled by content/flex */
+    min-height: 50px !important; /* do not get smaller than 50px */
+    /* Animate vertical size via flex-basis so expand/collapse is smooth */
+    flex: 0 0 auto !important; /* allow flex-basis to control size */
+    flex-basis: var(--tile-basis, 64px) !important; /* default collapsed height */
+    transition: flex-basis 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 220ms ease;
+    will-change: flex-basis;
   }
-  /* Make one tile taller by default (selected), mirroring width behavior on larger breakpoints */
-  .page[data-name="home page"] .tile-grid .tile.selected { flex: 8 1 0 !important; }
+  /* On small screens: make the expanded (selected) tile fill 50% of the viewport height */
+  .page[data-name="home page"] .tile-grid .tile.selected {
+    --tile-basis: 40vh; /* animate to 40% of the viewport height */
+  }
 }
 
 /* Base reset-ish */
@@ -305,6 +322,13 @@ p { margin: 0; }
   cursor: pointer; /* whole card is clickable */
   /* Ensure a consistent height across logo, tabs, and LinkedIn cards */
   height: var(--nav-card-height);
+}
+
+/* Ensure 8px margins at 1050px and below to match desired spacing */
+@media (max-width: 1050px) {
+  .nav-split .nav-bar {
+    margin: var(--space-xs);
+  }
 }
 .nav-split .nav-left {
   grid-column: 1;
@@ -673,6 +697,45 @@ p { margin: 0; }
 .tile-grid .tile:focus-visible {
   outline: none; /* remove focus outline */
   outline-offset: 0;
+}
+
+/* Medium breakpoint: 601px–1050px
+   - Collapsed tiles are capped to 45px width
+   - Selected tile expands normally
+   - Allow horizontal scrolling when tiles overflow
+   - Does not affect other breakpoints */
+@media (min-width: 601px) and (max-width: 1050px) {
+  /* Ensure the grid stays horizontal and can scroll sideways */
+  .page[data-name="home page"] .main .tile-grid {
+    flex-direction: row !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 100% !important;
+    /* Hide scrollbar visuals while preserving horizontal scroll */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;    /* Firefox */
+  }
+  .page[data-name="home page"] .main .tile-grid::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
+  /* Cap collapsed tiles to 45px width */
+  .page[data-name="home page"] .tile-grid .tile {
+    /* Animate horizontal size via flex-basis for smooth expand/collapse */
+    flex: 0 0 auto !important; /* allow flex-basis to control size */
+    flex-basis: var(--tile-width-basis, 45px) !important; /* default collapsed width */
+    min-width: 45px !important;
+    height: auto !important; /* let grid control height */
+    transition: flex-basis 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 220ms ease;
+    will-change: flex-basis;
+  }
+  /* Neutralize hover widening to avoid fighting flex-basis animation */
+  .page[data-name="home page"] .tile-grid .tile:not(.selected):hover,
+  .page[data-name="home page"] .tile-grid .tile:not(.selected):focus-visible,
+  .page[data-name="home page"] .tile-grid .tile.hover-proxy:not(.selected) {
+    flex: 0 0 auto !important;
+  }
+  /* Let the expanded tile be a fixed width at this breakpoint */
+  .page[data-name="home page"] .tile-grid .tile.selected {
+    --tile-width-basis: 550px; /* fixed expanded width with smooth flex-basis animation */
+  }
 }
 
 .text-container {
