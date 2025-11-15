@@ -8,12 +8,17 @@
     <meta http-equiv="Expires" content="0" />
     <title>Joey Greenwood - NestBank</title>
     <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="icon" href="./assets/favicon.png" type="image/png" />
     <!-- Manrope font to match Figma token font/family/manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css?v=4" />
+    <style>
+      /* NestBank-only: ensure the browser chrome/overscroll area is black */
+      html { background-color: #000 !important; }
+    </style>
   </head>
   <body class="page-nestbank">
     <!-- Fixed, full-viewport background sequence (behind content) -->

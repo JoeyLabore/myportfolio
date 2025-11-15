@@ -237,9 +237,15 @@ p { margin: 0; }
 /* --- NestBank page (case study) iOS safe area and edge-to-edge media --- */
 body.page-nestbank {
   background-color: #000 !important; /* ensure behind Safari bars is black */
+  color-scheme: dark; /* hint dark UI for form controls/bars */
+  min-height: 100svh; /* ensure body spans the visual viewport */
+  overscroll-behavior: none; /* avoid white during rubber-band overscroll */
 }
 body.page-nestbank #bg-sequence {
   background-color: #000 !important; /* full-viewport backdrop */
+  /* Fill the visual viewport including iOS browser chrome areas */
+  height: 100svh;
+  min-height: 100svh;
 }
 /* Force media to cover fully on NestBank so there are no letterbox bars */
 /* Do not force object-fit on media; honor existing per-asset rules (including .keep-contain) */
@@ -251,6 +257,17 @@ body.page-nestbank #bg-sequence {
     padding-right: env(safe-area-inset-right);
     /* Keep top/bottom bars visually black; content is already positioned using our layout */
   }
+  /* Expand the background container into the safe areas so media sits behind iOS bars */
+  body.page-nestbank #bg-sequence {
+    inset: calc(-1 * env(safe-area-inset-top)) calc(-1 * env(safe-area-inset-right)) calc(-1 * env(safe-area-inset-bottom)) calc(-1 * env(safe-area-inset-left));
+  }
+}
+
+/* Ensure the root background is black when on NestBank to avoid white during overscroll */
+html:has(body.page-nestbank) {
+  background-color: #000 !important;
+  min-height: 100%;
+  overscroll-behavior: none;
 }
 
 /* On small screens, let non-protected media fill edge-to-edge on NestBank only */
