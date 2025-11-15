@@ -5,6 +5,21 @@
   // Profiling toggle: set to true to show live performance stats
   const ENABLE_PROFILING = false;
 
+  // Force top-left scroll position on refresh/navigation
+  try {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+  } catch (_) { /* ignore */ }
+  try {
+    const resetScroll = () => {
+      try { window.scrollTo(0, 0); } catch (_) {}
+    };
+    // On full load and when restored from bfcache
+    window.addEventListener('load', resetScroll, { once: true });
+    window.addEventListener('pageshow', (e) => { if (e && e.persisted) resetScroll(); });
+  } catch (_) { /* ignore */ }
+
   // First-load markers: cookie + localStorage; REMOVE service worker and its caches
   try {
     // LocalStorage flag
@@ -236,14 +251,21 @@
             } catch (_) { /* ignore video control errors */ }
           } catch (_) { /* ignore */ }
         };
+        // Make selection callable from other modules (e.g., filtering) and init guard flag
+        try {
+          window.__homeSelectTile = selectTile;
+          if (typeof window.__autoSelecting === 'undefined') window.__autoSelecting = false;
+        } catch (_) { /* ignore */ }
+
         // Click/keyboard to select; if first tile is already selected (expanded), navigate to case study
         tiles.forEach((tile, idx) => {
           tile.addEventListener('click', () => {
             // If first tile and already expanded, navigate to NestBank
-            if (idx === 0 && tile.classList.contains('selected')) {
+            if (idx === 0 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
               window.location.href = './nestbank.html';
               return;
             }
+            // Allow CSS transitions for smooth expand/collapse
             selectTile(tile);
           });
 
@@ -275,10 +297,11 @@
           tile.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              if (idx === 0 && tile.classList.contains('selected')) {
+              if (idx === 0 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
                 window.location.href = './nestbank.html';
                 return;
               }
+              // Allow CSS transitions for smooth expand/collapse via keyboard
               selectTile(tile);
             }
           });
@@ -335,6 +358,66 @@
             grid.addEventListener('mouseleave', () => {
               clearProxy();
             });
+
+            // Enable drag-to-scroll + wheel-to-horizontal on medium breakpoint (601px–1050px)
+            try {
+              const mm = window.matchMedia && window.matchMedia('(min-width: 601px) and (max-width: 1050px)');
+              // Ensure carousel starts scrolled to the beginning on load within this breakpoint
+              try { if (!mm || mm.matches) { grid.scrollLeft = 0; } } catch (_) {}
+              let isDown = false;
+              let startX = 0;
+              let startScroll = 0;
+              let moved = false;
+              const DRAG_THRESHOLD = 8; // px before treating as drag
+
+              const onPointerDown = (e) => {
+                // Only primary button initiates drag
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                if (mm && !mm.matches) return; // only active in range
+                isDown = true;
+                moved = false;
+                startX = e.clientX;
+                startScroll = grid.scrollLeft;
+                // do not preventDefault here to allow clicks
+              };
+              const onPointerMove = (e) => {
+                if (!isDown) return;
+                const dx = e.clientX - startX;
+                if (!moved && Math.abs(dx) >= DRAG_THRESHOLD) {
+                  moved = true;
+                  grid.classList.add('dragging');
+                  try { grid.setPointerCapture && grid.setPointerCapture(e.pointerId); } catch (_) {}
+                }
+                if (moved) {
+                  grid.scrollLeft = startScroll - dx;
+                }
+              };
+              const onPointerUp = (e) => {
+                if (!isDown) return;
+                isDown = false;
+                grid.classList.remove('dragging');
+                try { grid.releasePointerCapture && grid.releasePointerCapture(e.pointerId); } catch (_) {}
+              };
+              const onWheel = (e) => {
+                // Convert vertical wheel to horizontal scroll within range
+                if (mm && !mm.matches) return;
+                if (!grid || grid.scrollWidth <= grid.clientWidth) return;
+                // If vertical delta exists, scroll horizontally
+                if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                  e.preventDefault();
+                  grid.scrollLeft += e.deltaY;
+                }
+              };
+              // Pointer events for robust drag
+              grid.addEventListener('pointerdown', onPointerDown);
+              window.addEventListener('pointermove', onPointerMove);
+              window.addEventListener('pointerup', onPointerUp);
+              window.addEventListener('pointercancel', onPointerUp);
+              // Cancel clicks after a drag movement occurred
+              grid.addEventListener('click', (e) => { if (moved) { e.preventDefault(); e.stopPropagation(); } }, true);
+              // Wheel map: passive false to allow preventDefault
+              grid.addEventListener('wheel', onWheel, { passive: false });
+            } catch (_) { /* ignore drag setup errors */ }
           }
         } catch (_) { /* ignore hover-proxy errors */ }
       })();
@@ -347,6 +430,67 @@
         const tabs = Array.from(tabList.querySelectorAll('.nav-item[role="tab"]'));
         if (!tabs.length) return;
 
+        // Helper: filter tiles by category and maintain selection sensibly
+        function filterTiles(category) {
+          const tiles = Array.from(document.querySelectorAll('.tile-grid .tile'));
+          // Temporarily disable transitions during filtering for instant updates
+          const grid = document.querySelector('.tile-grid');
+          if (grid) grid.classList.add('no-anim');
+          if (!tiles.length) {
+            // Ensure no-anim is cleared even on early return
+            if (grid) requestAnimationFrame(() => grid.classList.remove('no-anim'));
+            return;
+          }
+          const want = (category || 'all').toLowerCase();
+          let anyVisible = false;
+          tiles.forEach((tile) => {
+            const cat = (tile.dataset && tile.dataset.category) ? tile.dataset.category.toLowerCase() : '';
+            const show = (want === 'all') || (cat === want);
+            // Toggle visibility; rely on inline style to avoid specificity battles
+            tile.style.display = show ? '' : 'none';
+            tile.classList.toggle('filtered-out', !show);
+            if (show) anyVisible = true;
+            if (!show) {
+              // Ensure hidden tiles are not marked selected or pressed
+              tile.classList.remove('selected');
+              tile.setAttribute('aria-pressed', 'false');
+            }
+          });
+
+          // Do not replay intro animations when filtering; keep it instant
+          try {
+            // Clear any hover proxy from previous state without animating
+            const visibleTiles = tiles.filter((t) => t.style.display !== 'none');
+            visibleTiles.forEach((t) => t.classList.remove('hover-proxy'));
+          } catch (_) { /* ignore */ }
+
+          // Always select the first visible tile for the chosen category
+          if (!anyVisible) {
+            // Remove no-anim in next frame
+            if (grid) requestAnimationFrame(() => grid.classList.remove('no-anim'));
+            return; // nothing to select
+          }
+          const firstVisible = tiles.find((t) => t.style.display !== 'none');
+          if (firstVisible) {
+            // Programmatic selection: guard to avoid homepage navigation
+            try {
+              window.__autoSelecting = true;
+              if (typeof window.__homeSelectTile === 'function') {
+                window.__homeSelectTile(firstVisible);
+              } else {
+                // Fallback to direct call if exposure failed
+                selectTile(firstVisible);
+              }
+            } catch (_) { /* ignore */ }
+            finally {
+              // Release the guard on the next tick to avoid racing click handlers
+              setTimeout(() => { try { window.__autoSelecting = false; } catch (_) {} }, 0);
+            }
+          }
+          // Ensure transitions are re-enabled after DOM updates have applied
+          if (grid) requestAnimationFrame(() => grid.classList.remove('no-anim'));
+        }
+
         const setActive = (idx) => {
           tabs.forEach((t, i) => {
             const active = i === idx;
@@ -354,7 +498,12 @@
             t.setAttribute('aria-selected', active ? 'true' : 'false');
             t.tabIndex = active ? 0 : -1;
           });
-          // TODO: If/when filtering is desired, trigger it here based on tabs[idx].textContent
+          // Trigger filtering based on data-tab attribute of the active tab
+          try {
+            const tab = tabs[idx];
+            const category = (tab && tab.dataset) ? tab.dataset.tab : 'all';
+            filterTiles(category);
+          } catch (_) { /* ignore */ }
         };
 
         // Initialize: ensure only one active (default to first if none)
