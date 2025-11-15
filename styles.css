@@ -155,9 +155,10 @@
 /* Base reset-ish */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+html { background: #000; }
 body {
   margin: 0;
-  background: transparent; /* allow background sequence to be visible */
+  background: #000; /* solid base to blend with iOS top/bottom bars */
   color: var(--fg-color);
   font-family: var(--font-family-manrope);
   font-size: var(--font-size-s);
