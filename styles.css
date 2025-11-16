@@ -234,58 +234,6 @@ p { margin: 0; }
   height: 100dvh;
 }
 
-/* --- NestBank page (case study) iOS safe area and edge-to-edge media --- */
-body.page-nestbank {
-  background-color: #000 !important; /* ensure behind Safari bars is black */
-  color-scheme: dark; /* hint dark UI for form controls/bars */
-  min-height: 100svh; /* ensure body spans the visual viewport */
-  overscroll-behavior: none; /* avoid white during rubber-band overscroll */
-}
-body.page-nestbank #bg-sequence {
-  background-color: #000 !important; /* full-viewport backdrop */
-  /* Fill the visual viewport including iOS browser chrome areas */
-  height: 100svh;
-  min-height: 100svh;
-}
-/* Force media to cover fully on NestBank so there are no letterbox bars */
-/* Do not force object-fit on media; honor existing per-asset rules (including .keep-contain) */
-/* Accommodate iOS safe area insets without whitening edges */
-@supports (padding: max(0px)) {
-  body.page-nestbank {
-    /* No visual padding; just reserve safe areas for scroll bounce */
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-    /* Keep top/bottom bars visually black; content is already positioned using our layout */
-  }
-  /* Expand the background container into the safe areas so media sits behind iOS bars */
-  body.page-nestbank #bg-sequence {
-    inset: calc(-1 * env(safe-area-inset-top)) calc(-1 * env(safe-area-inset-right)) calc(-1 * env(safe-area-inset-bottom)) calc(-1 * env(safe-area-inset-left));
-  }
-}
-
-/* Ensure the root background is black when on NestBank to avoid white during overscroll */
-html:has(body.page-nestbank) {
-  background-color: #000 !important;
-  min-height: 100%;
-  overscroll-behavior: none;
-}
-
-/* On small screens, force all media to fill edge-to-edge on NestBank only */
-@media (max-width: 600px) {
-  body.page-nestbank .bg-layer {
-    object-fit: cover !important;
-    object-position: center center !important;
-  }
-  /* Preserve composition for specific PNGs on NestBank mobile */
-  body.page-nestbank .bg-layer[data-src$="/3.png"],
-  body.page-nestbank .bg-layer[data-src$="/5.png"],
-  body.page-nestbank .bg-layer[data-src$="/8.png"],
-  body.page-nestbank .bg-layer[data-src$="/11.png"] {
-    object-fit: contain !important;
-    object-position: center center !important;
-  }
-}
-
 /* Fullscreen background sequence */
 #bg-sequence {
   position: fixed;
