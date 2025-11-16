@@ -270,10 +270,18 @@ html:has(body.page-nestbank) {
   overscroll-behavior: none;
 }
 
-/* On small screens, let non-protected media fill edge-to-edge on NestBank only */
+/* On small screens, force all media to fill edge-to-edge on NestBank only */
 @media (max-width: 600px) {
-  body.page-nestbank .bg-layer:not(.keep-contain) {
+  body.page-nestbank .bg-layer {
     object-fit: cover !important;
+    object-position: center center !important;
+  }
+  /* Preserve composition for specific PNGs on NestBank mobile */
+  body.page-nestbank .bg-layer[data-src$="/3.png"],
+  body.page-nestbank .bg-layer[data-src$="/5.png"],
+  body.page-nestbank .bg-layer[data-src$="/8.png"],
+  body.page-nestbank .bg-layer[data-src$="/11.png"] {
+    object-fit: contain !important;
     object-position: center center !important;
   }
 }
