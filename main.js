@@ -545,22 +545,67 @@
           // If this split is being used as a tablist on the home page, do not attach link behaviors
           if (split.getAttribute('role') === 'tablist') return;
           const left = split.querySelector('.nav-left');
-          const right = split.querySelector('.nav-right');
+          const rights = Array.from(split.querySelectorAll('.nav-right'));
           if (left) {
             left.setAttribute('tabindex', '0');
             left.setAttribute('role', 'link');
             left.addEventListener('click', () => { window.location.href = './index.html'; });
             left.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = './index.html'; } });
           }
-          if (right) {
+          rights.forEach((right) => {
+            // If there are explicit anchor links inside, do not bind a container-level click that would override them.
+            const innerAnchors = Array.from(right.querySelectorAll('a.nav-item'));
+            if (innerAnchors.length > 0) {
+              right.setAttribute('role', 'group');
+              right.removeAttribute('tabindex');
+              return;
+            }
+            // Fallback behavior if a right card has no inner anchors
             right.setAttribute('tabindex', '0');
             right.setAttribute('role', 'link');
             const to = 'https://www.linkedin.com/in/josephgreenwood/';
             right.addEventListener('click', () => { try { window.open(to, '_blank', 'noopener,noreferrer'); } catch (_) { window.location.href = to; } });
             right.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); try { window.open(to, '_blank', 'noopener,noreferrer'); } catch (_) { window.location.href = to; } } });
-          }
+          });
         } catch (_) {}
       })();
+
+      // Home: Mobile menu overlay toggle
+      (function setupMobileMenu() {
+        try {
+          const menuCard = document.querySelector('.nav-right.nav-menu a.nav-item');
+          const overlay = document.querySelector('.mobile-menu-overlay');
+          if (!menuCard || !overlay) return;
+          const panel = overlay.querySelector('.mobile-menu-panel');
+
+          const open = () => {
+            overlay.classList.add('open');
+            try { overlay.setAttribute('aria-hidden', 'false'); } catch (_) {}
+            // Prevent background scroll while open
+            try { document.body.style.overflow = 'hidden'; } catch (_) {}
+          };
+          const close = () => {
+            overlay.classList.remove('open');
+            try { overlay.setAttribute('aria-hidden', 'true'); } catch (_) {}
+            try { document.body.style.overflow = ''; } catch (_) {}
+          };
+
+          menuCard.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (overlay.classList.contains('open')) close(); else open();
+          });
+          // Click outside the panel closes
+          overlay.addEventListener('click', (e) => {
+            if (!panel) { close(); return; }
+            if (!panel.contains(e.target)) close();
+          });
+          // Escape key closes
+          window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+          });
+        } catch (_) { /* ignore */ }
+      })();
+
     } catch (_) { /* ignore animation errors on minimal page */ }
     return;
   }

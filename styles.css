@@ -104,18 +104,46 @@
     pointer-events: auto !important;
   }
 
-  /* Home page (index): hide logo and LinkedIn cards, keep only tabs */
+  /* Home page (index): hide logo and LinkedIn cards */
   .page[data-name="home page"] .nav-split .nav-left,
   .page[data-name="home page"] .nav-split .nav-right { display: none; }
-  .page[data-name="home page"] .nav-split { justify-content: center; }
+  /* Position tabs to the top-left to leave room for the Menu button on the right */
+  .page[data-name="home page"] .nav-split { justify-content: flex-start; }
 
   /* Keep the tabs card fixed at the top while scrolling */
   .page[data-name="home page"] .nav-split .nav-middle {
     position: fixed !important;
     left: var(--space-xs);
-    right: var(--space-xs);
+    right: auto; /* free the right side for the Menu button */
     top: max(env(safe-area-inset-top), var(--space-xs));
     z-index: 3; /* above tiles */
+    width: max-content; /* shrink to the tabs' width */
+  }
+
+  /* Show the mobile-only Menu button at top-right on home page */
+  .page[data-name="home page"] .nav-split .nav-menu {
+    display: flex !important;
+    position: fixed !important;
+    top: max(env(safe-area-inset-top), var(--space-xs));
+    right: var(--space-xs);
+    z-index: 4; /* above tabs */
+    height: var(--nav-card-height);
+    padding: 12px; /* match card inner padding */
+    align-items: stretch;
+  }
+  /* Slightly larger menu icon for better tap target */
+  .page[data-name="home page"] .nav-split .nav-menu .icon-menu {
+    width: 24px;
+    height: 24px;
+  }
+  /* Allow the Menu button to animate in (override earlier small-screen static overrides) */
+  .page[data-name="home page"] .nav-right.nav-menu.intro-top-hidden {
+    transform: translate3d(0, -100%, 0) !important;
+    opacity: 0 !important;
+  }
+  .page[data-name="home page"] .nav-right.nav-menu.intro-top-visible {
+    transform: translate3d(0, 0, 0) !important;
+    opacity: 1 !important;
   }
 
   /* Home page (index): stack rectangles vertically instead of horizontally */
@@ -309,7 +337,7 @@ p { margin: 0; }
 /* Split nav: two independent sticky bars (left: logo, right: link) */
 .nav-split {
   display: grid;
-  grid-template-columns: 1fr auto 1fr; /* left takes available, middle auto, right available */
+  grid-template-columns: 1fr auto 1fr; /* left, tabs (center), right wrapper */
   align-items: flex-start;
   gap: var(--space-xs);
 }
@@ -346,15 +374,131 @@ p { margin: 0; }
   justify-content: flex-start;
   justify-self: start;
 }
+/* Ensure single right card on case study pages is placed in the right column */
 .nav-split .nav-right {
   grid-column: 3;
-  justify-content: flex-end;
   justify-self: end;
 }
+/* Right-side wrapper to hold multiple right nav cards while keeping tabs centered */
+.nav-right-wrap {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  gap: var(--space-xs);
+}
+/* Hide the Menu button by default (only visible <=600px) */
+.nav-split .nav-menu { display: none; }
+/* Keep each right card aligned consistently */
+.nav-right-wrap .nav-bar { margin: var(--space-s); }
+.nav-right-wrap .nav-bar + .nav-bar { margin-left: var(--space-xs); }
 /* Ensure the middle tabs stay perfectly centered regardless of side widths */
 .nav-split .nav-middle {
   grid-column: 2;
   justify-self: center;
+}
+
+/* Make the About parent container fully rounded and square */
+.nav-bar.nav-right.nav-about {
+  width: var(--nav-card-height); /* make width equal height */
+  border-radius: 50%;
+  padding: 0; /* let inner link/image fill edge-to-edge */
+  overflow: hidden; /* ensure inner image is clipped to the circle */
+}
+
+/* Mobile overlay menu (hidden by default) */
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5; /* above nav */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+.mobile-menu-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mobile-menu-panel {
+  width: calc(100% - 2 * var(--space-s));
+  max-width: 360px;
+  margin: var(--space-s);
+  padding: var(--space-m);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.38);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s); /* 16px gap between menu items */
+  box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+  transform: translateY(24px);
+  opacity: 0;
+  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 200ms ease;
+}
+.mobile-menu-overlay.open .mobile-menu-panel {
+  transform: translateY(0);
+  opacity: 1;
+}
+.mobile-menu-panel .nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-s);
+  border-radius: 10px;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0);
+  transition: background-color 160ms ease;
+}
+.mobile-menu-panel .nav-item .icon-arrow {
+  width: 16px;
+  height: 16px;
+  margin-left: 8px; /* 8px gap between text and icon */
+}
+.mobile-menu-panel .nav-item::after,
+.mobile-menu-panel .nav-item:hover::after,
+.mobile-menu-panel .nav-item:focus-visible::after,
+.mobile-menu-panel .nav-item:active::after {
+  content: none;
+  display: none;
+}
+.mobile-menu-panel .nav-item:hover,
+.mobile-menu-panel .nav-item:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Only show overlay on small screens; keep it inactive on larger */
+@media (min-width: 601px) {
+  .mobile-menu-overlay { display: none; }
+}
+
+/* Bottom-sheet style on small screens: animate up from bottom */
+@media (max-width: 600px) {
+  .mobile-menu-overlay {
+    align-items: flex-end; /* anchor panel to bottom */
+    justify-content: center;
+  }
+  .mobile-menu-panel {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: var(--space-m);
+    border-radius: 16px 16px 0 0; /* round top corners */
+    transform: translateY(100%);
+  }
+  .mobile-menu-overlay.open .mobile-menu-panel {
+    transform: translateY(0);
+  }
+}
+/* Make the About link itself fully rounded to match parent */
+.nav-right.nav-about .nav-item {
+  border-radius: 50%;
+  overflow: hidden; /* clip image to pill/circle */
+  width: 100%;
+  height: 100%;
 }
 .nav-logo {
   width: 24px; /* matches size-[24px] */
@@ -520,26 +664,55 @@ p { margin: 0; }
   background: #ffffff;
 }
 
-/* Make the LinkedIn nav match tab styling on hover/focus */
-.nav-split .nav-right { padding: 12px; align-items: stretch; }
+/* Make the LinkedIn/Right-side nav match tab styling on hover/focus and support multiple buttons */
+.nav-split .nav-right {
+  padding: 12px;
+  align-items: stretch;
+  gap: var(--space-xs);
+  justify-content: flex-end; /* keep multiple buttons grouped to the right */
+}
 .nav-split .nav-right .nav-item {
-  /* Make the child pill fill its parent card */
+  /* Pill-style buttons that sit side-by-side */
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
-  width: 100%;
+  width: auto; /* allow natural width so multiple items can sit inline */
   box-sizing: border-box;
   padding: 0 12px; /* 12px left/right inner padding for the text */
   border-radius: 10px; /* 2px less than parent card */
-  background-color: rgba(255, 255, 255, 0); /* absolutely no bg by default */
+  background-color: rgba(255, 255, 255, 0); /* no bg at rest */
   -webkit-backdrop-filter: none; /* ensure no tint/blur at rest */
   backdrop-filter: none;
   opacity: 1; /* text visible by default */
   pointer-events: auto; /* clickable by default */
-  transition: background-color 180ms ease, padding-right 160ms ease; /* smooth fade + pad grow */
+  transition: background-color 180ms ease; /* smooth fade */
   will-change: background-color;
 }
+/* Avatar image inside the About button */
+.nav-split .nav-right .nav-item .avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+/* Make the About avatar fill the entire button (no circular crop) */
+.nav-right.nav-about .nav-item { padding: 0; }
+.nav-right.nav-about .nav-item .avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%; /* make the image itself fully rounded */
+  object-fit: cover;
+  box-shadow: none;
+  padding: 8px; /* top, right, bottom, left */
+  box-sizing: border-box; /* keep image within the button bounds with padding */
+}
+/* Preserve hover/pressed affordance for image-filled button */
+.nav-right.nav-about .nav-item:hover .avatar,
+.nav-right.nav-about .nav-item:focus-visible .avatar { filter: brightness(0.92); }
+.nav-right.nav-about .nav-item:active .avatar { filter: brightness(0.85); }
 /* Inline arrow icon (Material CallMade) default state: hidden/subtle */
 .nav-split .nav-right .nav-item .icon-arrow {
   display: inline-block;
@@ -549,19 +722,18 @@ p { margin: 0; }
   transform: translateX(0);  /* no offset at rest */
   transition: opacity 160ms ease, transform 160ms ease, width 160ms ease, margin-left 160ms ease;
 }
-/* Reveal arrow on hover or keyboard focus */
-.nav-split .nav-right:hover .nav-item .icon-arrow,
+/* Reveal arrow on hover or keyboard focus of the specific link */
+.nav-split .nav-right .nav-item:hover .icon-arrow,
 .nav-split .nav-right .nav-item:focus-visible .icon-arrow {
   width: 16px;        /* expand to natural width */
   margin-left: 8px;   /* add gap next to text */
   opacity: 1;         /* show icon */
   transform: translateX(2px); /* subtle slide-in */
 }
-.nav-split .nav-right:hover .nav-item,
+/* Hover/focus background for the individual link */
+.nav-split .nav-right .nav-item:hover,
 .nav-split .nav-right .nav-item:focus-visible {
   background-color: rgba(0, 0, 0, 0.24) !important; /* ensure hover takes precedence over base */
-  /* keep text visible, only reveal the pill background */
-  padding-right: 16px; /* expand right padding when icon appears */
 }
 /* Pressed state: slightly darker than hover */
 .nav-split .nav-right .nav-item:active {

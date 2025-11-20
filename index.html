@@ -29,17 +29,44 @@
             <a href="#" class="nav-item" role="tab" aria-selected="false" tabindex="-1" data-tab="branding">Branding</a>
           </nav>
         </header>
-        <header class="nav-bar nav-right" aria-label="LinkedIn">
-          <a class="nav-item" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer">
-            Lets Connect
-            <svg class="icon-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" focusable="false">
-              <path d="M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z"></path>
+        <div class="nav-right-wrap" aria-label="Actions">
+          <header class="nav-bar nav-right nav-about" aria-label="About">
+            <a class="nav-item" href="./about.html" aria-label="About">
+              <img class="avatar" src="./assets/profile-photo.jpg" alt="Profile photo" />
+            </a>
+          </header>
+          <header class="nav-bar nav-right nav-connect" aria-label="LinkedIn">
+            <a class="nav-item" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer">
+              Lets Connect
+              <svg class="icon-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" focusable="false">
+                <path d="M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z"></path>
+              </svg>
+            </a>
+          </header>
+        </div>
+        <!-- Mobile-only menu button (<=600px) placed at top-right -->
+        <header class="nav-bar nav-right nav-menu" aria-label="Menu">
+          <a class="nav-item" href="#" aria-label="Open menu">
+            <svg class="icon-menu" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" focusable="false">
+              <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"></path>
             </svg>
           </a>
         </header>
       </div>
       <!-- Main content (blank home page) -->
       <main class="main" data-name="main" data-node-id="816:15570">
+        <!-- Mobile overlay menu (hidden by default) -->
+        <div class="mobile-menu-overlay" aria-hidden="true" role="dialog" aria-label="Menu">
+          <div class="mobile-menu-panel">
+            <a class="nav-item" href="./about.html">About</a>
+            <a class="nav-item" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer">
+              Lets Connect
+              <svg class="icon-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" focusable="false">
+                <path d="M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
         <div class="tile-grid" aria-hidden="true">
           <div class="tile" data-category="ux"></div>
           <div class="tile" data-category="ux"></div>
