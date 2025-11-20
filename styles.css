@@ -1,3 +1,39 @@
+/* --- Case Study Intro Overlay (NestBank) --- */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000; /* solid black */
+  color: #fff;
+  z-index: 10; /* above nav and bg */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0; /* start hidden, then fade in on enter */
+  transition: opacity 400ms ease;
+}
+.intro-overlay__inner {
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.intro-line {
+  font-family: var(--font-family-manrope);
+  font-size: 18px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Overlay fade-out helper */
+.intro-overlay.enter { opacity: 1; }
+.intro-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Generic slide-in helpers used after overlay hides */
+.nav-bar.intro-top-hidden { transform: translate3d(0, -100%, 0); opacity: 0; }
+.nav-bar.intro-top-visible { transform: translate3d(0, 0, 0); opacity: 1; }
 /* Design tokens from Figma */
 :root {
   /* Colors */
@@ -500,6 +536,21 @@ p { margin: 0; }
   width: 100%;
   height: 100%;
 }
+
+/* --- Page Transition Overlay (Home -> Case Study) --- */
+.nav-transition {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9; /* below case study intro (10), above content */
+  transition: opacity 320ms ease;
+}
+.nav-transition.open {
+  opacity: 1;
+  pointer-events: auto;
+}
 .nav-logo {
   width: 24px; /* matches size-[24px] */
   height: 24px;
@@ -933,6 +984,11 @@ p { margin: 0; }
     padding-right: 0;
     margin-left: 0;
     margin-right: 0;
+  }
+  /* NestBank/case studies: ensure an 8px left gap for the horizontal carousel */
+  .page[data-name="case study page"] .main {
+    padding-left: var(--space-xs) !important; /* 8px */
+    padding-right: var(--space-xs) !important; /* 8px right gap as well */
   }
   /* Cap collapsed tiles to 45px width */
   .page[data-name="home page"] .tile-grid .tile {

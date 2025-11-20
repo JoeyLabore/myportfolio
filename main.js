@@ -50,6 +50,92 @@
   const IS_SMALL_SCREEN = (() => {
     try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch { return false; }
   })();
+
+  // Case study: Intro overlay with typed text (e.g., NestBank)
+  (function setupCaseStudyIntroOverlay() {
+    try {
+      const overlay = document.querySelector('.intro-overlay');
+      if (!overlay) return; // only on pages that include the overlay (nestbank)
+
+      const lines = Array.from(overlay.querySelectorAll('.intro-line'));
+      const texts = lines.map((el) => (el && el.dataset ? String(el.dataset.text || '') : ''));
+
+      // Hide nav bars until overlay completes
+      const navs = Array.from(document.querySelectorAll('.nav-bar'));
+      navs.forEach((n) => {
+        n.classList.add('intro-top-hidden');
+        n.classList.remove('intro-top-visible');
+      });
+
+      // Fade overlay in for smooth transition
+      try { overlay.classList.add('enter'); } catch (_) {}
+
+      const TOTAL_MS = 10000;      // total overlay duration
+      const TYPE_TOTAL_MS = 7000;   // typing window (first 7s)
+      const perLineWindow = (lines.length > 0) ? (TYPE_TOTAL_MS / lines.length) : 0;
+
+      // Build rich lines with bold label (before //) and value (after //)
+      const rich = lines.map((el, idx) => {
+        const raw = texts[idx] || '';
+        const parts = raw.split('//');
+        const label = (parts[0] || '').trim();
+        const value = parts.slice(1).join('//').trim();
+        try {
+          el.innerHTML = `<span class="intro-label"><strong></strong></span>` + (value ? `<span class="intro-value"></span>` : '');
+        } catch (_) {}
+        const strongEl = el.querySelector('.intro-label strong');
+        const valueEl = el.querySelector('.intro-value');
+        return { el, strongEl, valueEl, labelText: label.length ? `${label} // ` : '', valueText: value };
+      });
+
+      function typeInto(targetEl, text, speed, done) {
+        const L = text.length;
+        let i = 0;
+        (function tick() {
+          try { if (targetEl) targetEl.textContent = text.slice(0, i); } catch (_) {}
+          i++;
+          if (i <= L) {
+            setTimeout(tick, speed);
+          } else if (typeof done === 'function') {
+            done();
+          }
+        })();
+      }
+
+      // Chain typing sequentially across lines
+      let idx = 0;
+      (function next() {
+        if (idx >= rich.length) return;
+        const info = rich[idx];
+        // Compute speeds for label and value to fit within per-line window
+        const totalChars = (info.labelText || '').length + (info.valueText || '').length;
+        const baseSpeed = Math.max(18, Math.floor(perLineWindow / Math.max(1, totalChars)));
+        typeInto(info.strongEl, info.labelText || '', baseSpeed, () => {
+          if (info.valueEl) {
+            typeInto(info.valueEl, info.valueText || '', baseSpeed, () => { idx++; next(); });
+          } else {
+            idx++; next();
+          }
+        });
+      })();
+
+      // After total duration, fade out overlay and reveal nav with a nice stagger
+      setTimeout(() => {
+        try { overlay.classList.add('fade-out'); } catch (_) {}
+        // Remove overlay after fade transition
+        setTimeout(() => { try { overlay.remove(); } catch (_) {} }, 420);
+        // Reveal navs (staggered)
+        const BASE_DELAY = 0;
+        const STEP = 180;
+        navs.forEach((nav, i) => {
+          setTimeout(() => {
+            nav.classList.remove('intro-top-hidden');
+            nav.classList.add('intro-top-visible');
+          }, BASE_DELAY + i * STEP);
+        });
+      }, TOTAL_MS);
+    } catch (_) { /* ignore overlay errors */ }
+  })();
   const SAVE_DATA = (() => {
     try { return !!(navigator.connection && navigator.connection.saveData); } catch { return false; }
   })();
@@ -260,9 +346,18 @@
         // Click/keyboard to select; if first tile is already selected (expanded), navigate to case study
         tiles.forEach((tile, idx) => {
           tile.addEventListener('click', () => {
-            // If first tile and already expanded, navigate to NestBank
+            // If first tile and already expanded, navigate to NestBank (with smooth transition)
             if (idx === 0 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              window.location.href = './nestbank.html';
+              try {
+                const trans = document.querySelector('.nav-transition');
+                if (trans) {
+                  trans.classList.add('open');
+                  // Delay navigation slightly for fade-in
+                  setTimeout(() => { window.location.href = './nestbank.html'; }, 340);
+                } else {
+                  window.location.href = './nestbank.html';
+                }
+              } catch (_) { window.location.href = './nestbank.html'; }
               return;
             }
             // Allow CSS transitions for smooth expand/collapse
@@ -298,7 +393,15 @@
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               if (idx === 0 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                window.location.href = './nestbank.html';
+                try {
+                  const trans = document.querySelector('.nav-transition');
+                  if (trans) {
+                    trans.classList.add('open');
+                    setTimeout(() => { window.location.href = './nestbank.html'; }, 340);
+                  } else {
+                    window.location.href = './nestbank.html';
+                  }
+                } catch (_) { window.location.href = './nestbank.html'; }
                 return;
               }
               // Allow CSS transitions for smooth expand/collapse via keyboard
