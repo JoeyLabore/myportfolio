@@ -430,6 +430,8 @@
               let best = null;
               let bestD = Infinity;
               for (const t of tiles) {
+                // Ignore hidden or hiding tiles entirely
+                if (t.classList && (t.classList.contains('filtered-out') || t.classList.contains('filter-hiding'))) continue;
                 const r = t.getBoundingClientRect();
                 const cx = r.left + r.width / 2;
                 const cy = r.top + r.height / 2;
@@ -533,65 +535,71 @@
         const tabs = Array.from(tabList.querySelectorAll('.nav-item[role="tab"]'));
         if (!tabs.length) return;
 
-        // Helper: filter tiles by category and maintain selection sensibly
+        // Helper: filter tiles by category with smooth transitions and maintain selection
         function filterTiles(category) {
           const tiles = Array.from(document.querySelectorAll('.tile-grid .tile'));
-          // Temporarily disable transitions during filtering for instant updates
           const grid = document.querySelector('.tile-grid');
-          if (grid) grid.classList.add('no-anim');
-          if (!tiles.length) {
-            // Ensure no-anim is cleared even on early return
-            if (grid) requestAnimationFrame(() => grid.classList.remove('no-anim'));
-            return;
-          }
+          if (!tiles.length) return;
           const want = (category || 'all').toLowerCase();
+
+          // Track if current selection can be preserved
+          const currentSelected = document.querySelector('.tile-grid .tile.selected');
+          let selectedStillVisible = false;
           let anyVisible = false;
           tiles.forEach((tile) => {
             const cat = (tile.dataset && tile.dataset.category) ? tile.dataset.category.toLowerCase() : '';
-            const show = (want === 'all') || (cat === want);
-            // Toggle visibility; rely on inline style to avoid specificity battles
-            tile.style.display = show ? '' : 'none';
-            tile.classList.toggle('filtered-out', !show);
-            if (show) anyVisible = true;
-            if (!show) {
-              // Ensure hidden tiles are not marked selected or pressed
+            const shouldShow = (want === 'all') || (cat === want);
+
+            // If we want to show it
+            if (shouldShow) {
+              anyVisible = true;
+              // Remove hidden state to let CSS animate back from 0 width/opacity
+              tile.classList.remove('filtered-out');
+              // Restore a11y visibility and focusability
+              try { tile.setAttribute('aria-hidden', 'false'); } catch (_) {}
+              try { tile.tabIndex = 0; } catch (_) {}
+              if (tile === currentSelected) {
+                selectedStillVisible = true;
+              }
+            } else {
+              // We want to hide it
+              // Clear selection/pressed states when filtering out
               tile.classList.remove('selected');
               tile.setAttribute('aria-pressed', 'false');
+              if (!tile.classList.contains('filtered-out')) {
+                tile.classList.add('filtered-out');
+                // Mark hidden for assistive tech and remove from tab order
+                try { tile.setAttribute('aria-hidden', 'true'); } catch (_) {}
+                try { tile.tabIndex = -1; } catch (_) {}
+              }
             }
           });
 
-          // Do not replay intro animations when filtering; keep it instant
+          // Clear any hover proxy from previous state
           try {
-            // Clear any hover proxy from previous state without animating
-            const visibleTiles = tiles.filter((t) => t.style.display !== 'none');
+            const visibleTiles = tiles.filter((t) => !t.classList.contains('filtered-out'));
             visibleTiles.forEach((t) => t.classList.remove('hover-proxy'));
           } catch (_) { /* ignore */ }
 
-          // Always select the first visible tile for the chosen category
-          if (!anyVisible) {
-            // Remove no-anim in next frame
-            if (grid) requestAnimationFrame(() => grid.classList.remove('no-anim'));
-            return; // nothing to select
-          }
-          const firstVisible = tiles.find((t) => t.style.display !== 'none');
-          if (firstVisible) {
-            // Programmatic selection: guard to avoid homepage navigation
+          // If the current selection is still visible, keep it to avoid jarring changes
+          if (selectedStillVisible) return;
+          // Otherwise, select the first visible tile (after layout updates)
+          if (!anyVisible) return;
+          requestAnimationFrame(() => {
+            const firstVisible = tiles.find((t) => !t.classList.contains('filtered-out'));
+            if (!firstVisible) return;
             try {
               window.__autoSelecting = true;
               if (typeof window.__homeSelectTile === 'function') {
                 window.__homeSelectTile(firstVisible);
-              } else {
-                // Fallback to direct call if exposure failed
+              } else if (typeof selectTile === 'function') {
                 selectTile(firstVisible);
               }
             } catch (_) { /* ignore */ }
             finally {
-              // Release the guard on the next tick to avoid racing click handlers
               setTimeout(() => { try { window.__autoSelecting = false; } catch (_) {} }, 0);
             }
-          }
-          // Ensure transitions are re-enabled after DOM updates have applied
-          if (grid) requestAnimationFrame(() => grid.classList.remove('no-anim'));
+          });
         }
 
         const setActive = (idx) => {
@@ -605,6 +613,13 @@
           try {
             const tab = tabs[idx];
             const category = (tab && tab.dataset) ? tab.dataset.tab : 'all';
+            // Reflect selected category on the grid for CSS targeting
+            const grid = document.querySelector('.tile-grid');
+            if (grid) {
+              grid.classList.remove('filter-all', 'filter-ux', 'filter-branding');
+              const cls = `filter-${String(category || 'all').toLowerCase()}`;
+              grid.classList.add(cls);
+            }
             filterTiles(category);
           } catch (_) { /* ignore */ }
         };

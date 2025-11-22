@@ -11,6 +11,17 @@
   opacity: 0; /* start hidden, then fade in on enter */
   transition: opacity 400ms ease;
 }
+
+/* Large breakpoint: remove extra space after the final tile */
+.tile-grid .tile:last-child { margin-right: 0; }
+
+/* When UX filter is active, remove margins on the 9th tile on large screens only */
+@media (min-width: 1051px) {
+  .page[data-name="home page"] .tile-grid.filter-ux .tile:nth-child(9) {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
 .intro-overlay__inner {
   max-width: 90vw;
   display: flex;
@@ -166,6 +177,8 @@
     height: var(--nav-card-height);
     padding: 12px; /* match card inner padding */
     align-items: stretch;
+    /* Remove right margin at mobile to hug the edge */
+    margin-right: 0 !important;
   }
   /* Slightly larger menu icon for better tap target */
   .page[data-name="home page"] .nav-split .nav-menu .icon-menu {
@@ -213,6 +226,29 @@
   /* On small screens: make the expanded (selected) tile fill 50% of the viewport height */
   .page[data-name="home page"] .tile-grid .tile.selected {
     --tile-basis: 40vh; /* animate to 40% of the viewport height */
+  }
+
+  /* On small screens: use vertical spacing instead of horizontal margins */
+  .page[data-name="home page"] .main .tile-grid {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .page[data-name="home page"] .tile-grid .tile {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+
+  /* On small screens: fully collapse hidden tiles vertically to remove gaps */
+  .page[data-name="home page"] .tile-grid .tile.filtered-out {
+    flex-basis: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
 }
 
@@ -404,6 +440,8 @@ p { margin: 0; }
   .nav-split .nav-bar {
     margin: var(--space-xs);
   }
+  /* Ensure the 'Lets Connect' button hugs an 8px right margin at this breakpoint */
+  .nav-right-wrap .nav-bar.nav-connect { margin-right: var(--space-xs); }
 }
 .nav-split .nav-left {
   grid-column: 1;
@@ -819,7 +857,11 @@ p { margin: 0; }
 /* Home page: 8 black tiles horizontally that fill the main container */
 .main .tile-grid {
   display: flex;
-  gap: var(--space-xs);
+  /* Use tile padding for spacing to avoid double gaps when some tiles are 0-width */
+  gap: 0;
+  /* Offset the per-tile horizontal margins so outer edges align */
+  margin-left: -4px;
+  margin-right: -4px;
   width: 100%;
   align-self: stretch;
   align-items: stretch; /* ensure tiles take full height of the grid */
@@ -829,6 +871,9 @@ p { margin: 0; }
 }
 .tile-grid .tile {
   background: #000;
+  /* Horizontal spacing via margins (4px on each side) */
+  margin-left: 4px;
+  margin-right: 4px;
   width: auto;
   height: auto; /* allow align-items:stretch to set height */
   align-self: stretch; /* ensure each tile fills the tile-grid height */
@@ -838,9 +883,10 @@ p { margin: 0; }
   position: relative; /* anchor absolutely-positioned media */
   min-height: 0; /* allow flex container to control cross-axis height */
   flex: 1 1 0;
-  transition: flex 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 360ms ease;
+  transition: flex 240ms cubic-bezier(0.2, 0.7, 0.2, 1), flex-basis 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 360ms ease;
   cursor: pointer;
   transform-origin: center;
+  will-change: flex-basis, transform, opacity;
   /* Compose slide + scale via CSS vars so states don't overwrite each other */
   --slideX: 0;
   --tiltX: 0deg; /* mouse tilt (X-axis rotation in deg) */
@@ -850,6 +896,19 @@ p { margin: 0; }
   --introOpacity: 0;      /* start invisible */
   opacity: var(--introOpacity);
   transform: translateX(var(--slideX)) translateY(var(--introY));
+}
+/* Hidden state: keep in flex flow but fully collapsed for smooth, non-jumpy animation */
+.tile-grid .tile.filtered-out {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  pointer-events: none;
+  flex-grow: 0;
+  flex-basis: 0px;
+  width: 0; /* guard for some browsers */
+  min-width: 0; /* ensure no minimum width */
+  /* Remove margins so no extra spacing remains when width is 0 */
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 /* When disabling animations programmatically, make tile changes instant */
 .tile-grid.no-anim .tile {
@@ -1424,8 +1483,21 @@ p { margin: 0; }
   .paragraph-col .paragraph-detail.open { margin-top: var(--space-xs); }
   .paragraph-col .paragraph-detail + .paragraph-detail { margin-top: var(--space-xs); }
 
-  /* Home page: reduce gap between rectangles to 4px at <=1050px */
-  .page[data-name="home page"] .main .tile-grid { gap: 4px; }
-  /* Home page: make expanded rectangle slightly less wide at <=1050px */
-  .page[data-name="home page"] .tile-grid .tile.selected { flex: 12 1 0; }
+  /* Home page: maintain 4px per-side margins at <=1050px */
+  .page[data-name="home page"] .main .tile-grid {
+    gap: 0;
+    margin-left: -4px;
+    margin-right: -4px;
+  }
+  .page[data-name="home page"] .tile-grid .tile { margin-left: 4px; margin-right: 4px; }
+  /* At <=1050px, keep 4px on the last tile too to align with edge offsets */
+  .page[data-name="home page"] .tile-grid .tile:last-child { margin-right: 4px; }
+  /* At <=1050px, force filtered tiles to fully collapse horizontally */
+  .page[data-name="home page"] .tile-grid .tile.filtered-out {
+    flex-basis: 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
