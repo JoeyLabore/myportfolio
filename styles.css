@@ -829,6 +829,298 @@ p { margin: 0; }
   background: rgba(0, 0, 0, 0.32) !important;
 }
 
+/* --- About Page (right-side card) --- */
+.page[data-name="about page"] .main {
+  align-items: flex-start; /* align content to the left */
+  justify-content: flex-start;
+  padding: var(--space-m);
+  gap: var(--space-lg);
+}
+.page[data-name="about page"] .about-card {
+  background: rgba(0, 0, 0, 0.38); /* match nav items glass tint */
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  color: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  min-height: 550px; /* ensure sufficient vertical size */
+  width: min(720px, 90vw);
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* distribute space evenly via justify-content */
+  justify-content: space-between; /* vertically space sections evenly */
+  position: fixed; /* pin to viewport */
+  left: max(env(safe-area-inset-left), var(--space-s));
+  top: calc(var(--space-s) + var(--nav-card-height) + 16px); /* 16px gap below nav row */
+  bottom: var(--space-s); /* fill down to 16px from bottom */
+  z-index: 1;
+  overflow: auto; /* allow internal scroll if content exceeds available height */
+  -webkit-overflow-scrolling: touch;
+  /* Tilt support (matches case study tilt variables) */
+  --tiltX: 0deg;
+  --tiltY: 0deg;
+  will-change: transform, opacity;
+  transform: perspective(800px) translateY(12px) rotateX(var(--tiltX)) rotateY(var(--tiltY));
+  opacity: 0; /* start hidden for intro animation */
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+/* About card intro animation */
+@keyframes aboutCardIn {
+  from { opacity: 0; transform: perspective(800px) translateY(12px) rotateX(0deg) rotateY(0deg); }
+  to   { opacity: 1; transform: perspective(800px) translateY(0)    rotateX(var(--tiltX)) rotateY(var(--tiltY)); }
+}
+.page[data-name="about page"] .about-card.about-enter {
+  animation: aboutCardIn 800ms cubic-bezier(.2,.8,.2,1) forwards;
+}
+.page[data-name="about page"] .about-heading {
+  font-family: var(--font-family-manrope);
+  font-weight: var(--font-weight-semiBold);
+  font-size: 40px; /* about page title size */
+  line-height: 1.4;
+  color: #ffffff;
+  margin: 0; /* remove default top/bottom margins */
+  padding-top: 0; /* ensure no top padding */
+  padding-bottom: 0; /* ensure no bottom padding */
+}
+.page[data-name="about page"] .about-skill-list {
+  list-style: none; /* using icons instead of bullets */
+  padding-left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+.page[data-name="about page"] .about-skill-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.page[data-name="about page"] .about-skill-list li span {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+}
+.page[data-name="about page"] .about-skill-list li .material-symbols-outlined {
+  font-size: 20px; /* icon size */
+  line-height: 1;
+  color: #9EE3A9; /* subtle success green; tweak as desired */
+  font-variation-settings: 'FILL' 0, 'wght' 600, 'opsz' 24;
+  margin-top: 2px; /* optical alignment with first text line */
+}
+.page[data-name="about page"] .about-tooltip {
+  position: relative;
+  cursor: help;
+}
+.page[data-name="about page"] .about-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  transform: translateY(-6px);
+  background: rgba(17,17,17,0.96);
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 8px;
+  max-width: 280px;
+  width: max-content;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, transform 120ms ease, visibility 0s linear 120ms;
+  z-index: 5;
+}
+.page[data-name="about page"] .about-tooltip::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  bottom: calc(100% - 4px);
+  width: 8px; height: 8px;
+  background: rgba(17,17,17,0.96);
+  transform: rotate(45deg);
+  opacity: 0; visibility: hidden;
+  transition: opacity 120ms ease, transform 120ms ease, visibility 0s linear 120ms;
+  z-index: 4;
+}
+.page[data-name="about page"] .about-tooltip:hover::after,
+.page[data-name="about page"] .about-tooltip:focus-visible::after,
+.page[data-name="about page"] .about-tooltip:hover::before,
+.page[data-name="about page"] .about-tooltip:focus-visible::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-8px);
+  transition-delay: 0s;
+}
+.page[data-name="about page"] .about-brands {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.page[data-name="about page"] .about-brands-label {
+  font-size: var(--font-size-xs); /* 14px */
+  line-height: var(--line-height-base);
+  color: #ffffff;
+  opacity: 0.9;
+}
+.page[data-name="about page"] .about-logos {
+  display: flex;
+  align-items: center;
+  gap: 0; /* use negative margins on images for overlap */
+  flex-wrap: wrap;
+}
+.page[data-name="about page"] .about-logos a {
+  display: inline-block;
+  margin-left: -6px; /* slight overlap between logos */
+  position: relative; /* enable z-index on hover */
+  transition: transform 160ms ease, box-shadow 160ms ease, z-index 0s linear;
+}
+.page[data-name="about page"] .about-logos a:first-child { margin-left: 0; }
+.page[data-name="about page"] .about-logos img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  display: block; /* remove inline whitespace gaps inside anchors */
+}
+.page[data-name="about page"] .about-logos a:hover {
+  transform: translateY(-4px);
+  z-index: 2; /* ensure lifted logo appears above neighbors */
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  border-radius: 50%; /* soften shadow edges around circular logo area */
+}
+
+/* About page: above 1050px, constrain card width to 610px */
+@media (min-width: 1051px) {
+  .page[data-name="about page"] .about-card {
+    max-width: 610px;
+    width: 610px;
+  }
+}
+
+/* About page: at and below 1050px, make the card span full width (with 8px side margins) */
+@media (max-width: 1050px) {
+  .page[data-name="about page"] .about-card {
+    width: auto;            /* let left/right define the width */
+    left: var(--space-xs);  /* 8px left margin */
+    right: var(--space-xs); /* 8px right margin */
+    bottom: var(--space-xs);/* 8px bottom margin */
+  }
+}
+
+/* Responsive: widen card on small screens and center */
+@media (max-width: 700px) {
+  .page[data-name="about page"] .main { align-items: stretch; }
+  .page[data-name="about page"] .about-card {
+    width: auto;
+    left: var(--space-xs);   /* 8px */
+    right: var(--space-xs);  /* 8px */
+    top: calc(var(--space-s) + var(--nav-card-height) + 16px);
+    bottom: var(--space-xs); /* 8px */
+  }
+}
+
+/* About page: title size at and below 600px */
+@media (max-width: 600px) {
+  .page[data-name="about page"] .about-heading {
+    font-size: 28px;
+  }
+}
+
+/* About page: shrink brand logos to 48x48 at and below 475px */
+@media (max-width: 475px) {
+  .page[data-name="about page"] .about-logos img {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* About page: shrink brand logos further to 40x40 at and below 325px */
+@media (max-width: 325px) {
+  .page[data-name="about page"] .about-logos img {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* About page: when viewport height is 670px or less, make the card part of the flow
+     and allow the page to scroll */
+@media (max-height: 670px) {
+  body.about-page { overflow-y: auto !important; }
+  .page[data-name="about page"] .about-card {
+    position: static; /* no fixed pinning */
+    left: auto; right: auto; top: auto; bottom: auto;
+    width: auto; /* allow width to be defined by margins */
+    margin: var(--space-xs);   /* 8px top/right/bottom/left */
+  }
+  /* Keep the entire nav row fixed at the top while page scrolls */
+  .page[data-name="about page"] .nav-split {
+    position: fixed;
+    top: var(--space-xs);    /* 8px top */
+    left: var(--space-xs);   /* 8px left */
+    right: var(--space-xs);  /* 8px right */
+    z-index: 4; /* above content */
+  }
+  /* Nav cards: use 8px margins on all sides within the fixed row */
+  .page[data-name="about page"] .nav-split .nav-bar {
+    margin: var(--space-xs) !important;
+  }
+  /* Provide space under the fixed nav so content doesn't sit underneath */
+  .page[data-name="about page"] .main {
+    padding-top: calc(var(--nav-card-height) + var(--space-lg));
+    padding-left: var(--space-xs);
+    padding-right: var(--space-xs);
+  }
+}
+
+/* About page: when height <= 670px AND width <= 1050px, use 16px top margin for nav */
+@media (max-height: 670px) and (max-width: 1050px) {
+  .page[data-name="about page"] .nav-split {
+    top: var(--space-s); /* 16px top margin */
+    left: 4px;
+    right: 4px;
+  }
+  /* Nav cards: 4px outer margins at this width */
+  .page[data-name="about page"] .nav-split .nav-bar {
+    margin: 4px !important;
+  }
+  /* About card: 48px gap below nav via top margin; use 8px left and right margins */
+  .page[data-name="about page"] .about-card {
+    margin-top: 48px; /* explicit 48px gap under nav */
+    margin-left: var(--space-xs); /* 8px on the left */
+    margin-right: var(--space-xs); /* 8px on the right */
+    margin-bottom: 0; /* keep bottom flush */
+    width: calc(100% - (var(--space-xs) * 2)); /* fill width between 8px margins */
+  }
+  /* About card: 16px gap below nav */
+  .page[data-name="about page"] .main {
+    padding-top: var(--nav-card-height, 64px); /* push content below fixed nav height */
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* About page: when height <= 670px AND width <= 600px, use 8px top/left/right margins for the about card */
+@media (max-height: 670px) and (max-width: 600px) {
+  .page[data-name="about page"] .about-card {
+    margin-top: 48px; /* ensure 48px gap below nav at <=600px width */
+    margin-left: var(--space-xs);
+    margin-right: var(--space-xs);
+    width: calc(100% - (var(--space-xs) * 2)); /* fill width between margins */
+    /* keep bottom as defined by broader rule (16px) unless you want 8px too */
+  }
+}
+
+/* About page: when height <= 670px AND width >= 1051px, use 8px top/left/right margins for the about card */
+@media (max-height: 670px) and (min-width: 1051px) {
+  .page[data-name="about page"] .about-card {
+    margin-top: 48px; /* ensure 48px gap below nav at >=1051px width */
+    margin-left: var(--space-xs);
+    margin-right: var(--space-xs);
+    /* keep bottom margin from base rule (16px) */
+  }
+}
+
 /* Main */
 .main {
   flex: 1 1 auto;

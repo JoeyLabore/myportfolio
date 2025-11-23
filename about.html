@@ -9,9 +9,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
+    <!-- Material Symbols for MUI Done icon -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css?v=3" />
   </head>
-  <body>
+  <body class="about-page" style="background-color:#0F0F0F;">
     <div class="page" data-name="about page">
       <div class="nav-split" data-name="nav-split">
         <header class="nav-bar nav-left" aria-label="Logo">
@@ -32,8 +34,72 @@
           </header>
         </div>
       </div>
-      <main class="main"></main>
+      <main class="main">
+        <section class="about-card" aria-labelledby="about-headline" data-node-id="901:4213">
+          <h1 id="about-headline" class="about-heading" data-node-id="901:4214">Design Consultant with 7 years in the industry.</h1>
+
+          <div class="about-skills" data-name="list-skills" data-node-id="901:4215">
+            <ul class="about-skill-list">
+              <li><span class="material-symbols-outlined" aria-hidden="true">done</span><span>UX Design & Research</span></li>
+              <li><span class="material-symbols-outlined" aria-hidden="true">done</span><span>Product Strategy</span></li>
+              <li><span class="material-symbols-outlined" aria-hidden="true">done</span><span>Design Systems</span></li>
+              <li><span class="material-symbols-outlined" aria-hidden="true">done</span><span class="about-tooltip" data-tooltip="Hello there! I designed and developed this portfolio from scratch using Figma’s MCP, Windsurf, and Cursor.">AI Assisted Product Building...</span></li>
+              <li><span class="material-symbols-outlined" aria-hidden="true">done</span><span>Brand Identity Design</span></li>
+            </ul>
+          </div>
+
+          <div class="about-brands" data-name="brands" data-node-id="901:4221">
+            <p class="about-brands-label">Brands I've worked with:</p>
+            <div class="about-logos" data-name="logo-container" data-node-id="901:4223">
+              <a href="https://www.toyota.com/racing" target="_blank" rel="noopener noreferrer" aria-label="Toyota Racing (opens in new tab)"><img alt="Toyota" src="./assets/brand-logos/toyota.png" /></a>
+              <a href="https://www.relias.com" target="_blank" rel="noopener noreferrer" aria-label="Relias (opens in new tab)"><img alt="Relias" src="./assets/brand-logos/relias.png" /></a>
+              <a href="https://www.rocketmortgage.com/" target="_blank" rel="noopener noreferrer" aria-label="Rocket Mortgage (opens in new tab)"><img alt="Rocket Mortgage" src="./assets/brand-logos/rocket-mortgage.png" /></a>
+              <a href="https://www.grameenamerica.org/" target="_blank" rel="noopener noreferrer" aria-label="Grameen America (opens in new tab)"><img alt="Grameen" src="./assets/brand-logos/grameen.png" /></a>
+              <a href="https://www.medbridge.com/" target="_blank" rel="noopener noreferrer" aria-label="MedBridge (opens in new tab)"><img alt="MedBridge" src="./assets/brand-logos/medbridge.png" /></a>
+              <a href="https://www.boostb2b.com/" target="_blank" rel="noopener noreferrer" aria-label="Boost B2B (opens in new tab)"><img alt="Boost" src="./assets/brand-logos/boost.png" /></a>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
     <script src="./main.js?v=3"></script>
+    <script>
+      // Subtle tilt for About card (mirrors case study tile tilt)
+      (function () {
+        try {
+          const aboutCard = document.querySelector('.about-card');
+          if (!aboutCard) return;
+          // Trigger intro animation on load (respect reduced motion)
+          const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (!reduceMotion) {
+            // ensure starting state is applied, then add class next frame
+            requestAnimationFrame(() => aboutCard.classList.add('about-enter'));
+          }
+          const supportsHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+          if (!supportsHover || reduceMotion) return;
+
+          const MAX_TILT = 1; // degrees, keep ultra subtle like tiles
+          const onMove = (e) => {
+            const r = aboutCard.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width;  // 0..1
+            const y = (e.clientY - r.top) / r.height;  // 0..1
+            const dx = (x - 0.5) * 2; // -1..1
+            const dy = (y - 0.5) * 2; // -1..1
+            const tiltY = (dx * MAX_TILT).toFixed(2) + 'deg';
+            const tiltX = (-dy * MAX_TILT).toFixed(2) + 'deg';
+            aboutCard.style.setProperty('--tiltX', tiltX);
+            aboutCard.style.setProperty('--tiltY', tiltY);
+          };
+          const onLeave = () => {
+            aboutCard.style.setProperty('--tiltX', '0deg');
+            aboutCard.style.setProperty('--tiltY', '0deg');
+          };
+          aboutCard.addEventListener('mousemove', onMove);
+          aboutCard.addEventListener('mouseleave', onLeave);
+        } catch (_) {
+          /* ignore tilt errors */
+        }
+      })();
+    </script>
   </body>
 </html>

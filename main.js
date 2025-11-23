@@ -535,6 +535,39 @@
         const tabs = Array.from(tabList.querySelectorAll('.nav-item[role="tab"]'));
         if (!tabs.length) return;
 
+        // Responsive label: under 374px, show 'UX' instead of 'Product' for the ux tab
+        try {
+          const uxTab = tabs.find((t) => t && t.dataset && t.dataset.tab === 'ux');
+          const updateUxLabel = () => {
+            if (!uxTab) return;
+            const isNarrow = (window.innerWidth || 0) < 374; // strictly below 374px
+            const target = isNarrow ? 'UX' : 'Product';
+            // Only touch text when it actually changes to avoid unnecessary layout work
+            if (uxTab.textContent !== target) {
+              uxTab.textContent = target;
+            }
+          };
+          updateUxLabel();
+          window.addEventListener('resize', updateUxLabel);
+          window.addEventListener('orientationchange', updateUxLabel);
+        } catch (_) { /* ignore responsive label errors */ }
+
+        // Responsive label: at or below 339px, show 'Brand' instead of 'Branding' for the branding tab
+        try {
+          const brandingTab = tabs.find((t) => t && t.dataset && t.dataset.tab === 'branding');
+          const updateBrandingLabel = () => {
+            if (!brandingTab) return;
+            const isVeryNarrow = (window.innerWidth || 0) <= 339; // at or below 339px
+            const target = isVeryNarrow ? 'Brand' : 'Branding';
+            if (brandingTab.textContent !== target) {
+              brandingTab.textContent = target;
+            }
+          };
+          updateBrandingLabel();
+          window.addEventListener('resize', updateBrandingLabel);
+          window.addEventListener('orientationchange', updateBrandingLabel);
+        } catch (_) { /* ignore responsive label errors */ }
+
         // Helper: filter tiles by category with smooth transitions and maintain selection
         function filterTiles(category) {
           const tiles = Array.from(document.querySelectorAll('.tile-grid .tile'));
