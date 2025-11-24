@@ -844,6 +844,7 @@ p { margin: 0; }
   border-radius: 24px;
   padding: 24px;
   min-height: 550px; /* ensure sufficient vertical size */
+  max-height: 650px; /* cap height while still filling available space */
   width: min(720px, 90vw);
   display: flex;
   flex-direction: column;
@@ -852,26 +853,67 @@ p { margin: 0; }
   position: fixed; /* pin to viewport */
   left: max(env(safe-area-inset-left), var(--space-s));
   top: calc(var(--space-s) + var(--nav-card-height) + 16px); /* 16px gap below nav row */
-  bottom: var(--space-s); /* fill down to 16px from bottom */
-  z-index: 1;
+  bottom: auto; /* use explicit height calc to allow max-height to cap */
+  height: min(calc(100vh - var(--nav-card-height) - (2 * var(--space-s)) - 16px), 650px);
+  z-index: 2; /* ensure card stays above Spline for interactivity */
   overflow: auto; /* allow internal scroll if content exceeds available height */
   -webkit-overflow-scrolling: touch;
-  /* Tilt support (matches case study tilt variables) */
-  --tiltX: 0deg;
-  --tiltY: 0deg;
-  will-change: transform, opacity;
-  transform: perspective(800px) translateY(12px) rotateX(var(--tiltX)) rotateY(var(--tiltY));
-  opacity: 0; /* start hidden for intro animation */
-  transition: transform 120ms ease, opacity 120ms ease;
+  will-change: auto;
+  transform: none;
+  opacity: 1; /* visible by default */
+  transition: none;
 }
 
 /* About card intro animation */
 @keyframes aboutCardIn {
-  from { opacity: 0; transform: perspective(800px) translateY(12px) rotateX(0deg) rotateY(0deg); }
-  to   { opacity: 1; transform: perspective(800px) translateY(0)    rotateX(var(--tiltX)) rotateY(var(--tiltY)); }
+  from { opacity: 0; transform: perspective(800px) translateY(12px); }
+  to   { opacity: 1; transform: perspective(800px) translateY(0); }
 }
 .page[data-name="about page"] .about-card.about-enter {
-  animation: aboutCardIn 800ms cubic-bezier(.2,.8,.2,1) forwards;
+  animation: aboutCardIn 2000ms cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+/* Fade-only variant used when centering to avoid transform conflicts */
+@keyframes aboutCardFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Large and tall screens: center card vertically and horizontally */
+@media (min-width: 1051px) and (min-height: 774px) {
+  .page[data-name="about page"] .about-card {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto; /* allow max-height to constrain size */
+    height: min(calc(100vh - (2 * var(--space-s))), 650px); /* fill while respecting cap */
+    transform: translate(-50%, -50%);
+  }
+  .page[data-name="about page"] .about-card.about-enter {
+    animation: aboutCardFade 2000ms cubic-bezier(.2,.8,.2,1) forwards;
+  }
+}
+
+/* Below 1050px width: revert tall-viewport centering and use original layout/animation */
+@media (max-width: 1050px) {
+  .page[data-name="about page"] .about-card {
+    left: var(--space-xs);
+    right: var(--space-xs);
+    top: calc(var(--space-xs) + var(--nav-card-height) + 16px);
+    bottom: auto;
+    height: min(calc(100vh - var(--nav-card-height) - (2 * var(--space-xs)) - 16px), 650px);
+    transform: none;
+  }
+  .page[data-name="about page"] .about-card.about-enter {
+    animation: aboutCardIn 2000ms cubic-bezier(.2,.8,.2,1) forwards;
+  }
+}
+
+/* Respect reduced motion preferences: disable the entry animation */
+@media (prefers-reduced-motion: reduce) {
+  .page[data-name="about page"] .about-card.about-enter {
+    animation: none !important;
+  }
 }
 .page[data-name="about page"] .about-heading {
   font-family: var(--font-family-manrope);
@@ -882,6 +924,68 @@ p { margin: 0; }
   margin: 0; /* remove default top/bottom margins */
   padding-top: 0; /* ensure no top padding */
   padding-bottom: 0; /* ensure no bottom padding */
+}
+
+/* --- Spline Viewer (About page right side) --- */
+.page[data-name="about page"] .about-spline {
+  position: fixed;
+  left: 0;  /* fill full width */
+  right: 0; /* fill full width */
+  top: 0;   /* start at the very top of the page */
+  bottom: 0; /* extend to bottom to fill height */
+  width: 100vw; /* full viewport width */
+  height: 100vh; /* full viewport height */
+  border-radius: 0;
+  overflow: hidden;
+  z-index: 1; /* above background, below card (z=2) and nav (z=2+) */
+  display: block;
+}
+
+/* Below 1050px: place Spline below the about card, not full-screen */
+@media (max-width: 1050px) {
+  .page[data-name="about page"] .about-spline {
+    position: static;           /* participate in normal flow below the card */
+    left: auto; right: auto;    /* reset fixed positioning */
+    top: auto; bottom: auto;    /* reset fixed positioning */
+    width: 100%;                /* take full content width */
+    height: 360px;              /* reasonable embed height on tablet/mobile */
+    max-height: 50vh;           /* never exceed half the viewport height */
+    border-radius: 16px;        /* match card rounding */
+    margin: var(--space-s) var(--space-xs) var(--space-s); /* spacing around viewer */
+    z-index: auto;              /* no layering needed in flow */
+    display: block;
+  }
+}
+
+/* Below 1050px width but above the 670px height breakpoint: hide the Spline viewer */
+@media (max-width: 1050px) and (min-height: 671px) {
+  .page[data-name="about page"] .about-spline {
+    display: none !important;
+  }
+}
+
+/* Large and tall screens: vertically center the Spline to mirror the card */
+@media (min-width: 1051px) and (min-height: 774px) {
+  .page[data-name="about page"] .about-spline {
+    /* Align to the right and overlap the about card (360px) */
+    left: calc(50% + 305px - 360px);
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+    transform: none;
+  }
+}
+
+/* Large screens: align to right and overlap the about card (360px) */
+@media (min-width: 1051px) {
+  .page[data-name="about page"] .about-spline {
+    left: calc(var(--space-s) + 610px - 360px);
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+  }
 }
 .page[data-name="about page"] .about-skill-list {
   list-style: none; /* using icons instead of bullets */
@@ -907,52 +1011,18 @@ p { margin: 0; }
   font-variation-settings: 'FILL' 0, 'wght' 600, 'opsz' 24;
   margin-top: 2px; /* optical alignment with first text line */
 }
-.page[data-name="about page"] .about-tooltip {
-  position: relative;
-  cursor: help;
+
+/* Reduce about list font size on very small screens */
+@media (max-width: 475px) {
+  .page[data-name="about page"] .about-skill-list li span {
+    font-size: 14px;
+  }
+  .page[data-name="about page"] .about-heading {
+    font-size: 20px;
+  }
 }
-.page[data-name="about page"] .about-tooltip::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 0;
-  bottom: 100%;
-  transform: translateY(-6px);
-  background: rgba(17,17,17,0.96);
-  color: #fff;
-  padding: 8px 10px;
-  border-radius: 8px;
-  max-width: 280px;
-  width: max-content;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-  font-size: 12px;
-  line-height: 1.4;
-  white-space: normal;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 120ms ease, transform 120ms ease, visibility 0s linear 120ms;
-  z-index: 5;
-}
-.page[data-name="about page"] .about-tooltip::before {
-  content: '';
-  position: absolute;
-  left: 10px;
-  bottom: calc(100% - 4px);
-  width: 8px; height: 8px;
-  background: rgba(17,17,17,0.96);
-  transform: rotate(45deg);
-  opacity: 0; visibility: hidden;
-  transition: opacity 120ms ease, transform 120ms ease, visibility 0s linear 120ms;
-  z-index: 4;
-}
-.page[data-name="about page"] .about-tooltip:hover::after,
-.page[data-name="about page"] .about-tooltip:focus-visible::after,
-.page[data-name="about page"] .about-tooltip:hover::before,
-.page[data-name="about page"] .about-tooltip:focus-visible::before {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(-8px);
-  transition-delay: 0s;
-}
+
+
 .page[data-name="about page"] .about-brands {
   display: flex;
   flex-direction: column;
@@ -1004,7 +1074,8 @@ p { margin: 0; }
     width: auto;            /* let left/right define the width */
     left: var(--space-xs);  /* 8px left margin */
     right: var(--space-xs); /* 8px right margin */
-    bottom: var(--space-xs);/* 8px bottom margin */
+    bottom: auto;
+    height: min(calc(100vh - var(--nav-card-height) - (2 * var(--space-xs)) - 16px), 650px);
   }
 }
 
@@ -1016,7 +1087,8 @@ p { margin: 0; }
     left: var(--space-xs);   /* 8px */
     right: var(--space-xs);  /* 8px */
     top: calc(var(--space-s) + var(--nav-card-height) + 16px);
-    bottom: var(--space-xs); /* 8px */
+    bottom: auto;
+    height: min(calc(100vh - var(--nav-card-height) - (2 * var(--space-xs)) - 16px), 650px);
   }
 }
 
@@ -1024,6 +1096,13 @@ p { margin: 0; }
 @media (max-width: 600px) {
   .page[data-name="about page"] .about-heading {
     font-size: 28px;
+  }
+}
+
+/* Ensure the about title is smaller on very small screens, overriding the 600px rule above */
+@media (max-width: 475px) {
+  .page[data-name="about page"] .about-heading {
+    font-size: 20px;
   }
 }
 
