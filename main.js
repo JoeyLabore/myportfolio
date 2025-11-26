@@ -294,20 +294,29 @@
             document.body.classList.remove('home-bg-tom');
             document.body.classList.remove('home-bg-kinti');
             document.body.classList.remove('home-bg-kakakoala');
+            document.body.classList.remove('home-bg-dynobytes');
+            document.body.classList.remove('home-bg-apendito');
+            document.body.classList.remove('home-bg-relias');
             if (idx === 0) {
               document.body.classList.add('home-bg-nestbank');
             } else if (idx === 1) {
-              document.body.classList.add('home-bg-medigo');
-            } else if (idx === 2) {
               document.body.classList.add('home-bg-logofolio');
+            } else if (idx === 2) {
+              document.body.classList.add('home-bg-medigo');
             } else if (idx === 3) {
               document.body.classList.add('home-bg-orion');
             } else if (idx === 4) {
               document.body.classList.add('home-bg-tom');
+            } else if (idx === 5) {
+              document.body.classList.add('home-bg-relias');
             } else if (idx === 6) {
               document.body.classList.add('home-bg-kinti');
             } else if (idx === 7) {
               document.body.classList.add('home-bg-kakakoala');
+            } else if (idx === 8) {
+              document.body.classList.add('home-bg-dynobytes');
+            } else if (idx === 9) {
+              document.body.classList.add('home-bg-apendito');
             }
             // Manage Orion video playback for 4th tile
             try {
@@ -360,6 +369,62 @@
               } catch (_) { window.location.href = './nestbank.html'; }
               return;
             }
+            // If Logofolio tile (now 2nd) and already expanded, navigate to Logofolio page
+            if (idx === 1 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+              try {
+                const trans = document.querySelector('.nav-transition');
+                if (trans) {
+                  trans.classList.add('open');
+                  setTimeout(() => { window.location.href = './logofolio.html'; }, 340);
+                } else {
+                  window.location.href = './logofolio.html';
+                }
+              } catch (_) { window.location.href = './logofolio.html'; }
+              return;
+            }
+            // If Medigo tile (3rd) and already expanded, open Behance in new tab
+            if (idx === 2 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+              try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {}
+              return;
+            }
+            // If Tom tile (5th) and already expanded, open Behance in new tab
+            if (idx === 4 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+              try { window.open('https://www.behance.net/gallery/227685253/TOM-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+              return;
+            }
+            // If Kinti tile (7th) and already expanded, open Behance in new tab
+            if (idx === 6 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+              try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+              return;
+            }
+            // If Kakakoala tile (8th) and already expanded, open Behance in new tab
+            if (idx === 7 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+              try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+              return;
+            }
+            // If DinoBytes tile (9th) and already expanded, open Behance in new tab
+            if (idx === 8 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+              try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+              return;
+            }
+            // If Aprendito tile (10th) and already expanded, open Behance in new tab
+            if (idx === 9 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+              try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+              return;
+            }
+            // Default: if selected and no dedicated page, go to password gate
+            if (tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+              try {
+                const trans = document.querySelector('.nav-transition');
+                if (trans) {
+                  trans.classList.add('open');
+                  setTimeout(() => { window.location.href = './password.html'; }, 340);
+                } else {
+                  window.location.href = './password.html';
+                }
+              } catch (_) { window.location.href = './password.html'; }
+              return;
+            }
             // Allow CSS transitions for smooth expand/collapse
             selectTile(tile);
           });
@@ -402,6 +467,61 @@
                     window.location.href = './nestbank.html';
                   }
                 } catch (_) { window.location.href = './nestbank.html'; }
+                return;
+              }
+              if (idx === 1 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+                try {
+                  const trans = document.querySelector('.nav-transition');
+                  if (trans) {
+                    trans.classList.add('open');
+                    setTimeout(() => { window.location.href = './logofolio.html'; }, 340);
+                  } else {
+                    window.location.href = './logofolio.html';
+                  }
+                } catch (_) { window.location.href = './logofolio.html'; }
+                return;
+              }
+              // If Medigo tile (3rd) and already expanded, open Behance in new tab
+              if (idx === 2 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+                try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {}
+                return;
+              }
+              // If Tom tile (5th) and already expanded, open Behance in new tab
+              if (idx === 4 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+                try { window.open('https://www.behance.net/gallery/227685253/TOM-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+                return;
+              }
+              // If Kinti tile (7th) and already expanded, open Behance in new tab
+              if (idx === 6 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+                try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+                return;
+              }
+              // If Kakakoala tile (8th) and already expanded, open Behance in new tab
+              if (idx === 7 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+                try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+                return;
+              }
+              // If DinoBytes tile (9th) and already expanded, open Behance in new tab
+              if (idx === 8 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+                try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+                return;
+              }
+              // If Aprendito tile (10th) and already expanded, open Behance in new tab
+              if (idx === 9 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+                try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
+                return;
+              }
+              // Default: if selected and no dedicated page, go to password gate
+              if (tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
+                try {
+                  const trans = document.querySelector('.nav-transition');
+                  if (trans) {
+                    trans.classList.add('open');
+                    setTimeout(() => { window.location.href = './password.html'; }, 340);
+                  } else {
+                    window.location.href = './password.html';
+                  }
+                } catch (_) { window.location.href = './password.html'; }
                 return;
               }
               // Allow CSS transitions for smooth expand/collapse via keyboard
@@ -755,6 +875,429 @@
             if (e.key === 'Escape' && overlay.classList.contains('open')) close();
           });
         } catch (_) { /* ignore */ }
+      })();
+
+      // Logofolio page: infinite tiled logo canvas
+      (function setupLogofolio() {
+        try {
+          const canvas = document.getElementById('logofolio-canvas');
+          if (!canvas) return; // only on logofolio page
+
+          const ctx = canvas.getContext('2d');
+          const DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+          let vw = 0, vh = 0;
+          function resize() {
+            vw = window.innerWidth || document.documentElement.clientWidth || canvas.clientWidth || 0;
+            vh = window.innerHeight || document.documentElement.clientHeight || canvas.clientHeight || 0;
+            canvas.width = Math.max(1, Math.floor(vw * DPR));
+            canvas.height = Math.max(1, Math.floor(vh * DPR));
+            canvas.style.width = vw + 'px';
+            canvas.style.height = vh + 'px';
+          }
+          resize();
+          window.addEventListener('resize', resize);
+          window.addEventListener('orientationchange', resize);
+
+          // Manifest of logo assets (from ./assets/logofolio/)
+          const LOGOS = [
+            "./assets/logofolio/Union.svg",
+            "./assets/logofolio/air-show-entertainment-icon.svg",
+            "./assets/logofolio/aprendito-logo-2.svg",
+            "./assets/logofolio/aprendito-logo-3.svg",
+            "./assets/logofolio/aprendito-logo.svg",
+            "./assets/logofolio/beez-kneez-icon.svg",
+            "./assets/logofolio/bird-icon.svg",
+            "./assets/logofolio/book-icon.svg",
+            "./assets/logofolio/credence-designs-icon.svg",
+            "./assets/logofolio/dinobytes-logo-2.svg",
+            "./assets/logofolio/dinobytes-logo-3.svg",
+            "./assets/logofolio/dinobytes-logo.svg",
+            "./assets/logofolio/equa-icon.svg",
+            "./assets/logofolio/familes-set-free-icon.svg",
+            "./assets/logofolio/familes-set-free-secondary.svg",
+            "./assets/logofolio/hanks-icon.svg",
+            "./assets/logofolio/hanks-secondary.svg",
+            "./assets/logofolio/jj-icon.svg",
+            "./assets/logofolio/jj-secondary.svg",
+            "./assets/logofolio/kakaoala-logo-2.svg",
+            "./assets/logofolio/kakaoala-logo-3.svg",
+            "./assets/logofolio/kakaoala-logo.svg",
+            "./assets/logofolio/kinti-logo-2.svg",
+            "./assets/logofolio/kinti-logo-3.svg",
+            "./assets/logofolio/kinti-logo.svg",
+            "./assets/logofolio/logo-svg-2.svg",
+            "./assets/logofolio/logo-svg-3.svg",
+            "./assets/logofolio/logo-svg.svg",
+            "./assets/logofolio/medigo-icon.svg",
+            "./assets/logofolio/mountbatten.svg",
+            "./assets/logofolio/peacock.svg",
+            "./assets/logofolio/queenfisher-farm-full.svg",
+            "./assets/logofolio/queenfisher-farm-icon.svg",
+            "./assets/logofolio/queenfisher-farm-secondary.svg",
+            "./assets/logofolio/skilldex-icon.svg",
+            "./assets/logofolio/squirrel-icon.svg",
+            "./assets/logofolio/starwars.svg",
+            "./assets/logofolio/swyndlr-icon.svg",
+            "./assets/logofolio/tom-logo-2.svg",
+            "./assets/logofolio/tom-logo-3.svg",
+            "./assets/logofolio/tom-logo-4.svg",
+            "./assets/logofolio/tom-logo-5.svg",
+            "./assets/logofolio/tom-logo-6.svg",
+            "./assets/logofolio/tom-logo.svg",
+            "./assets/logofolio/version-1.svg",
+            "./assets/logofolio/version-3.svg",
+            "./assets/logofolio/wema-logo-2.svg",
+            "./assets/logofolio/wema-logo-3.svg",
+            "./assets/logofolio/wema-logo.svg",
+          ];
+
+          function loadImage(src) {
+            return new Promise((resolve) => {
+              const img = new Image();
+              img.decoding = 'async';
+              img.onload = () => resolve(img);
+              img.onerror = () => resolve(null);
+              img.src = src;
+            });
+          }
+
+          let images = [];
+          let ready = false;
+          (async () => {
+            const loaded = await Promise.all(LOGOS.map(loadImage));
+            images = loaded.filter(Boolean);
+            if (!images.length) return;
+            initScene();
+            // Default: start more zoomed out and centered
+            try {
+              scale = 0.6; // more zoomed out (bounded by MIN_SCALE)
+              const visW = vw / scale;
+              const visH = vh / scale;
+              offsetX = (visW - baseW) / 2; // center on base tile
+              offsetY = (visH - baseH) / 2 - 360; // start a bit further up
+            } catch (_) {}
+            ready = true;
+            requestRender();
+          })();
+
+          // Scene setup: positions repeat over a base tile to create infinite tiling
+          const rnd = (min, max) => min + Math.random() * (max - min);
+          const randInt = (min, max) => Math.floor(rnd(min, max + 1));
+          let baseW = 2200; // base tile width
+          let baseH = 2200; // base tile height
+          let sprites = [];
+          // Fade-in state
+          let fadeStart = 0;
+          let fading = false;
+          const FADE_MS = 900;
+          const STAGGER_MS = 20;
+          function startFade() {
+            try { fadeStart = performance.now ? performance.now() : Date.now(); } catch (_) { fadeStart = Date.now(); }
+            fading = true;
+          }
+          function initScene() {
+            // Determine grid cell size and uniform logo size for even spacing
+            const target = Math.max(1600, Math.min(3200, Math.hypot(vw, vh) * 1.6));
+            const CELL = 220; // px per grid cell
+            const UNIFORM_MAX = 120; // max dimension (width or height) for each logo
+            const cols = Math.max(3, Math.floor(target / CELL));
+            const rows = Math.max(3, Math.floor(target / CELL));
+            baseW = cols * CELL;
+            baseH = rows * CELL;
+
+            const list = [];
+            const JITTER = Math.max(4, Math.floor(CELL * 0.08)); // ~8% of cell size
+            for (let j = 0; j < rows; j++) {
+              const rowOffset = (j % 2 === 1) ? CELL / 2 : 0; // stagger every other row by half a cell
+              for (let i = 0; i < cols; i++) {
+                const img = images[(j * cols + i) % images.length];
+                const iw = Math.max(1, img.naturalWidth || 0);
+                const ih = Math.max(1, img.naturalHeight || 0);
+                const ratio = (iw > 0 && ih > 0) ? (iw / ih) : 1;
+                let w, h;
+                if (ratio >= 1) {
+                  w = UNIFORM_MAX;
+                  h = Math.max(1, w / ratio);
+                } else {
+                  h = UNIFORM_MAX;
+                  w = Math.max(1, h * ratio);
+                }
+                const cellX = i * CELL + rowOffset;
+                const cellY = j * CELL;
+                // Base centered position within the (possibly shifted) cell
+                let x = cellX + (CELL - w) / 2;
+                let y = cellY + (CELL - h) / 2;
+                // Add small jitter for an organized-mess look
+                x += (Math.random() * 2 - 1) * JITTER;
+                y += (Math.random() * 2 - 1) * JITTER;
+                const idx = j * cols + i;
+                const delay = idx * STAGGER_MS + Math.random() * (STAGGER_MS * 0.5);
+                list.push({ img, w, h, x, y, a: 1, delay });
+              }
+            }
+            sprites = list;
+            startFade();
+          }
+          window.addEventListener('resize', () => { if (ready) { initScene(); requestRender(); } });
+
+          // Pan state
+          let offsetX = 0, offsetY = 0; // world translation (px at scale=1)
+          let velX = 0, velY = 0;
+          let scale = 1; // world scale
+          const MIN_SCALE = 0.4;
+          const MAX_SCALE = 6.0;
+          // Zoom inertia state
+          let zoomVel = 0; // velocity in log-scale units per frame
+          let zoomFocusX = 0; // last zoom focus (screen coords in CSS px)
+          let zoomFocusY = 0;
+          let animating = false;
+          function zoomAt(screenX, screenY, factor) {
+            const prevScale = scale;
+            const newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, prevScale * factor));
+            if (newScale === prevScale) return false;
+            // Keep the world point under (screenX, screenY) stationary
+            offsetX = offsetX + screenX * (1 / newScale - 1 / prevScale);
+            offsetY = offsetY + screenY * (1 / newScale - 1 / prevScale);
+            scale = newScale;
+            return true;
+          }
+          function requestRender() {
+            if (!animating) {
+              animating = true;
+              requestAnimationFrame(render);
+            }
+          }
+
+          function render() {
+            animating = false;
+            if (!ready) return;
+            // Apply inertia
+            offsetX += velX;
+            offsetY += velY;
+            velX *= 0.94; velY *= 0.94;
+            // Apply zoom inertia (convert log-velocity to multiplicative factor)
+            if (Math.abs(zoomVel) > 0.00005) {
+              const factor = Math.exp(zoomVel);
+              if (zoomAt(zoomFocusX, zoomFocusY, factor)) {
+                animating = true;
+              }
+              // decay zoom velocity
+              zoomVel *= 0.88;
+              // clamp very small values to zero
+              if (Math.abs(zoomVel) < 1e-5) zoomVel = 0;
+            }
+            if (Math.abs(velX) > 0.02 || Math.abs(velY) > 0.02) animating = true;
+
+            // Normalize offsets to avoid big numbers
+            const ox = ((offsetX % baseW) + baseW) % baseW;
+            const oy = ((offsetY % baseH) + baseH) % baseH;
+
+            // Reset to device scale, clear, then apply world scale
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+            ctx.clearRect(0, 0, vw, vh);
+            ctx.save();
+            ctx.scale(scale, scale);
+
+            // Determine visible tile indices
+            const visW = vw / scale;
+            const visH = vh / scale;
+            const margin = 200 / scale;
+            const minX = -ox - margin;
+            const minY = -oy - margin;
+            const maxX = visW - ox + margin;
+            const maxY = visH - oy + margin;
+            const i0 = Math.floor(minX / baseW);
+            const j0 = Math.floor(minY / baseH);
+            const i1 = Math.floor(maxX / baseW);
+            const j1 = Math.floor(maxY / baseH);
+
+            let allFaded = true;
+            const nowT = performance.now ? performance.now() : Date.now();
+            const ease = (p) => (p <= 0 ? 0 : (p >= 1 ? 1 : (p * p * (3 - 2 * p))));
+            for (let i = i0; i <= i1; i++) {
+              for (let j = j0; j <= j1; j++) {
+                const tx = i * baseW + ox;
+                const ty = j * baseH + oy;
+                for (let k = 0; k < sprites.length; k++) {
+                  const s = sprites[k];
+                  const x = tx + s.x;
+                  const y = ty + s.y;
+                  // Cull if out of viewport bounds (including margin)
+                  if (x + s.w < -margin || y + s.h < -margin || x > visW + margin || y > visH + margin) continue;
+                  let alpha = s.a;
+                  if (fading) {
+                    const t = (nowT - fadeStart - (s.delay || 0)) / FADE_MS;
+                    const p = ease(t);
+                    alpha *= p;
+                    if (p < 1) allFaded = false;
+                  }
+                  ctx.globalAlpha = alpha;
+                  ctx.drawImage(s.img, x, y, s.w, s.h);
+                }
+              }
+            }
+
+            ctx.globalAlpha = 1;
+            ctx.restore();
+            if (animating || (fading && !allFaded)) {
+              animating = true;
+              requestAnimationFrame(render);
+            } else if (fading && allFaded) {
+              fading = false;
+            }
+          }
+
+          // Input handlers: drag, wheel, keys, touch
+          let dragging = false;
+          let lastX = 0, lastY = 0;
+          canvas.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return;
+            dragging = true;
+            lastX = e.clientX; lastY = e.clientY;
+            velX = velY = 0;
+          });
+          window.addEventListener('mousemove', (e) => {
+            if (!dragging) return;
+            const dx = e.clientX - lastX;
+            const dy = e.clientY - lastY;
+            offsetX += dx; offsetY += dy;
+            velX = dx * 0.2; velY = dy * 0.2;
+            lastX = e.clientX; lastY = e.clientY;
+            requestRender();
+            e.preventDefault();
+          }, { passive: false });
+          window.addEventListener('mouseup', () => { dragging = false; });
+
+          canvas.addEventListener('wheel', (e) => {
+            // Zoom when ctrlKey is held (pinch on trackpads sets ctrlKey)
+            if (e.ctrlKey) {
+              // Much higher sensitivity
+              const ds = Math.exp(-e.deltaY * 0.006);
+              const rect = canvas.getBoundingClientRect();
+              const sx = e.clientX - rect.left;
+              const sy = e.clientY - rect.top;
+              if (zoomAt(sx, sy, ds)) {
+                // accumulate zoom inertia around cursor
+                zoomFocusX = sx; zoomFocusY = sy;
+                zoomVel += Math.log(ds) * 0.6;
+                // cap zoomVel to avoid runaway
+                zoomVel = Math.max(-0.08, Math.min(0.08, zoomVel));
+                requestRender();
+              }
+              e.preventDefault();
+              return;
+            }
+            // Otherwise: pan
+            const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : 0;
+            const dy = e.deltaY;
+            offsetX -= dx; // natural scroll
+            offsetY -= dy;
+            velX = -dx * 0.1;
+            velY = -dy * 0.1;
+            requestRender();
+            e.preventDefault();
+          }, { passive: false });
+
+          window.addEventListener('keydown', (e) => {
+            const STEP = 40;
+            if (e.key === 'ArrowUp') { offsetY += STEP; velY = 4; requestRender(); }
+            else if (e.key === 'ArrowDown') { offsetY -= STEP; velY = -4; requestRender(); }
+            else if (e.key === 'ArrowLeft') { offsetX += STEP; velX = 4; requestRender(); }
+            else if (e.key === 'ArrowRight') { offsetX -= STEP; velX = -4; requestRender(); }
+            else if (e.key === '+' || e.key === '=' ) {
+              const cx = vw / 2, cy = vh / 2;
+              if (zoomAt(cx, cy, 1.2)) requestRender();
+            } else if (e.key === '-' || e.key === '_') {
+              const cx = vw / 2, cy = vh / 2;
+              if (zoomAt(cx, cy, 1/1.2)) requestRender();
+            }
+          });
+
+          // Touch (drag + pinch to zoom + double-tap)
+          let tDragging = false; let tLastX = 0; let tLastY = 0;
+          let pinching = false; let lastDist = 0; let lastMidX = 0; let lastMidY = 0;
+          let lastTapT = 0; let lastTapX = 0; let lastTapY = 0;
+          function dist(a, b) { const dx = a.clientX - b.clientX; const dy = a.clientY - b.clientY; return Math.hypot(dx, dy); }
+          function mid(a, b) { return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 }; }
+          canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+              const t = e.touches[0];
+              tDragging = true; pinching = false; velX = velY = 0;
+              tLastX = t.clientX; tLastY = t.clientY;
+              // Double-tap to zoom in
+              const now = performance.now ? performance.now() : Date.now();
+              const dt = now - lastTapT;
+              const d2 = Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY);
+              if (dt < 300 && d2 < 24) {
+                const rect = canvas.getBoundingClientRect();
+                const sx = t.clientX - rect.left; const sy = t.clientY - rect.top;
+                if (zoomAt(sx, sy, 1.6)) requestRender();
+              }
+              lastTapT = now; lastTapX = t.clientX; lastTapY = t.clientY;
+            } else if (e.touches.length === 2) {
+              tDragging = false; pinching = true; velX = velY = 0;
+              lastDist = dist(e.touches[0], e.touches[1]);
+              const m = mid(e.touches[0], e.touches[1]); lastMidX = m.x; lastMidY = m.y;
+            }
+          }, { passive: true });
+          canvas.addEventListener('touchmove', (e) => {
+            if (pinching && e.touches.length === 2) {
+              const d = dist(e.touches[0], e.touches[1]);
+              if (d > 0 && lastDist > 0) {
+                // Stronger sensitivity
+                const ds = Math.pow(d / lastDist, 1.5);
+                const rect = canvas.getBoundingClientRect();
+                const m = mid(e.touches[0], e.touches[1]);
+                const sx = m.x - rect.left;
+                const sy = m.y - rect.top;
+                if (zoomAt(sx, sy, ds)) {
+                  zoomFocusX = sx; zoomFocusY = sy;
+                  zoomVel += Math.log(ds) * 0.6;
+                  zoomVel = Math.max(-0.08, Math.min(0.08, zoomVel));
+                  requestRender();
+                }
+                lastDist = d;
+                const m2 = mid(e.touches[0], e.touches[1]); lastMidX = m2.x; lastMidY = m2.y;
+              }
+              e.preventDefault();
+              return;
+            }
+            const t = e.touches[0]; if (!t || !tDragging) return;
+            const dx = t.clientX - tLastX; const dy = t.clientY - tLastY;
+            offsetX += dx; offsetY += dy; velX = dx * 0.2; velY = dy * 0.2;
+            tLastX = t.clientX; tLastY = t.clientY; requestRender();
+            e.preventDefault();
+          }, { passive: false });
+          canvas.addEventListener('touchend', (e) => {
+            const touches = e.touches ? e.touches.length : 0;
+            if (touches === 0) { tDragging = false; pinching = false; }
+            else if (touches === 1) { tDragging = true; pinching = false; }
+            else if (touches === 2) { tDragging = false; pinching = true; }
+          }, { passive: true });
+
+          // Mouse: double-click to zoom (Shift/Alt to zoom out)
+          canvas.addEventListener('dblclick', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const sx = e.clientX - rect.left; const sy = e.clientY - rect.top;
+            const factor = (e.shiftKey || e.altKey || e.metaKey) ? 1/1.6 : 1.6;
+            if (zoomAt(sx, sy, factor)) {
+              zoomFocusX = sx; zoomFocusY = sy;
+              zoomVel += Math.log(factor) * 0.4;
+              zoomVel = Math.max(-0.06, Math.min(0.06, zoomVel));
+              requestRender();
+            }
+            e.preventDefault();
+          });
+
+          // Gentle auto drift to keep motion alive
+          setInterval(() => {
+            if (!ready) return;
+            if (dragging || tDragging) return;
+            velX += (Math.random() - 0.5) * 0.02;
+            velY += (Math.random() - 0.5) * 0.02;
+            requestRender();
+          }, 1200);
+        } catch (_) { /* ignore logofolio errors */ }
       })();
 
     } catch (_) { /* ignore animation errors on minimal page */ }
@@ -1917,6 +2460,8 @@
         const canExitUI = !(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
         if (!canExitUI) return;
         if (openCards.size === 0 && !insideNav) {
+          // Disable hide-on-background-click for the NestBank page
+          try { if (/nestbank\.html$/i.test(window.location.pathname)) return; } catch (_) {}
           document.documentElement.classList.add('ui-exited');
           const nav = document.querySelector('.nav-bar');
           const cardsArr = Array.from(document.querySelectorAll('.paragraph'));

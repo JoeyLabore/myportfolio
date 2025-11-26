@@ -316,6 +316,27 @@ body.home-bg-kakakoala {
 body.home-bg-kakakoala #bg-sequence {
   background-color: #FF6B3B;
 }
+/* Home: when the ninth tile is expanded/selected, tint background for Dynobytes */
+body.home-bg-dynobytes {
+  background: #388E6D;
+}
+body.home-bg-dynobytes #bg-sequence {
+  background-color: #388E6D;
+}
+/* Home: when the tenth tile is expanded/selected, tint background for Apendito */
+body.home-bg-apendito {
+  background: #297AD5;
+}
+body.home-bg-apendito #bg-sequence {
+  background-color: #297AD5;
+}
+/* Home: when the sixth tile is expanded/selected, tint background for Relias */
+body.home-bg-relias {
+  background: #0D0D0D;
+}
+body.home-bg-relias #bg-sequence {
+  background-color: #0D0D0D;
+}
 img { display: block; max-width: 100%; height: auto; }
 p { margin: 0; }
 
@@ -829,6 +850,11 @@ p { margin: 0; }
   background: rgba(0, 0, 0, 0.32) !important;
 }
 
+/* Logofolio page: ensure 'Lets Connect' text renders white for contrast */
+.page[data-name="logofolio page"] .nav-split .nav-right .nav-item {
+  color: #ffffff !important;
+}
+
 /* --- About Page (right-side card) --- */
 .page[data-name="about page"] .main {
   align-items: flex-start; /* align content to the left */
@@ -1303,16 +1329,16 @@ p { margin: 0; }
   background-position: center;
   background-repeat: no-repeat;
 }
-/* Home: second tile shows Medigo thumbnail */
+/* Home: second tile shows Logofolio thumbnail (moved up) */
 .page[data-name="home page"] .tile-grid .tile:nth-child(2) {
-  background-image: url('./assets/thumbnails/medigo.jpg');
+  background-image: url('./assets/thumbnails/logofolio.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
-/* Home: third tile shows Logofolio thumbnail */
+/* Home: third tile shows Medigo thumbnail (moved down) */
 .page[data-name="home page"] .tile-grid .tile:nth-child(3) {
-  background-image: url('./assets/thumbnails/logofolio.jpg');
+  background-image: url('./assets/thumbnails/medigo.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1324,6 +1350,13 @@ p { margin: 0; }
   background-position: center;
   background-repeat: no-repeat;
 }
+/* Home: sixth tile shows Relias thumbnail */
+.page[data-name="home page"] .tile-grid .tile:nth-child(6) {
+  background-image: url('./assets/thumbnails/relias.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
 /* Home: seventh tile hosts a video; use transparent background to avoid any edge showing */
 .page[data-name="home page"] .tile-grid .tile:nth-child(7) {
   background: transparent;
@@ -1331,6 +1364,20 @@ p { margin: 0; }
 /* Home: eighth tile shows Kakakoala thumbnail */
 .page[data-name="home page"] .tile-grid .tile:nth-child(8) {
   background-image: url('./assets/thumbnails/kakakoala.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Home: ninth tile shows Dynobytes thumbnail */
+.page[data-name="home page"] .tile-grid .tile:nth-child(9) {
+  background-image: url('./assets/thumbnails/dynobytes.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Home: tenth tile shows Apendito thumbnail */
+.page[data-name="home page"] .tile-grid .tile:nth-child(10) {
+  background-image: url('./assets/thumbnails/apendito.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
