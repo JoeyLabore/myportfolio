@@ -9,9 +9,33 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
+    <!-- Material Symbols for MUI icons (lock) -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css?v=3" />
+    <style>
+      /* Disable hover/pressed/selected widen and tilt on home page tiles */
+      .page[data-name="home page"] .tile-grid .tile.selected {
+        flex: initial !important;
+        transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
+      }
+      .page[data-name="home page"] .tile-grid .tile:not(.selected):hover,
+      .page[data-name="home page"] .tile-grid .tile.hover-proxy:not(.selected),
+      .page[data-name="home page"] .tile-grid .tile:not(.selected):focus-visible {
+        flex: initial !important;
+      }
+      /* Keep subtle 3D tilt on the hovered/focused tile; ensure it overrides prior rules */
+      .page[data-name="home page"] .tile-grid .tile:hover,
+      .page[data-name="home page"] .tile-grid .tile:focus-visible {
+        transform: translateX(var(--slideX)) translateY(var(--introY)) perspective(800px) rotateX(var(--tiltX)) rotateY(var(--tiltY)) !important;
+      }
+      .page[data-name="home page"] .tile-grid .tile { --tiltX: 0deg; --tiltY: 0deg; }
+    </style>
   </head>
   <body>
+    <!-- Home: black route overlay used to swipe in before navigating to NestBank -->
+    <div class="intro-overlay" aria-hidden="true">
+      <div class="intro-overlay__inner"></div>
+    </div>
     <div class="page" data-name="home page" data-node-id="816:11957">
       <!-- Top row: logo left, tabs middle, LinkedIn right -->
       <div class="nav-split" data-name="nav-split">
@@ -54,7 +78,7 @@
         </header>
       </div>
       <!-- Main content (blank home page) -->
-      <main class="main" data-name="main" data-node-id="816:15570">
+      <main class="main" data-name="main" data-node-id="816:15570" style="margin-top: 96px;">
         <!-- Mobile overlay menu (hidden by default) -->
         <div class="mobile-menu-overlay" aria-hidden="true" role="dialog" aria-label="Menu">
           <div class="mobile-menu-panel">
@@ -69,21 +93,23 @@
         </div>
         <!-- Page transition overlay (used when navigating to case studies) -->
         <div class="nav-transition" aria-hidden="true"></div>
-        <div class="tile-grid" aria-hidden="true">
-          <div class="tile" data-category="ux"></div>
-          <div class="tile" data-category="branding"></div>
-          <div class="tile" data-category="ux"></div>
-          <div class="tile" data-category="ux"></div>
-          <div class="tile" data-category="branding"></div>
-          <div class="tile" data-category="ux"></div>
-          <div class="tile" data-category="branding"></div>
-          <div class="tile" data-category="branding"></div>
-          <div class="tile" data-category="branding"></div>
-          <div class="tile" data-category="branding"></div>
+        <div class="tile-grid filter-all">
+          <div class="tile" data-category="ux" data-project="toyota"></div>
+          <div class="tile" data-category="ux" data-project="relias"></div>
+          <div class="tile" data-category="ux" data-project="orion"></div>
+          <div class="tile" data-category="ux" data-project="nestbank"></div>
+          <div class="tile" data-category="ux" data-project="medigo"></div>
+          <div class="tile" data-category="branding" data-project="logofolio"></div>
+          <div class="tile" data-category="branding" data-project="tom"></div>
+          <div class="tile" data-category="branding" data-project="apendito"></div>
+          <div class="tile" data-category="branding" data-project="kinti"></div>
+          <div class="tile" data-category="branding" data-project="dinobytes"></div>
+          <div class="tile" data-category="branding" data-project="kakaoala"></div>
+          <div class="tile" data-category="branding" data-project="skilldex"></div>
         </div>
       </main>
     </div>
-    <script src="./main.js?v=3"></script>
+    <script src="./main.js?v=4"></script>
   </body>
 </html>
 

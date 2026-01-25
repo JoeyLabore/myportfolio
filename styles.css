@@ -8,12 +8,109 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0; /* start hidden, then fade in on enter */
-  transition: opacity 400ms ease;
+  /* Slide from left to cover, then out to the right */
+  transform: translateX(-100%);
+  transition: transform 400ms ease;
+  will-change: transform;
+}
+.page[data-name="about page"] .about-photo:focus-visible {
+  outline: none;
+  /* rounded focus ring that respects the radius */
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* About photo next to the card */
+.page[data-name="about page"] .about-photo {
+  margin: 0;
+  display: flex;            /* allow child img to size to height */
+  align-items: center;      /* center image vertically inside fixed height */
+  border-radius: var(--about-radius);      /* match card rounding */
+  overflow: hidden;         /* keep clean edges */
+  clip-path: inset(0 round var(--about-radius)); /* enforce rounded clipping even under 3D transforms */
+  outline: none;            /* we'll provide an accessible custom focus ring below */
+  /* Tilt effect base styles */
+  --tiltX: 0deg;            /* rotation around X-axis */
+  --tiltY: 0deg;            /* rotation around Y-axis */
+  --liftZ: 0px;             /* subtle lift */
+  transform: perspective(800px) translateZ(var(--liftZ)) rotateX(var(--tiltX)) rotateY(var(--tiltY));
+  transform-style: preserve-3d;
+  transition: transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 220ms ease;
+  will-change: transform;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.page[data-name="about page"] .about-photo img {
+  height: auto;            /* will be controlled to fit figure by JS */
+  width: auto;             /* preserve aspect ratio */
+  display: block;
+  object-fit: contain;     /* avoid cropping; maintain AR */
+  border-radius: inherit;  /* match the figure's radius exactly */
+  backface-visibility: hidden; /* reduce flicker during 3D transforms */
+}
+/* Home: Toyota thumbnail */
+.page[data-name="home page"] .tile-grid .tile[data-project="toyota"] {
+  background-image: url('./assets/thumbnails/toyota.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Home page: remove side margins so tiles fit within the padded container exactly */
+.page[data-name="home page"] .tile-grid .tile {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Large screens: display tiles as a 3x3 square grid on the home page */
+@media (min-width: 1051px) {
+  .page[data-name="home page"] .main .tile-grid {
+    display: grid; /* override flex */
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-xs); /* 8px between tiles */
+    height: auto; /* let rows grow naturally and allow page to scroll */
+    overflow: visible; /* let body handle scrolling so sticky nav works */
+  }
+  /* Ensure the cards are inset 16px from the left/right browser edges */
+  .page[data-name="home page"] .main {
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
+  }
+  .page[data-name="home page"] .tile-grid .tile {
+    margin: 0; /* remove horizontal margins from flex layout */
+    aspect-ratio: 1 / 1; /* force perfect squares */
+    height: auto; /* governed by aspect-ratio */
+    align-self: stretch;
+  }
+  /* In grid mode, hide filtered-out tiles by removing them from layout */
+  .page[data-name="home page"] .tile-grid .tile.filtered-out {
+    display: none !important;
+  }
+  /* Neutralize flex-based widening/selection effects in grid mode */
+  .page[data-name="home page"] .tile-grid .tile.selected,
+  .page[data-name="home page"] .tile-grid .tile.hover-proxy,
+  .page[data-name="home page"] .tile-grid .tile:not(.selected):hover,
+  .page[data-name="home page"] .tile-grid .tile:not(.selected):focus-visible {
+    flex: initial;
+    transform: translateY(var(--introY)); /* keep intro offset only */
+  }
+}
+
+/* XL screens: switch to 4 columns at >=1596px */
+@media (min-width: 1596px) {
+  .page[data-name="home page"] .main .tile-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 /* Large breakpoint: remove extra space after the final tile */
 .tile-grid .tile:last-child { margin-right: 0; }
+
+/* Always remove filtered tiles from layout so tab switches never leave blanks */
+.tile-grid .tile.filtered-out { display: none !important; }
+
+/* CSS fallback filtering by category to guard against any JS/class timing issues */
+.page[data-name="home page"] .tile-grid.filter-ux .tile[data-category]:not([data-category="ux"]) { display: none !important; }
+.page[data-name="home page"] .tile-grid.filter-branding .tile[data-category]:not([data-category="branding"]) { display: none !important; }
+.page[data-name="home page"] .tile-grid.filter-all .tile[data-category] { display: block !important; }
 
 /* When UX filter is active, remove margins on the 9th tile on large screens only */
 @media (min-width: 1051px) {
@@ -36,9 +133,9 @@
 }
 
 /* Overlay fade-out helper */
-.intro-overlay.enter { opacity: 1; }
+.intro-overlay.enter { transform: translateX(0); }
 .intro-overlay.fade-out {
-  opacity: 0;
+  transform: translateX(100%);
   pointer-events: none;
 }
 
@@ -160,9 +257,9 @@
   /* Keep the tabs card fixed at the top while scrolling */
   .page[data-name="home page"] .nav-split .nav-middle {
     position: fixed !important;
-    left: var(--space-xs);
+    left: var(--space-s);
     right: auto; /* free the right side for the Menu button */
-    top: max(env(safe-area-inset-top), var(--space-xs));
+    top: max(env(safe-area-inset-top), var(--space-s));
     z-index: 3; /* above tiles */
     width: max-content; /* shrink to the tabs' width */
   }
@@ -171,8 +268,8 @@
   .page[data-name="home page"] .nav-split .nav-menu {
     display: flex !important;
     position: fixed !important;
-    top: max(env(safe-area-inset-top), var(--space-xs));
-    right: var(--space-xs);
+    top: max(env(safe-area-inset-top), var(--space-s));
+    right: var(--space-s);
     z-index: 4; /* above tabs */
     height: var(--nav-card-height);
     padding: 12px; /* match card inner padding */
@@ -208,6 +305,9 @@
     justify-content: stretch;  /* let children fill height */
     /* Add offset for the fixed tabs card height + 32px gap below it */
     padding-top: calc(var(--nav-card-height) + var(--space-lg)) !important;
+    /* Inset content 16px from left/right edges */
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
   }
   .page[data-name="home page"] .main .tile-grid {
     flex-direction: column !important;
@@ -257,85 +357,14 @@
 html, body { height: 100%; }
 body {
   margin: 0;
-  background: transparent; /* allow background sequence to be visible */
+  background: #0F0F0F; /* fixed background color for home */
   color: var(--fg-color);
   font-family: var(--font-family-manrope);
   font-size: var(--font-size-s);
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-base);
-  overflow-y: hidden; /* no vertical scrolling */
+  overflow-y: auto; /* allow vertical page scrolling */
   overflow-x: auto;  /* allow horizontal scroll when cards exceed width */
-}
-/* Home: when the first tile is expanded/selected, tint background */
-body.home-bg-nestbank {
-  background: #FFAFEB;
-}
-/* Ensure the full-viewport media layer adopts the tint as well */
-body.home-bg-nestbank #bg-sequence {
-  background-color: #FFAFEB;
-}
-/* Home: when the second tile is expanded/selected, tint background for Medigo */
-body.home-bg-medigo {
-  background: #006EDB;
-}
-body.home-bg-medigo #bg-sequence {
-  background-color: #006EDB;
-}
-/* Home: when the third tile is expanded/selected, tint background for Logofolio */
-body.home-bg-logofolio {
-  background: #333333;
-}
-body.home-bg-logofolio #bg-sequence {
-  background-color: #333333;
-}
-/* Home: when the fourth tile is expanded/selected, tint background for Orion */
-body.home-bg-orion {
-  background: #99D0F3;
-}
-body.home-bg-orion #bg-sequence {
-  background-color: #99D0F3;
-}
-/* Home: when the fifth tile is expanded/selected, tint background for Tom */
-body.home-bg-tom {
-  background: #E7B53E;
-}
-body.home-bg-tom #bg-sequence {
-  background-color: #E7B53E;
-}
-/* Home: when the seventh tile is expanded/selected, tint background for Kinti */
-body.home-bg-kinti {
-  background: #6B7B52;
-}
-body.home-bg-kinti #bg-sequence {
-  background-color: #6B7B52;
-}
-/* Home: when the eighth tile is expanded/selected, tint background for Kakakoala */
-body.home-bg-kakakoala {
-  background: #FF6B3B;
-}
-body.home-bg-kakakoala #bg-sequence {
-  background-color: #FF6B3B;
-}
-/* Home: when the ninth tile is expanded/selected, tint background for Dynobytes */
-body.home-bg-dynobytes {
-  background: #388E6D;
-}
-body.home-bg-dynobytes #bg-sequence {
-  background-color: #388E6D;
-}
-/* Home: when the tenth tile is expanded/selected, tint background for Apendito */
-body.home-bg-apendito {
-  background: #297AD5;
-}
-body.home-bg-apendito #bg-sequence {
-  background-color: #297AD5;
-}
-/* Home: when the sixth tile is expanded/selected, tint background for Relias */
-body.home-bg-relias {
-  background: #0D0D0D;
-}
-body.home-bg-relias #bg-sequence {
-  background-color: #0D0D0D;
 }
 img { display: block; max-width: 100%; height: auto; }
 p { margin: 0; }
@@ -433,6 +462,33 @@ p { margin: 0; }
   grid-template-columns: 1fr auto 1fr; /* left, tabs (center), right wrapper */
   align-items: flex-start;
   gap: var(--space-xs);
+}
+
+/* Home page: Fix the entire nav row to the top on tablet/desktop */
+@media (min-width: 601px) {
+  .page[data-name="home page"] .nav-split {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--space-s); /* 16px from viewport top */
+    z-index: 3;
+    pointer-events: none; /* let individual cards handle interactions */
+    padding-left: var(--space-s);  /* 16px from left edge */
+    padding-right: var(--space-s); /* 16px from right edge */
+  }
+  .page[data-name="home page"] .nav-split .nav-bar {
+    position: static !important; /* neutralize sticky for fixed container */
+    top: auto !important;
+    pointer-events: auto; /* restore interaction on cards */
+    /* Remove extra top margin so visual offset remains exactly 16px */
+    margin-top: 0;
+    margin-left: 0;  /* align card edge with 16px padded container */
+    margin-right: 0; /* align card edge with 16px padded container */
+  }
+  /* Add top padding so content doesn't hide behind the fixed nav row */
+  .page[data-name="home page"] .main {
+    padding-top: calc(var(--nav-card-height) + (2 * var(--space-s)));
+  }
 }
 /* Home: ensure middle tabs card uses the same vertical padding as other nav cards */
 .page[data-name="home page"] .nav-split .nav-middle {
@@ -856,39 +912,38 @@ p { margin: 0; }
 }
 
 /* --- About Page (right-side card) --- */
+.page[data-name="about page"] {
+  --about-radius: 24px; /* single source of truth for rounding on card & photo */
+}
 .page[data-name="about page"] .main {
-  align-items: flex-start; /* align content to the left */
-  justify-content: flex-start;
+  align-items: flex-start; /* let card's content determine its own height */
+  justify-content: center; /* center row within page */
   padding: var(--space-m);
   gap: var(--space-lg);
+  flex-direction: row; /* place photo next to card */
 }
 .page[data-name="about page"] .about-card {
   background: rgba(0, 0, 0, 0.38); /* match nav items glass tint */
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   backdrop-filter: blur(12px) saturate(140%);
   color: #ffffff;
-  border-radius: 24px;
+  border-radius: var(--about-radius);
   padding: 24px;
-  min-height: 550px; /* ensure sufficient vertical size */
-  max-height: 650px; /* cap height while still filling available space */
-  width: min(720px, 90vw);
-  display: flex;
-  flex-direction: column;
-  gap: 0; /* distribute space evenly via justify-content */
-  justify-content: space-between; /* vertically space sections evenly */
-  position: fixed; /* pin to viewport */
-  left: max(env(safe-area-inset-left), var(--space-s));
-  top: calc(var(--space-s) + var(--nav-card-height) + 16px); /* 16px gap below nav row */
-  bottom: auto; /* use explicit height calc to allow max-height to cap */
-  height: min(calc(100vh - var(--nav-card-height) - (2 * var(--space-s)) - 16px), 650px);
-  z-index: 2; /* ensure card stays above Spline for interactivity */
-  overflow: auto; /* allow internal scroll if content exceeds available height */
-  -webkit-overflow-scrolling: touch;
-  will-change: auto;
-  transform: none;
-  opacity: 1; /* visible by default */
+  width: 100%;
+  max-width: 650px;
+  display: grid;               /* grid keeps height to content */
+  grid-auto-rows: max-content; /* each row hugs its content */
+  row-gap: var(--space-lg);    /* 32px between content sections */
+  position: static;            /* participate in normal document flow */
+  height: auto;                /* hug content */
+  min-height: 0;               /* prevent inherited min-heights */
+  max-height: none;            /* no cap */
+  align-self: flex-start;      /* never stretch to row height */
+  overflow: visible;           /* content defines height; no scroll container */
+  opacity: 1;                  /* visible by default */
   transition: none;
 }
+
 
 /* About card intro animation */
 @keyframes aboutCardIn {
@@ -899,48 +954,6 @@ p { margin: 0; }
   animation: aboutCardIn 2000ms cubic-bezier(.2,.8,.2,1) forwards;
 }
 
-/* Fade-only variant used when centering to avoid transform conflicts */
-@keyframes aboutCardFade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* Large and tall screens: center card vertically and horizontally */
-@media (min-width: 1051px) and (min-height: 774px) {
-  .page[data-name="about page"] .about-card {
-    top: 50%;
-    left: 50%;
-    right: auto;
-    bottom: auto; /* allow max-height to constrain size */
-    height: min(calc(100vh - (2 * var(--space-s))), 650px); /* fill while respecting cap */
-    transform: translate(-50%, -50%);
-  }
-  .page[data-name="about page"] .about-card.about-enter {
-    animation: aboutCardFade 2000ms cubic-bezier(.2,.8,.2,1) forwards;
-  }
-}
-
-/* Below 1050px width: revert tall-viewport centering and use original layout/animation */
-@media (max-width: 1050px) {
-  .page[data-name="about page"] .about-card {
-    left: var(--space-xs);
-    right: var(--space-xs);
-    top: calc(var(--space-xs) + var(--nav-card-height) + 16px);
-    bottom: auto;
-    height: min(calc(100vh - var(--nav-card-height) - (2 * var(--space-xs)) - 16px), 650px);
-    transform: none;
-  }
-  .page[data-name="about page"] .about-card.about-enter {
-    animation: aboutCardIn 2000ms cubic-bezier(.2,.8,.2,1) forwards;
-  }
-}
-
-/* Respect reduced motion preferences: disable the entry animation */
-@media (prefers-reduced-motion: reduce) {
-  .page[data-name="about page"] .about-card.about-enter {
-    animation: none !important;
-  }
-}
 .page[data-name="about page"] .about-heading {
   font-family: var(--font-family-manrope);
   font-weight: var(--font-weight-semiBold);
@@ -967,52 +980,6 @@ p { margin: 0; }
   display: block;
 }
 
-/* Below 1050px: place Spline below the about card, not full-screen */
-@media (max-width: 1050px) {
-  .page[data-name="about page"] .about-spline {
-    position: static;           /* participate in normal flow below the card */
-    left: auto; right: auto;    /* reset fixed positioning */
-    top: auto; bottom: auto;    /* reset fixed positioning */
-    width: 100%;                /* take full content width */
-    height: 360px;              /* reasonable embed height on tablet/mobile */
-    max-height: 50vh;           /* never exceed half the viewport height */
-    border-radius: 16px;        /* match card rounding */
-    margin: var(--space-s) var(--space-xs) var(--space-s); /* spacing around viewer */
-    z-index: auto;              /* no layering needed in flow */
-    display: block;
-  }
-}
-
-/* Below 1050px width but above the 670px height breakpoint: hide the Spline viewer */
-@media (max-width: 1050px) and (min-height: 671px) {
-  .page[data-name="about page"] .about-spline {
-    display: none !important;
-  }
-}
-
-/* Large and tall screens: vertically center the Spline to mirror the card */
-@media (min-width: 1051px) and (min-height: 774px) {
-  .page[data-name="about page"] .about-spline {
-    /* Align to the right and overlap the about card (360px) */
-    left: calc(50% + 305px - 360px);
-    right: 0;
-    top: 0;
-    bottom: 0;
-    height: 100vh;
-    transform: none;
-  }
-}
-
-/* Large screens: align to right and overlap the about card (360px) */
-@media (min-width: 1051px) {
-  .page[data-name="about page"] .about-spline {
-    left: calc(var(--space-s) + 610px - 360px);
-    right: 0;
-    top: 0;
-    bottom: 0;
-    height: 100vh;
-  }
-}
 .page[data-name="about page"] .about-skill-list {
   list-style: none; /* using icons instead of bullets */
   padding-left: 0;
@@ -1038,15 +1005,7 @@ p { margin: 0; }
   margin-top: 2px; /* optical alignment with first text line */
 }
 
-/* Reduce about list font size on very small screens */
-@media (max-width: 475px) {
-  .page[data-name="about page"] .about-skill-list li span {
-    font-size: 14px;
-  }
-  .page[data-name="about page"] .about-heading {
-    font-size: 20px;
-  }
-}
+
 
 
 .page[data-name="about page"] .about-brands {
@@ -1086,145 +1045,8 @@ p { margin: 0; }
   border-radius: 50%; /* soften shadow edges around circular logo area */
 }
 
-/* About page: above 1050px, constrain card width to 610px */
-@media (min-width: 1051px) {
-  .page[data-name="about page"] .about-card {
-    max-width: 610px;
-    width: 610px;
-  }
-}
 
-/* About page: at and below 1050px, make the card span full width (with 8px side margins) */
-@media (max-width: 1050px) {
-  .page[data-name="about page"] .about-card {
-    width: auto;            /* let left/right define the width */
-    left: var(--space-xs);  /* 8px left margin */
-    right: var(--space-xs); /* 8px right margin */
-    bottom: auto;
-    height: min(calc(100vh - var(--nav-card-height) - (2 * var(--space-xs)) - 16px), 650px);
-  }
-}
 
-/* Responsive: widen card on small screens and center */
-@media (max-width: 700px) {
-  .page[data-name="about page"] .main { align-items: stretch; }
-  .page[data-name="about page"] .about-card {
-    width: auto;
-    left: var(--space-xs);   /* 8px */
-    right: var(--space-xs);  /* 8px */
-    top: calc(var(--space-s) + var(--nav-card-height) + 16px);
-    bottom: auto;
-    height: min(calc(100vh - var(--nav-card-height) - (2 * var(--space-xs)) - 16px), 650px);
-  }
-}
-
-/* About page: title size at and below 600px */
-@media (max-width: 600px) {
-  .page[data-name="about page"] .about-heading {
-    font-size: 28px;
-  }
-}
-
-/* Ensure the about title is smaller on very small screens, overriding the 600px rule above */
-@media (max-width: 475px) {
-  .page[data-name="about page"] .about-heading {
-    font-size: 20px;
-  }
-}
-
-/* About page: shrink brand logos to 48x48 at and below 475px */
-@media (max-width: 475px) {
-  .page[data-name="about page"] .about-logos img {
-    width: 48px;
-    height: 48px;
-  }
-}
-
-/* About page: shrink brand logos further to 40x40 at and below 325px */
-@media (max-width: 325px) {
-  .page[data-name="about page"] .about-logos img {
-    width: 40px;
-    height: 40px;
-  }
-}
-
-/* About page: when viewport height is 670px or less, make the card part of the flow
-     and allow the page to scroll */
-@media (max-height: 670px) {
-  body.about-page { overflow-y: auto !important; }
-  .page[data-name="about page"] .about-card {
-    position: static; /* no fixed pinning */
-    left: auto; right: auto; top: auto; bottom: auto;
-    width: auto; /* allow width to be defined by margins */
-    margin: var(--space-xs);   /* 8px top/right/bottom/left */
-  }
-  /* Keep the entire nav row fixed at the top while page scrolls */
-  .page[data-name="about page"] .nav-split {
-    position: fixed;
-    top: var(--space-xs);    /* 8px top */
-    left: var(--space-xs);   /* 8px left */
-    right: var(--space-xs);  /* 8px right */
-    z-index: 4; /* above content */
-  }
-  /* Nav cards: use 8px margins on all sides within the fixed row */
-  .page[data-name="about page"] .nav-split .nav-bar {
-    margin: var(--space-xs) !important;
-  }
-  /* Provide space under the fixed nav so content doesn't sit underneath */
-  .page[data-name="about page"] .main {
-    padding-top: calc(var(--nav-card-height) + var(--space-lg));
-    padding-left: var(--space-xs);
-    padding-right: var(--space-xs);
-  }
-}
-
-/* About page: when height <= 670px AND width <= 1050px, use 16px top margin for nav */
-@media (max-height: 670px) and (max-width: 1050px) {
-  .page[data-name="about page"] .nav-split {
-    top: var(--space-s); /* 16px top margin */
-    left: 4px;
-    right: 4px;
-  }
-  /* Nav cards: 4px outer margins at this width */
-  .page[data-name="about page"] .nav-split .nav-bar {
-    margin: 4px !important;
-  }
-  /* About card: 48px gap below nav via top margin; use 8px left and right margins */
-  .page[data-name="about page"] .about-card {
-    margin-top: 48px; /* explicit 48px gap under nav */
-    margin-left: var(--space-xs); /* 8px on the left */
-    margin-right: var(--space-xs); /* 8px on the right */
-    margin-bottom: 0; /* keep bottom flush */
-    width: calc(100% - (var(--space-xs) * 2)); /* fill width between 8px margins */
-  }
-  /* About card: 16px gap below nav */
-  .page[data-name="about page"] .main {
-    padding-top: var(--nav-card-height, 64px); /* push content below fixed nav height */
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-
-/* About page: when height <= 670px AND width <= 600px, use 8px top/left/right margins for the about card */
-@media (max-height: 670px) and (max-width: 600px) {
-  .page[data-name="about page"] .about-card {
-    margin-top: 48px; /* ensure 48px gap below nav at <=600px width */
-    margin-left: var(--space-xs);
-    margin-right: var(--space-xs);
-    width: calc(100% - (var(--space-xs) * 2)); /* fill width between margins */
-    /* keep bottom as defined by broader rule (16px) unless you want 8px too */
-  }
-}
-
-/* About page: when height <= 670px AND width >= 1051px, use 8px top/left/right margins for the about card */
-@media (max-height: 670px) and (min-width: 1051px) {
-  .page[data-name="about page"] .about-card {
-    margin-top: 48px; /* ensure 48px gap below nav at >=1051px width */
-    margin-left: var(--space-xs);
-    margin-right: var(--space-xs);
-    /* keep bottom margin from base rule (16px) */
-  }
-}
 
 /* Main */
 .main {
@@ -1266,6 +1088,17 @@ p { margin: 0; }
   min-height: 0; /* allow flex child to shrink without overflow */
   height: 100%; /* ensure a non-zero height for tiles to stretch into */
 }
+/* Make Toyota appear first without changing DOM order, so nth-child styles remain intact */
+.page[data-name="home page"] .tile-grid .tile[data-project="toyota"] {
+  order: -1;
+}
+/* Ensure the home page grid never exceeds its container width */
+.page[data-name="home page"] .main .tile-grid {
+  box-sizing: border-box;
+  width: 100%;
+  margin-left: 0 !important;  /* cancel base negative margins */
+  margin-right: 0 !important; /* cancel base negative margins */
+}
 .tile-grid .tile {
   background: #000;
   /* Horizontal spacing via margins (4px on each side) */
@@ -1276,6 +1109,7 @@ p { margin: 0; }
   align-self: stretch; /* ensure each tile fills the tile-grid height */
   border-radius: 16px;
   overflow: hidden; /* clip inner video to rounded corners; avoids black fringe */
+  position: relative; /* allow absolute-positioned tag container */
   /* Ensure child content cannot force a taller intrinsic height when filtering */
   position: relative; /* anchor absolutely-positioned media */
   min-height: 0; /* allow flex container to control cross-axis height */
@@ -1316,75 +1150,111 @@ p { margin: 0; }
   display: block;
   position: absolute; /* prevent content height from affecting tile height */
   inset: 0; /* fill the tile */
+  z-index: 1; /* keep media below overlay tags */
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: inherit; /* match tile radius exactly */
   background: transparent;
 }
-/* Home: first tile shows NestBank thumbnail */
-.page[data-name="home page"] .tile-grid .tile:first-child {
-  background-image: url('./assets/thumbnails/nestbank.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+/* Small tag container and pills for home tiles */
+.tile-grid .tile .tile-tags {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  left: 16px; /* allow wrap within tile with side padding */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end; /* align pills to the right */
+  align-content: flex-end;   /* wrap lines align to bottom/right */
+  z-index: 2; /* above videos */
+  pointer-events: none; /* let tile capture clicks */
 }
-/* Home: second tile shows Logofolio thumbnail (moved up) */
-.page[data-name="home page"] .tile-grid .tile:nth-child(2) {
-  background-image: url('./assets/thumbnails/logofolio.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+.tile-grid .tile .tile-tag {
+  pointer-events: none; /* ensure entire tile remains clickable */
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px; /* 8px top/bottom, 12px left/right */
+  border-radius: 8px;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: 1;
+  color: #ffffff;
+  /* Match nav items pill background */
+  background: rgba(0, 0, 0, 0.38);
+  border: none;
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  white-space: nowrap;
 }
-/* Home: third tile shows Medigo thumbnail (moved down) */
-.page[data-name="home page"] .tile-grid .tile:nth-child(3) {
-  background-image: url('./assets/thumbnails/medigo.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+
+/* Top-left project flag (e.g., 'Current Project' for Toyota) */
+.tile-grid .tile .tile-flag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.38);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  z-index: 2;
+  pointer-events: none; /* keep tile clickable */
 }
-/* Home: fifth tile shows Tom thumbnail */
-.page[data-name="home page"] .tile-grid .tile:nth-child(5) {
-  background-image: url('./assets/thumbnails/tom.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+.tile-grid .tile .tile-flag-icon {
+  font-size: 18px;
+  line-height: 1;
 }
-/* Home: sixth tile shows Relias thumbnail */
-.page[data-name="home page"] .tile-grid .tile:nth-child(6) {
+.tile-grid .tile .tile-flag-label {
+  font-size: var(--font-size-xs);
+  line-height: 1;
+}
+/* Home thumbnails by project (attribute selectors so DOM order can change safely) */
+.page[data-name="home page"] .tile-grid .tile[data-project="relias"] {
   background-image: url('./assets/thumbnails/relias.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
 }
-/* Home: seventh tile hosts a video; use transparent background to avoid any edge showing */
-.page[data-name="home page"] .tile-grid .tile:nth-child(7) {
-  background: transparent;
+.page[data-name="home page"] .tile-grid .tile[data-project="orion"] {
+  background: transparent; /* video host */
 }
-/* Home: eighth tile shows Kakakoala thumbnail */
-.page[data-name="home page"] .tile-grid .tile:nth-child(8) {
-  background-image: url('./assets/thumbnails/kakakoala.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+.page[data-name="home page"] .tile-grid .tile[data-project="nestbank"] {
+  background-image: url('./assets/thumbnails/nestbank.jpg');
+  background-size: cover; background-position: center; background-repeat: no-repeat;
 }
-/* Home: ninth tile shows Dynobytes thumbnail */
-.page[data-name="home page"] .tile-grid .tile:nth-child(9) {
-  background-image: url('./assets/thumbnails/dynobytes.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+.page[data-name="home page"] .tile-grid .tile[data-project="medigo"] {
+  background-image: url('./assets/thumbnails/medigo.jpg');
+  background-size: cover; background-position: center; background-repeat: no-repeat;
 }
-/* Home: tenth tile shows Apendito thumbnail */
-.page[data-name="home page"] .tile-grid .tile:nth-child(10) {
+.page[data-name="home page"] .tile-grid .tile[data-project="logofolio"] {
+  background-image: url('./assets/thumbnails/logofolio.jpg');
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.page[data-name="home page"] .tile-grid .tile[data-project="tom"] {
+  background-image: url('./assets/thumbnails/tom.jpg');
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.page[data-name="home page"] .tile-grid .tile[data-project="apendito"] {
   background-image: url('./assets/thumbnails/apendito.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
 }
-/* Home: fourth tile hosts a video; use transparent background to avoid any edge showing */
-.page[data-name="home page"] .tile-grid .tile:nth-child(4) {
-  background: transparent;
+.page[data-name="home page"] .tile-grid .tile[data-project="kinti"] {
+  background: transparent; /* video host */
+}
+.page[data-name="home page"] .tile-grid .tile[data-project="dinobytes"] {
+  background-image: url('./assets/thumbnails/dynobytes.jpg');
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.page[data-name="home page"] .tile-grid .tile[data-project="kakaoala"] {
+  background-image: url('./assets/thumbnails/kakakoala.jpg');
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.page[data-name="home page"] .tile-grid .tile[data-project="skilldex"] {
+  background: #ffffff;
 }
 /* Intro states: fade + slight slide-up to avoid overlapping other tiles */
 .tile-grid .tile.intro-hidden {
@@ -1448,10 +1318,10 @@ p { margin: 0; }
     cursor: grabbing;
   }
   .page[data-name="home page"] .main .tile-grid::-webkit-scrollbar { display: none; } /* Chrome, Safari, Opera */
-  /* Home page: remove side padding/margin so tiles bleed to edges */
+  /* Home page: inset tiles 16px from left/right edges */
   .page[data-name="home page"] .main {
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
     margin-left: 0;
     margin-right: 0;
   }
@@ -1904,8 +1774,8 @@ p { margin: 0; }
   /* Home page: maintain 4px per-side margins at <=1050px */
   .page[data-name="home page"] .main .tile-grid {
     gap: 0;
-    margin-left: -4px;
-    margin-right: -4px;
+    margin-left: 0;  /* keep grid inside 16px page padding */
+    margin-right: 0; /* keep grid inside 16px page padding */
   }
   .page[data-name="home page"] .tile-grid .tile { margin-left: 4px; margin-right: 4px; }
   /* At <=1050px, keep 4px on the last tile too to align with edge offsets */
@@ -1917,5 +1787,72 @@ p { margin: 0; }
     min-width: 0 !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+  }
+}
+
+/* Large screens: when filtering, fully remove hidden tiles from the grid to avoid gaps */
+@media (min-width: 1051px) {
+  .page[data-name="home page"] .tile-grid .tile.filtered-out {
+    display: none !important;
+  }
+}
+
+/* Medium screens (601–1050px): use a 2-column square grid on home page */
+@media (min-width: 601px) and (max-width: 1050px) {
+  /* Provide horizontal padding on the main container only */
+  .page[data-name="home page"] .main {
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
+  }
+  .page[data-name="home page"] .main .tile-grid {
+    display: grid !important; /* override previous flex/carousel */
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xs);
+    height: auto !important;
+    overflow: visible !important;
+    padding-left: 0 !important;  /* avoid double padding so tiles fill full container */
+    padding-right: 0 !important; /* avoid double padding so tiles fill full container */
+    cursor: default !important;
+    -webkit-user-select: auto !important;
+    user-select: auto !important;
+    touch-action: auto !important;
+    scroll-padding-left: 0 !important;
+    scroll-padding-right: 0 !important;
+    width: 100%;
+  }
+  .page[data-name="home page"] .tile-grid .tile {
+    margin: 0 !important;
+    aspect-ratio: 1 / 1;
+    height: auto !important;
+    flex: initial !important; /* neutralize flex-basis behaviors */
+  }
+}
+
+/* Small screens (<=600px): use a single-column square grid on home page */
+@media (max-width: 600px) {
+  .page[data-name="home page"] .main {
+    /* Remove top padding on small screens */
+    padding-top: 0 !important;
+    /* Set top margin to 112px on small screens */
+    margin-top: 112px !important;
+  }
+  .page[data-name="home page"] .main .tile-grid {
+    display: grid !important; /* override previous flex column */
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+    height: auto !important;
+    overflow: visible !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .page[data-name="home page"] .tile-grid .tile {
+    margin: 0 !important;
+    aspect-ratio: 1 / 1;
+    height: auto !important;
+    flex: initial !important; /* neutralize flex-basis animations */
+  }
+  /* Ensure fully hidden when filtered, no vertical gaps */
+  .page[data-name="home page"] .tile-grid .tile.filtered-out {
+    display: none !important;
   }
 }

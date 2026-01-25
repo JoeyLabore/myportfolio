@@ -51,11 +51,107 @@
     try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch { return false; }
   })();
 
+  // About page: subtle 3D tilt on the portrait when hovering with a mouse
+  (function setupAboutPhotoTilt() {
+    try {
+      const root = document.querySelector('.page[data-name="about page"] .about-photo');
+      if (!root) return;
+      const supportsHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      if (!supportsHover) return; // only enable on hover-capable devices
+
+      const MAX_TILT = 4; // degrees
+      const LIFT = 8;     // px translateZ
+
+      const update = (clientX, clientY) => {
+        const r = root.getBoundingClientRect();
+        const x = (clientX - r.left) / r.width;  // 0..1
+        const y = (clientY - r.top) / r.height;  // 0..1
+        const dx = (x - 0.5) * 2; // -1..1
+        const dy = (y - 0.5) * 2; // -1..1
+        const tiltY = (dx * MAX_TILT).toFixed(2) + 'deg';      // rotateY left/right
+        const tiltX = (-dy * MAX_TILT).toFixed(2) + 'deg';     // rotateX up/down (invert for natural feel)
+        root.style.setProperty('--tiltX', tiltX);
+        root.style.setProperty('--tiltY', tiltY);
+        root.style.setProperty('--liftZ', LIFT + 'px');
+      };
+
+      const reset = () => {
+        root.style.setProperty('--tiltX', '0deg');
+        root.style.setProperty('--tiltY', '0deg');
+        root.style.setProperty('--liftZ', '0px');
+      };
+
+      const onMove = (e) => update(e.clientX, e.clientY);
+      const onLeave = () => reset();
+      const onFocus = (e) => {
+        // center tilt when focused via keyboard
+        const r = root.getBoundingClientRect();
+        update(r.left + r.width / 2, r.top + r.height / 2);
+      };
+
+      root.addEventListener('mousemove', onMove);
+      root.addEventListener('mouseleave', onLeave);
+      root.addEventListener('focusin', onFocus);
+      root.addEventListener('focusout', onLeave);
+
+      // Click to open LinkedIn profile in a new tab (no layout changes)
+      const openLinkedIn = () => {
+        try { window.open('https://www.linkedin.com/in/josephgreenwood/', '_blank', 'noopener,noreferrer'); } catch (_) {}
+      };
+      root.addEventListener('click', openLinkedIn);
+      root.setAttribute('tabindex', '0');
+      root.setAttribute('role', 'link');
+      root.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openLinkedIn();
+        }
+      });
+    } catch (_) { /* ignore tilt errors */ }
+  })();
+
+  // About page: keep the portrait image height equal to the about card's content height
+  (function setupAboutPhotoHeightSync() {
+    try {
+      const aboutPage = document.querySelector('.page[data-name="about page"]');
+      if (!aboutPage) return;
+      const card = aboutPage.querySelector('.about-card');
+      const figure = aboutPage.querySelector('.about-photo');
+      const img = figure ? figure.querySelector('img') : null;
+      if (!card || !figure || !img) return;
+
+      const apply = () => {
+        try {
+          const h = Math.max(0, Math.floor(card.getBoundingClientRect().height));
+          figure.style.height = h ? h + 'px' : '';
+          img.style.height = '100%';
+          img.style.width = 'auto';
+        } catch (_) { /* ignore */ }
+      };
+      // On load and resize
+      window.addEventListener('load', apply);
+      window.addEventListener('resize', apply);
+      // Ensure we sync when the image finishes loading
+      try { img.addEventListener('load', apply, { once: false }); } catch (_) {}
+      // React to card content changes
+      try {
+        const ro = new ResizeObserver(() => apply());
+        ro.observe(card);
+        ro.observe(figure);
+      } catch (_) { /* ignore if unsupported */ }
+      // Initial call
+      apply();
+    } catch (_) { /* ignore about sync errors */ }
+  })();
+
   // Case study: Intro overlay with typed text (e.g., NestBank)
   (function setupCaseStudyIntroOverlay() {
     try {
       const overlay = document.querySelector('.intro-overlay');
       if (!overlay) return; // only on pages that include the overlay (nestbank)
+      // Run this logic only on case study pages, not on home (home uses overlay for routing only)
+      const isCaseStudy = !!document.querySelector('.page[data-name="case study page"]');
+      if (!isCaseStudy) return;
 
       const lines = Array.from(overlay.querySelectorAll('.intro-line'));
       const texts = lines.map((el) => (el && el.dataset ? String(el.dataset.text || '') : ''));
@@ -67,11 +163,34 @@
         n.classList.remove('intro-top-visible');
       });
 
-      // Fade overlay in for smooth transition
-      try { overlay.classList.add('enter'); } catch (_) {}
+      // Fade/slide overlay in for smooth transition unless coming from home handoff
+      let cameFromHome = false;
+      try { cameFromHome = (sessionStorage.getItem('nb_from_home') === '1'); } catch (_) { cameFromHome = false; }
+      if (cameFromHome) {
+        try {
+          // Ensure overlay is already present without playing the enter animation
+          const prev = overlay.style.transition;
+          overlay.style.transition = 'none';
+          overlay.classList.add('enter');
+          // force reflow
+          void overlay.offsetHeight;
+          overlay.style.transition = prev;
+        } catch (_) {}
+        try { sessionStorage.removeItem('nb_from_home'); } catch (_) {}
+      } else {
+        try { overlay.classList.add('enter'); } catch (_) {}
+      }
 
-      const TOTAL_MS = 10000;      // total overlay duration
-      const TYPE_TOTAL_MS = 7000;   // typing window (first 7s)
+      // Use a shorter overlay on NestBank for a snappier feel
+      const IS_NESTBANK = (() => {
+        try {
+          const p = String(location && location.pathname || '').toLowerCase();
+          const t = String(document && document.title || '').toLowerCase();
+          return p.includes('nestbank.html') || t.includes('nestbank');
+        } catch (_) { return false; }
+      })();
+      const TOTAL_MS = IS_NESTBANK ? 3000 : 10000;      // total overlay duration
+      const TYPE_TOTAL_MS = Math.min(7000, Math.floor(TOTAL_MS * 0.7));   // typing window (~70%)
       const perLineWindow = (lines.length > 0) ? (TYPE_TOTAL_MS / lines.length) : 0;
 
       // Build rich lines with bold label (before //) and value (after //)
@@ -197,9 +316,76 @@
       (function setupTiles() {
         const tiles = Array.from(document.querySelectorAll('.tile-grid .tile'));
         if (!tiles.length) return;
+        const getTileByProject = (name) => {
+          try { return tiles.find((t) => t && t.dataset && String(t.dataset.project || '').toLowerCase() === String(name || '').toLowerCase()); } catch (_) { return null; }
+        };
+        // Helper: sort tiles by computed CSS order (fallback to DOM index)
+        const sortByCssOrder = (list) => {
+          try {
+            return list
+              .map((el, idx) => ({ el, idx, ord: Number(getComputedStyle(el).order || 0) || 0 }))
+              .sort((a, b) => (a.ord - b.ord) || (a.idx - b.idx))
+              .map((x) => x.el);
+          } catch (_) { return list; }
+        };
+        // Inject small category/role tags per tile keeping site style
+        try {
+          const TAGS = {
+            relias: 'Enterprise UX, Product Design Lead',
+            orion: 'Consumer UX, Sr. Product Designer',
+            nestbank: 'Consumer UX, UI Lead',
+            medigo: 'Consumer UX, UI Lead',
+            logofolio: 'Branding, Freelance',
+            tom: 'Branding, Visual Design Lead',
+            apendito: 'Branding, Freelance', // note: tile key is "apendito"
+            kinti: 'Branding, Freelance',
+            dinobytes: 'Branding, Freelance',
+            kakaoala: 'Branding, Freelance',
+            skilldex: 'Branding, Visual Design Lead',
+            placeholder: 'Branding, Freelance', // fallback for last tile if not renamed
+            toyota: 'Enterprise UX, Product Design Lead',
+          };
+          tiles.forEach((tile) => {
+            const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
+            const list = TAGS[proj];
+            if (!list) return;
+            // Avoid duplicating if re-run
+            if (tile.querySelector('.tile-tags')) return;
+            const container = document.createElement('div');
+            container.className = 'tile-tags';
+            container.setAttribute('aria-hidden', 'true');
+            // Split by comma and trim
+            list.split(',').map((s) => s.trim()).filter(Boolean).forEach((label) => {
+              const span = document.createElement('span');
+              span.className = 'tile-tag';
+              span.textContent = label;
+              container.appendChild(span);
+            });
+            tile.appendChild(container);
+            // Add a top-left flag for current project (Toyota)
+            try {
+              if (proj === 'toyota' && !tile.querySelector('.tile-flag')) {
+                const flag = document.createElement('div');
+                flag.className = 'tile-flag';
+                flag.setAttribute('aria-hidden', 'true');
+                const icon = document.createElement('span');
+                icon.className = 'material-symbols-outlined tile-flag-icon';
+                icon.textContent = 'lock';
+                const label = document.createElement('span');
+                label.className = 'tile-flag-label';
+                label.textContent = 'Current Project';
+                flag.appendChild(icon);
+                flag.appendChild(label);
+                tile.appendChild(flag);
+              }
+            } catch (_) { /* ignore flag errors */ }
+          });
+        } catch (_) { /* ignore tag injection errors */ }
         // Optional: home tile 4 video (Orion) and tile 7 video (Kinti)
         let orionVideo = null;
         let kintiVideo = null;
+        let nestbankVideo = null;
+        let logofolioVideo = null;
 
         // Make tiles focusable and clickable
         tiles.forEach((tile) => {
@@ -215,7 +401,8 @@
             tiles.forEach((tile) => tile.classList.add('intro-hidden'));
             const BASE_DELAY = 200; // ms delay before first tile
             const STEP = 70; // ms between tiles
-            tiles.forEach((tile, i) => {
+            const animTiles = sortByCssOrder(tiles);
+            animTiles.forEach((tile, i) => {
               setTimeout(() => {
                 tile.classList.remove('intro-hidden');
                 tile.classList.add('intro-visible'); // keep this class to avoid reverse flash
@@ -223,52 +410,120 @@
             });
           }
         } catch (_) { /* ignore animation errors */ }
-        // Lazy-init the Orion video and attach to the 4th tile (index 3)
+        // Lazy-init the NestBank video and attach to the NestBank tile (by data-project)
+        function ensureNestbankVideo() {
+          if (nestbankVideo) return;
+          const t = getTileByProject('nestbank');
+          if (!t) return;
+          const v = document.createElement('video');
+          v.src = './assets/thumbnails/nestbank-thumbnail-video.mp4';
+          v.muted = true;
+          v.loop = true;
+          v.playsInline = true;
+          try { v.preload = 'auto'; } catch (_) {}
+          v.autoplay = true;
+          v.setAttribute('aria-hidden', 'true');
+          const onMeta = () => {
+            try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
+            try { v.play().catch(() => {}); } catch (_) {}
+          };
+          v.addEventListener('loadedmetadata', onMeta, { once: true });
+          // Do NOT clear innerHTML; preserve tags/overlays
+          try {
+            // Insert video as the first child so it sits beneath overlays (z-index handles layers)
+            t.insertBefore(v, t.firstChild || null);
+          } catch (_) {
+            // Fallback: append if insertBefore fails
+            try { t.appendChild(v); } catch (_) {}
+          }
+          nestbankVideo = v;
+          try { v.play().catch(() => {}); } catch (_) {}
+        }
+
+        // Lazy-init the Logofolio video and attach to the Logofolio tile (by data-project)
+        function ensureLogofolioVideo() {
+          if (logofolioVideo) return;
+          const t = getTileByProject('logofolio');
+          if (!t) return;
+          const v = document.createElement('video');
+          v.src = './assets/thumbnails/logofolio-video.mp4';
+          v.muted = true;
+          v.loop = true;
+          v.playsInline = true;
+          try { v.preload = 'auto'; } catch (_) {}
+          v.autoplay = true;
+          v.setAttribute('aria-hidden', 'true');
+          const onMeta = () => {
+            try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
+            try { v.play().catch(() => {}); } catch (_) {}
+          };
+          v.addEventListener('loadedmetadata', onMeta, { once: true });
+          // Do NOT clear innerHTML; preserve tags/overlays
+          try {
+            t.insertBefore(v, t.firstChild || null);
+          } catch (_) {
+            try { t.appendChild(v); } catch (_) {}
+          }
+          logofolioVideo = v;
+          try { v.play().catch(() => {}); } catch (_) {}
+        }
+
+        // Lazy-init the Orion video and attach to the Orion tile (by data-project)
         function ensureOrionVideo() {
-          if (orionVideo || tiles.length < 4) return;
-          const t4 = tiles[3];
-          if (!t4) return;
+          if (orionVideo) return;
+          const t = getTileByProject('orion');
+          if (!t) return;
           const v = document.createElement('video');
           v.src = './assets/thumbnails/orion.mp4';
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
-          try { v.preload = 'metadata'; } catch (_) {}
-          v.autoplay = false;
+          try { v.preload = 'auto'; } catch (_) {}
+          v.autoplay = true;
           v.setAttribute('aria-hidden', 'true');
-          // Nudge to first frame so a poster-like frame is visible while paused
           const onMeta = () => {
             try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
+            try { v.play().catch(() => {}); } catch (_) {}
           };
           v.addEventListener('loadedmetadata', onMeta, { once: true });
-          // Insert as the only content for the tile
+          // Do NOT clear innerHTML; preserve tags/overlays
           try {
-            t4.innerHTML = '';
-          } catch (_) {}
-          t4.appendChild(v);
+            t.insertBefore(v, t.firstChild || null);
+          } catch (_) {
+            try { t.appendChild(v); } catch (_) {}
+          }
           orionVideo = v;
+          // Attempt immediate play in case metadata already available
+          try { v.play().catch(() => {}); } catch (_) {}
         }
 
-        // Lazy-init the Kinti video and attach to the 7th tile (index 6)
+        // Lazy-init the Kinti video and attach to the Kinti tile (by data-project)
         function ensureKintiVideo() {
-          if (kintiVideo || tiles.length < 7) return;
-          const t7 = tiles[6];
-          if (!t7) return;
+          if (kintiVideo) return;
+          const t = getTileByProject('kinti');
+          if (!t) return;
           const v = document.createElement('video');
           v.src = './assets/thumbnails/kinti.mp4';
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
-          try { v.preload = 'metadata'; } catch (_) {}
-          v.autoplay = false;
+          try { v.preload = 'auto'; } catch (_) {}
+          v.autoplay = true;
           v.setAttribute('aria-hidden', 'true');
           const onMeta = () => {
             try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
+            try { v.play().catch(() => {}); } catch (_) {}
           };
           v.addEventListener('loadedmetadata', onMeta, { once: true });
-          try { t7.innerHTML = ''; } catch (_) {}
-          t7.appendChild(v);
+          // Do NOT clear innerHTML; preserve tags/overlays
+          try {
+            t.insertBefore(v, t.firstChild || null);
+          } catch (_) {
+            try { t.appendChild(v); } catch (_) {}
+          }
           kintiVideo = v;
+          // Attempt immediate play in case metadata already available
+          try { v.play().catch(() => {}); } catch (_) {}
         }
 
         const selectTile = (tile) => {
@@ -283,67 +538,18 @@
               t.setAttribute('aria-pressed', 'false');
             }
           });
-          // Home page background color when specific tiles are selected
+          // Background theme is now fixed; do not toggle body classes on selection
           try {
-            const idx = tiles.indexOf(tile);
-            // Clear all home bg classes, then apply based on index
-            document.body.classList.remove('home-bg-nestbank');
-            document.body.classList.remove('home-bg-medigo');
-            document.body.classList.remove('home-bg-logofolio');
-            document.body.classList.remove('home-bg-orion');
-            document.body.classList.remove('home-bg-tom');
-            document.body.classList.remove('home-bg-kinti');
-            document.body.classList.remove('home-bg-kakakoala');
-            document.body.classList.remove('home-bg-dynobytes');
-            document.body.classList.remove('home-bg-apendito');
-            document.body.classList.remove('home-bg-relias');
-            if (idx === 0) {
-              document.body.classList.add('home-bg-nestbank');
-            } else if (idx === 1) {
-              document.body.classList.add('home-bg-logofolio');
-            } else if (idx === 2) {
-              document.body.classList.add('home-bg-medigo');
-            } else if (idx === 3) {
-              document.body.classList.add('home-bg-orion');
-            } else if (idx === 4) {
-              document.body.classList.add('home-bg-tom');
-            } else if (idx === 5) {
-              document.body.classList.add('home-bg-relias');
-            } else if (idx === 6) {
-              document.body.classList.add('home-bg-kinti');
-            } else if (idx === 7) {
-              document.body.classList.add('home-bg-kakakoala');
-            } else if (idx === 8) {
-              document.body.classList.add('home-bg-dynobytes');
-            } else if (idx === 9) {
-              document.body.classList.add('home-bg-apendito');
-            }
-            // Manage Orion video playback for 4th tile
-            try {
-              if (!orionVideo && tiles.length >= 4) ensureOrionVideo();
-              if (orionVideo) {
-                const isOrionSelected = idx === 3;
-                if (isOrionSelected) {
-                  if (orionVideo.paused) { try { orionVideo.play().catch(() => {}); } catch (_) {} }
-                } else {
-                  if (!orionVideo.paused) { try { orionVideo.pause(); } catch (_) {} }
-                  // Reset to initial visible frame
-                  try { orionVideo.currentTime = Math.max(0.01, orionVideo.currentTime); } catch (_) {}
-                }
-              }
-              // Manage Kinti video playback for 7th tile
-              if (!kintiVideo && tiles.length >= 7) ensureKintiVideo();
-              if (kintiVideo) {
-                const isKintiSelected = idx === 6;
-                if (isKintiSelected) {
-                  if (kintiVideo.paused) { try { kintiVideo.play().catch(() => {}); } catch (_) {} }
-                } else {
-                  if (!kintiVideo.paused) { try { kintiVideo.pause(); } catch (_) {} }
-                  // Reset to initial visible frame
-                  try { kintiVideo.currentTime = Math.max(0.01, kintiVideo.currentTime); } catch (_) {}
-                }
-              }
-            } catch (_) { /* ignore video control errors */ }
+            // Ensure videos exist and play continuously
+            try { if (!nestbankVideo) ensureNestbankVideo(); } catch (_) {}
+            try { if (nestbankVideo && nestbankVideo.paused) nestbankVideo.play().catch(() => {}); } catch (_) {}
+            try { if (!logofolioVideo) ensureLogofolioVideo(); } catch (_) {}
+            try { if (logofolioVideo && logofolioVideo.paused) logofolioVideo.play().catch(() => {}); } catch (_) {}
+            // Ensure videos exist and play continuously
+            try { if (!orionVideo) ensureOrionVideo(); } catch (_) {}
+            try { if (orionVideo && orionVideo.paused) orionVideo.play().catch(() => {}); } catch (_) {}
+            try { if (!kintiVideo) ensureKintiVideo(); } catch (_) {}
+            try { if (kintiVideo && kintiVideo.paused) kintiVideo.play().catch(() => {}); } catch (_) {}
           } catch (_) { /* ignore */ }
         };
         // Make selection callable from other modules (e.g., filtering) and init guard flag
@@ -352,90 +558,50 @@
           if (typeof window.__autoSelecting === 'undefined') window.__autoSelecting = false;
         } catch (_) { /* ignore */ }
 
-        // Click/keyboard to select; if first tile is already selected (expanded), navigate to case study
+        // Helper: trigger home overlay, then navigate to a URL
+        function navigateWithOverlay(url) {
+          try { sessionStorage.setItem('nb_from_home', '1'); } catch (_) {}
+          const overlay = document.querySelector('.intro-overlay');
+          if (!overlay) { window.location.href = url; return; }
+          // start slide-in
+          try { overlay.classList.add('enter'); } catch (_) {}
+          let navigated = false;
+          const go = () => {
+            if (navigated) return; navigated = true;
+            window.location.href = url;
+          };
+          // prefer transition end
+          const onEnd = (e) => {
+            try { overlay.removeEventListener('transitionend', onEnd); } catch (_) {}
+            go();
+          };
+          try { overlay.addEventListener('transitionend', onEnd); } catch (_) {}
+          // fallback timeout if transitionend not fired
+          setTimeout(go, 500);
+        }
+
+        // Click/keyboard to navigate immediately to the relevant page (no select/expand state)
         tiles.forEach((tile, idx) => {
           tile.addEventListener('click', () => {
-            // If first tile and already expanded, navigate to NestBank (with smooth transition)
-            if (idx === 0 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              try {
-                const trans = document.querySelector('.nav-transition');
-                if (trans) {
-                  trans.classList.add('open');
-                  // Delay navigation slightly for fade-in
-                  setTimeout(() => { window.location.href = './nestbank.html'; }, 340);
-                } else {
-                  window.location.href = './nestbank.html';
-                }
-              } catch (_) { window.location.href = './nestbank.html'; }
-              return;
-            }
-            // If Logofolio tile (now 2nd) and already expanded, navigate to Logofolio page
-            if (idx === 1 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              try {
-                const trans = document.querySelector('.nav-transition');
-                if (trans) {
-                  trans.classList.add('open');
-                  setTimeout(() => { window.location.href = './logofolio.html'; }, 340);
-                } else {
-                  window.location.href = './logofolio.html';
-                }
-              } catch (_) { window.location.href = './logofolio.html'; }
-              return;
-            }
-            // If Medigo tile (3rd) and already expanded, open Behance in new tab
-            if (idx === 2 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {}
-              return;
-            }
-            // If Tom tile (5th) and already expanded, open Behance in new tab
-            if (idx === 4 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              try { window.open('https://www.behance.net/gallery/227685253/TOM-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-              return;
-            }
-            // If Kinti tile (7th) and already expanded, open Behance in new tab
-            if (idx === 6 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-              return;
-            }
-            // If Kakakoala tile (8th) and already expanded, open Behance in new tab
-            if (idx === 7 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-              return;
-            }
-            // If DinoBytes tile (9th) and already expanded, open Behance in new tab
-            if (idx === 8 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-              return;
-            }
-            // If Aprendito tile (10th) and already expanded, open Behance in new tab
-            if (idx === 9 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-              return;
-            }
-            // Default: if selected and no dedicated page, go to password gate
-            if (tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-              try {
-                const trans = document.querySelector('.nav-transition');
-                if (trans) {
-                  trans.classList.add('open');
-                  setTimeout(() => { window.location.href = './password.html'; }, 340);
-                } else {
-                  window.location.href = './password.html';
-                }
-              } catch (_) { window.location.href = './password.html'; }
-              return;
-            }
-            // Allow CSS transitions for smooth expand/collapse
-            selectTile(tile);
+            const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
+            if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
+            if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+            if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
+            if (proj === 'tom') { try { window.open('https://www.behance.net/gallery/227685253/TOM-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+            if (proj === 'apendito') { try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+            if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+            if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+            if (proj === 'kakaoala') { try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+            // relias, orion, placeholder -> gated
+            window.location.href = './password.html';
           });
 
-          // Mouse tilt effect only for hover-capable pointers and only when tile is selected
+          // Mouse tilt effect for hover-capable pointers
           try {
             const supportsHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
             if (supportsHover) {
-              const MAX_TILT = 1; // degrees (ultra subtle)
+              const MAX_TILT = 2; // degrees (subtle)
               const onMove = (e) => {
-                if (!tile.classList.contains('selected')) return; // only tilt expanded tile
                 const r = tile.getBoundingClientRect();
                 const x = (e.clientX - r.left) / r.width;  // 0..1
                 const y = (e.clientY - r.top) / r.height;  // 0..1
@@ -445,10 +611,13 @@
                 const tiltX = (-dy * MAX_TILT).toFixed(2) + 'deg';     // up/down => rotateX (invert for natural feel)
                 tile.style.setProperty('--tiltX', tiltX);
                 tile.style.setProperty('--tiltY', tiltY);
+                // Force transform inline to ensure visibility over any CSS rule
+                tile.style.transform = 'translateX(var(--slideX)) translateY(var(--introY)) perspective(800px) rotateX(var(--tiltX)) rotateY(var(--tiltY))';
               };
               const onLeave = () => {
                 tile.style.setProperty('--tiltX', '0deg');
                 tile.style.setProperty('--tiltY', '0deg');
+                tile.style.transform = ''; // allow CSS to reset
               };
               tile.addEventListener('mousemove', onMove);
               tile.addEventListener('mouseleave', onLeave);
@@ -457,88 +626,40 @@
           tile.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              if (idx === 0 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                try {
-                  const trans = document.querySelector('.nav-transition');
-                  if (trans) {
-                    trans.classList.add('open');
-                    setTimeout(() => { window.location.href = './nestbank.html'; }, 340);
-                  } else {
-                    window.location.href = './nestbank.html';
-                  }
-                } catch (_) { window.location.href = './nestbank.html'; }
-                return;
-              }
-              if (idx === 1 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                try {
-                  const trans = document.querySelector('.nav-transition');
-                  if (trans) {
-                    trans.classList.add('open');
-                    setTimeout(() => { window.location.href = './logofolio.html'; }, 340);
-                  } else {
-                    window.location.href = './logofolio.html';
-                  }
-                } catch (_) { window.location.href = './logofolio.html'; }
-                return;
-              }
-              // If Medigo tile (3rd) and already expanded, open Behance in new tab
-              if (idx === 2 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {}
-                return;
-              }
-              // If Tom tile (5th) and already expanded, open Behance in new tab
-              if (idx === 4 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                try { window.open('https://www.behance.net/gallery/227685253/TOM-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-                return;
-              }
-              // If Kinti tile (7th) and already expanded, open Behance in new tab
-              if (idx === 6 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-                return;
-              }
-              // If Kakakoala tile (8th) and already expanded, open Behance in new tab
-              if (idx === 7 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-                return;
-              }
-              // If DinoBytes tile (9th) and already expanded, open Behance in new tab
-              if (idx === 8 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-                return;
-              }
-              // If Aprendito tile (10th) and already expanded, open Behance in new tab
-              if (idx === 9 && tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {}
-                return;
-              }
-              // Default: if selected and no dedicated page, go to password gate
-              if (tile.classList.contains('selected') && !(window && window.__autoSelecting)) {
-                try {
-                  const trans = document.querySelector('.nav-transition');
-                  if (trans) {
-                    trans.classList.add('open');
-                    setTimeout(() => { window.location.href = './password.html'; }, 340);
-                  } else {
-                    window.location.href = './password.html';
-                  }
-                } catch (_) { window.location.href = './password.html'; }
-                return;
-              }
-              // Allow CSS transitions for smooth expand/collapse via keyboard
-              selectTile(tile);
+              const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
+              if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
+              if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+              if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
+              if (proj === 'tom') { try { window.open('https://www.behance.net/gallery/227685253/TOM-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+              if (proj === 'apendito') { try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+              if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+              if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+              if (proj === 'kakaoala') { try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+              window.location.href = './password.html';
             }
           });
         });
-        // Initialize video elements before first selection so paused frames are visible
+        // Initialize video elements
+        try { ensureNestbankVideo(); } catch (_) {}
+        try { ensureLogofolioVideo(); } catch (_) {}
         try { ensureOrionVideo(); } catch (_) {}
         try { ensureKintiVideo(); } catch (_) {}
-        // Default to first tile selected on load
-        selectTile(tiles[0]);
 
         // Hover-proxy: when cursor is in the gaps between tiles, slightly expand the nearest tile
         try {
           const grid = document.querySelector('.tile-grid');
           if (grid) {
+            // If layout is CSS grid, skip hover-proxy entirely
+            try {
+              const isGrid = (window.getComputedStyle(grid).display || '').toLowerCase().includes('grid');
+              if (isGrid) throw new Error('skip-hover-proxy');
+            } catch (e) {
+              if (String(e && e.message || '').includes('skip-hover-proxy')) {
+                // Do nothing when using grid layout
+              } else {
+                // proceed below only if not grid
+              }
+            }
             let lastProxy = null;
             const clearProxy = () => {
               if (lastProxy) { lastProxy.classList.remove('hover-proxy'); lastProxy = null; }
@@ -587,6 +708,9 @@
             // Enable drag-to-scroll + wheel-to-horizontal on medium breakpoint (601px–1050px)
             try {
               const mm = window.matchMedia && window.matchMedia('(min-width: 601px) and (max-width: 1050px)');
+              // If layout is CSS grid at this breakpoint, skip drag setup
+              const isGridNow = (window.getComputedStyle(grid).display || '').toLowerCase().includes('grid');
+              if (isGridNow) throw new Error('skip-drag');
               // Ensure carousel starts scrolled to the beginning on load within this breakpoint
               try { if (!mm || mm.matches) { grid.scrollLeft = 0; } } catch (_) {}
               let isDown = false;
@@ -655,12 +779,12 @@
         const tabs = Array.from(tabList.querySelectorAll('.nav-item[role="tab"]'));
         if (!tabs.length) return;
 
-        // Responsive label: under 374px, show 'UX' instead of 'Product' for the ux tab
+        // Responsive label: under 400px, show 'UX' instead of 'Product' for the ux tab
         try {
           const uxTab = tabs.find((t) => t && t.dataset && t.dataset.tab === 'ux');
           const updateUxLabel = () => {
             if (!uxTab) return;
-            const isNarrow = (window.innerWidth || 0) < 374; // strictly below 374px
+            const isNarrow = (window.innerWidth || 0) < 400; // strictly below 400px
             const target = isNarrow ? 'UX' : 'Product';
             // Only touch text when it actually changes to avoid unnecessary layout work
             if (uxTab.textContent !== target) {
@@ -672,12 +796,12 @@
           window.addEventListener('orientationchange', updateUxLabel);
         } catch (_) { /* ignore responsive label errors */ }
 
-        // Responsive label: at or below 339px, show 'Brand' instead of 'Branding' for the branding tab
+        // Responsive label: at or below 360px, show 'Brand' instead of 'Branding' for the branding tab
         try {
           const brandingTab = tabs.find((t) => t && t.dataset && t.dataset.tab === 'branding');
           const updateBrandingLabel = () => {
             if (!brandingTab) return;
-            const isVeryNarrow = (window.innerWidth || 0) <= 339; // at or below 339px
+            const isVeryNarrow = (window.innerWidth || 0) <= 360; // at or below 360px
             const target = isVeryNarrow ? 'Brand' : 'Branding';
             if (brandingTab.textContent !== target) {
               brandingTab.textContent = target;
@@ -695,63 +819,50 @@
           if (!tiles.length) return;
           const want = (category || 'all').toLowerCase();
 
-          // Track if current selection can be preserved
-          const currentSelected = document.querySelector('.tile-grid .tile.selected');
-          let selectedStillVisible = false;
-          let anyVisible = false;
-          tiles.forEach((tile) => {
-            const cat = (tile.dataset && tile.dataset.category) ? tile.dataset.category.toLowerCase() : '';
-            const shouldShow = (want === 'all') || (cat === want);
-
-            // If we want to show it
-            if (shouldShow) {
-              anyVisible = true;
-              // Remove hidden state to let CSS animate back from 0 width/opacity
-              tile.classList.remove('filtered-out');
-              // Restore a11y visibility and focusability
-              try { tile.setAttribute('aria-hidden', 'false'); } catch (_) {}
-              try { tile.tabIndex = 0; } catch (_) {}
-              if (tile === currentSelected) {
-                selectedStillVisible = true;
-              }
-            } else {
-              // We want to hide it
-              // Clear selection/pressed states when filtering out
-              tile.classList.remove('selected');
-              tile.setAttribute('aria-pressed', 'false');
-              if (!tile.classList.contains('filtered-out')) {
-                tile.classList.add('filtered-out');
-                // Mark hidden for assistive tech and remove from tab order
-                try { tile.setAttribute('aria-hidden', 'true'); } catch (_) {}
-                try { tile.tabIndex = -1; } catch (_) {}
-              }
-            }
+          // Full reset for all tiles; rely on CSS grid class to hide non-matching
+          tiles.forEach((t) => {
+            t.classList.remove('filtered-out', 'intro-hidden');
+            t.classList.add('intro-visible');
+            try { t.style.display = 'block'; } catch (_) {}
+            try { t.setAttribute('aria-hidden', 'false'); } catch (_) {}
+            try { t.tabIndex = 0; } catch (_) {}
           });
 
           // Clear any hover proxy from previous state
-          try {
-            const visibleTiles = tiles.filter((t) => !t.classList.contains('filtered-out'));
-            visibleTiles.forEach((t) => t.classList.remove('hover-proxy'));
-          } catch (_) { /* ignore */ }
+          try { tiles.forEach((t) => t.classList.remove('hover-proxy')); } catch (_) {}
 
-          // If the current selection is still visible, keep it to avoid jarring changes
-          if (selectedStillVisible) return;
-          // Otherwise, select the first visible tile (after layout updates)
-          if (!anyVisible) return;
+          // Re-trigger intro animation for the currently visible set based on desired category
+          try {
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const visibleNow = tiles.filter((t) => {
+              const cat = (t.dataset && t.dataset.category) ? t.dataset.category.toLowerCase() : '';
+              return want === 'all' || cat === want;
+            });
+            if (prefersReduced) {
+              visibleNow.forEach((t) => { t.classList.remove('intro-hidden'); t.classList.add('intro-visible'); });
+            } else {
+              visibleNow.forEach((t) => { t.classList.remove('intro-visible'); t.classList.add('intro-hidden'); });
+              const BASE_DELAY = 100, STEP = 60;
+              requestAnimationFrame(() => {
+                const ordered = (typeof sortByCssOrder === 'function') ? sortByCssOrder(visibleNow) : visibleNow;
+                ordered.forEach((t, i) => setTimeout(() => { t.classList.remove('intro-hidden'); t.classList.add('intro-visible'); }, BASE_DELAY + i * STEP));
+              });
+            }
+          } catch (_) { /* ignore animation errors */ }
+
+          // Auto-select the first visible tile in the requested category
           requestAnimationFrame(() => {
-            const firstVisible = tiles.find((t) => !t.classList.contains('filtered-out'));
+            const firstVisible = tiles.find((t) => {
+              const cat = (t.dataset && t.dataset.category) ? t.dataset.category.toLowerCase() : '';
+              return want === 'all' || cat === want;
+            });
             if (!firstVisible) return;
             try {
               window.__autoSelecting = true;
-              if (typeof window.__homeSelectTile === 'function') {
-                window.__homeSelectTile(firstVisible);
-              } else if (typeof selectTile === 'function') {
-                selectTile(firstVisible);
-              }
+              if (typeof window.__homeSelectTile === 'function') window.__homeSelectTile(firstVisible);
+              else if (typeof selectTile === 'function') selectTile(firstVisible);
             } catch (_) { /* ignore */ }
-            finally {
-              setTimeout(() => { try { window.__autoSelecting = false; } catch (_) {} }, 0);
-            }
+            finally { setTimeout(() => { try { window.__autoSelecting = false; } catch (_) {} }, 0); }
           });
         }
 
@@ -772,6 +883,8 @@
               grid.classList.remove('filter-all', 'filter-ux', 'filter-branding');
               const cls = `filter-${String(category || 'all').toLowerCase()}`;
               grid.classList.add(cls);
+              // Ensure grid itself is not hidden
+              try { grid.setAttribute('aria-hidden', 'false'); } catch (_) {}
             }
             filterTiles(category);
           } catch (_) { /* ignore */ }
@@ -1187,10 +1300,10 @@
               e.preventDefault();
               return;
             }
-            // Otherwise: pan
-            const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : 0;
+            // Otherwise: pan freely in both axes
+            const dx = e.deltaX;
             const dy = e.deltaY;
-            offsetX -= dx; // natural scroll
+            offsetX -= dx;
             offsetY -= dy;
             velX = -dx * 0.1;
             velY = -dy * 0.1;
@@ -2189,11 +2302,11 @@
         // Three deliverable panels with title and supporting description
         const items = [
           {
-            title: "NestBank's Visual Identity Definition",
+            title: "NestBank's Visual Identity",
             body: 'Defined the brand’s core visual language, including colour palette, typography, iconography, and imagery style.',
           },
           {
-            title: 'Design System Creation',
+            title: 'Design System',
             body: 'Built a scalable component library to ensure consistency and efficiency across design and development.',
           },
           {
@@ -2201,7 +2314,7 @@
             body: 'Designed end-to-end user flows covering onboarding, loan management, payments, and financial tracking.',
           },
           {
-            title: 'User & Process Research',
+            title: 'User Research & Testing',
             body: 'Analysed user groups, current loan journeys, and brand perception to identify opportunities for a digital-first experience.',
           },
         ];
