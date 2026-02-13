@@ -189,7 +189,14 @@
           return p.includes('nestbank.html') || t.includes('nestbank');
         } catch (_) { return false; }
       })();
-      const TOTAL_MS = IS_NESTBANK ? 3000 : 10000;      // total overlay duration
+      const IS_TOM = (() => {
+        try {
+          const p = String(location && location.pathname || '').toLowerCase();
+          const t = String(document && document.title || '').toLowerCase();
+          return p.includes('tom.html') || t.includes('tom');
+        } catch (_) { return false; }
+      })();
+      const TOTAL_MS = IS_NESTBANK ? 3000 : (IS_TOM ? 3000 : 10000);      // total overlay duration
       const TYPE_TOTAL_MS = Math.min(7000, Math.floor(TOTAL_MS * 0.7));   // typing window (~70%)
       const perLineWindow = (lines.length > 0) ? (TYPE_TOTAL_MS / lines.length) : 0;
 
@@ -260,7 +267,7 @@
   })();
   const LITE_MODE = IS_SMALL_SCREEN || SAVE_DATA;
 
-  const ALL_FILES = [
+  const NESTBANK_FILES = [
     // Ordered to match assets/nestbank folder including videos
     // Sequence follows numeric filenames, with fractional steps like 4.5, 12.5, 16
     "./assets/nestbank/1.jpg",
@@ -282,8 +289,34 @@
     "./assets/nestbank/8.png",
   ];
 
+  const TOM_FILES = [
+    "./assets/tom/1.jpg",
+    "./assets/tom/2.svg",
+    "./assets/tom/4.jpg",
+    "./assets/tom/3.jpg",
+    "./assets/tom/5.jpg",
+    "./assets/tom/6.svg",
+    "./assets/tom/7.jpg",
+    "./assets/tom/8.jpg",
+    "./assets/tom/10.jpg",
+    "./assets/tom/9.jpg",
+    "./assets/tom/11.jpg",
+    // Remaining TOM assets after the 1–11 sequence
+    "./assets/tom/12.jpg",
+  ];
+
+  function getCaseStudyFiles() {
+    try {
+      const p = String(location && location.pathname || '').toLowerCase();
+      const t = String(document && document.title || '').toLowerCase();
+      if (p.includes('tom.html') || t.includes('tom')) return TOM_FILES;
+      if (p.includes('nestbank.html') || t.includes('nestbank')) return NESTBANK_FILES;
+    } catch (_) {}
+    return NESTBANK_FILES;
+  }
+
   // Keep ALL assets (images and videos), per requirement. We'll optimize how we load/play them instead.
-  const files = ALL_FILES;
+  const files = getCaseStudyFiles();
 
   const root = document.getElementById("bg-sequence");
   if (!root) {
@@ -587,7 +620,7 @@
             if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
             if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
             if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
-            if (proj === 'tom') { try { window.open('https://www.behance.net/gallery/227685253/TOM-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+            if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
             if (proj === 'apendito') { try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
             if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
             if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
@@ -630,7 +663,7 @@
               if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
               if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
               if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
-              if (proj === 'tom') { try { window.open('https://www.behance.net/gallery/227685253/TOM-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+              if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
               if (proj === 'apendito') { try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
               if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
               if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
@@ -1557,7 +1590,13 @@
         || /(\/)8\.png$/i.test(srcPath)
         || /(\/)11\.png$/i.test(srcPath)
         || /(^|\/)12\.5\.mp4$/i.test(srcPath)
-        || /(^|\/)20\.mp4$/i.test(srcPath)) {
+        || /(^|\/)20\.mp4$/i.test(srcPath)
+        // TOM: keep specific frames from being cropped at <=600px
+        || /(^|\/)2\.svg$/i.test(srcPath)
+        || /(^|\/)3\.jpg$/i.test(srcPath)
+        || /(^|\/)6\.svg$/i.test(srcPath)
+        || /(^|\/)8\.jpg$/i.test(srcPath)
+        || /(^|\/)9\.jpg$/i.test(srcPath)) {
         el.classList.add('keep-contain');
       }
       el.style.opacity = "1";
@@ -1611,8 +1650,22 @@
   // Continuous timeline-based engine (no discrete switches)
   // Continuous infinite timeline (circular). floor(timeline % L) selects current index.
   // Default view: second image current, third at 60% progress.
-  const INITIAL_INDEX = 1;     // 0-based -> second image
-  const INITIAL_PROGRESS = 0.6; // 60%
+  function getInitialTimeline() {
+    try {
+      const p = String(location && location.pathname || '').toLowerCase();
+      const t = String(document && document.title || '').toLowerCase();
+      const isTom = p.includes('tom.html') || t.includes('tom');
+      if (isTom) {
+        // Tom: start with 1.jpg fully visible, and 2.svg partially progressed
+        // timeline is idx + progress, where idx=0 => first frame.
+        return { index: 0, progress: 0.35 };
+      }
+    } catch (_) {}
+    // Default: show 2nd image with 60% into next (3rd)
+    return { index: 1, progress: 0.6 };
+  }
+
+  const { index: INITIAL_INDEX, progress: INITIAL_PROGRESS } = getInitialTimeline();
   let timeline = 0; // current position along an infinite loop
   let targetTimeline = 0; // eased target along the loop
   const ZOOM_MAX = 1.6; // scale at the end of a segment
@@ -2299,58 +2352,101 @@
           afterNode = d;
         });
       } else if (isDeliverables) {
-        // Three deliverable panels with title and supporting description
-        const items = [
-          {
-            title: "NestBank's Visual Identity",
-            body: 'Defined the brand’s core visual language, including colour palette, typography, iconography, and imagery style.',
-          },
-          {
-            title: 'Design System',
-            body: 'Built a scalable component library to ensure consistency and efficiency across design and development.',
-          },
-          {
-            title: 'Mobile App Interface Design',
-            body: 'Designed end-to-end user flows covering onboarding, loan management, payments, and financial tracking.',
-          },
-          {
-            title: 'User Research & Testing',
-            body: 'Analysed user groups, current loan journeys, and brand perception to identify opportunities for a digital-first experience.',
-          },
-        ];
-        // If we already created them once, reuse
-        const existing = openDetails.get(card);
-        if (existing && Array.isArray(existing) && existing.length === items.length) {
-          detailsToOpen = existing;
-          detailsToOpen.forEach((d, i) => {
-            d.classList.remove('open');
-            d.style.marginTop = '';
-            d.style.opacity = '';
-            d.style.pointerEvents = '';
-            const inner = d.querySelector('.paragraph-detail__inner') || d;
-            // Ensure regular weight for deliverables
-            inner.classList.remove('emphasize');
-            const itm = items[i] || { title: '', body: '' };
-            inner.innerHTML = `<p class="text-label">${itm.title}</p>`;
+        // If the page provides a real deliverables list, use it directly.
+        // This prevents TOM from inheriting NestBank's hardcoded deliverables panels.
+        const body = card.querySelector('.text-body');
+        const hasList = !!(body && (body.querySelector('ul') || body.querySelector('ol')));
+        if (hasList) {
+          const list = (body && (body.querySelector('ul') || body.querySelector('ol')));
+          const items = list ? Array.from(list.querySelectorAll(':scope > li')) : [];
+
+          // If we already created them once, reuse
+          const existing = openDetails.get(card);
+          if (existing && Array.isArray(existing) && existing.length === items.length) {
+            detailsToOpen = existing;
+            detailsToOpen.forEach((d, i) => {
+              d.classList.remove('open');
+              d.style.marginTop = '';
+              d.style.opacity = '';
+              d.style.pointerEvents = '';
+              const inner = d.querySelector('.paragraph-detail__inner') || d;
+              inner.classList.remove('emphasize');
+              const txt = (items[i] && items[i].textContent) ? items[i].textContent.trim() : '';
+              inner.innerHTML = `<p class="text-label">${txt}</p>`;
+            });
+          } else {
+            detailsToOpen = (items.length ? items : [null]).map((li, idx) => {
+              const txt = li && li.textContent ? li.textContent.trim() : '';
+              const d = makeDetail(
+                `<p class="text-label">${txt}</p>`,
+                txt ? `${txt} details` : `Deliverable ${idx + 1}`
+              );
+              d.querySelector('.paragraph-detail__inner')?.classList.remove('emphasize');
+              return d;
+            });
+          }
+
+          // Insert sequentially after the card
+          let afterNode = card;
+          detailsToOpen.forEach((d) => {
+            if (afterNode.nextSibling) col.insertBefore(d, afterNode.nextSibling);
+            else col.appendChild(d);
+            afterNode = d;
           });
         } else {
-          detailsToOpen = items.map(({ title, body }) => {
-            const d = makeDetail(
-              `<p class=\"text-label\">${title}</p>`,
-              `${title} details`
-            );
-            // Ensure regular weight for deliverables
-            d.querySelector('.paragraph-detail__inner')?.classList.remove('emphasize');
-            return d;
+          // Fallback: NestBank-style hardcoded deliverable panels
+          const items = [
+            {
+              title: "NestBank's Visual Identity",
+              body: 'Defined the brand’s core visual language, including colour palette, typography, iconography, and imagery style.',
+            },
+            {
+              title: 'Design System',
+              body: 'Built a scalable component library to ensure consistency and efficiency across design and development.',
+            },
+            {
+              title: 'Mobile App Interface Design',
+              body: 'Designed end-to-end user flows covering onboarding, loan management, payments, and financial tracking.',
+            },
+            {
+              title: 'User Research & Testing',
+              body: 'Analysed user groups, current loan journeys, and brand perception to identify opportunities for a digital-first experience.',
+            },
+          ];
+          // If we already created them once, reuse
+          const existing = openDetails.get(card);
+          if (existing && Array.isArray(existing) && existing.length === items.length) {
+            detailsToOpen = existing;
+            detailsToOpen.forEach((d, i) => {
+              d.classList.remove('open');
+              d.style.marginTop = '';
+              d.style.opacity = '';
+              d.style.pointerEvents = '';
+              const inner = d.querySelector('.paragraph-detail__inner') || d;
+              // Ensure regular weight for deliverables
+              inner.classList.remove('emphasize');
+              const itm = items[i] || { title: '', body: '' };
+              inner.innerHTML = `<p class="text-label">${itm.title}</p>`;
+            });
+          } else {
+            detailsToOpen = items.map(({ title, body }) => {
+              const d = makeDetail(
+                `<p class=\"text-label\">${title}</p>`,
+                `${title} details`
+              );
+              // Ensure regular weight for deliverables
+              d.querySelector('.paragraph-detail__inner')?.classList.remove('emphasize');
+              return d;
+            });
+          }
+          // Insert sequentially after the card
+          let afterNode = card;
+          detailsToOpen.forEach((d) => {
+            if (afterNode.nextSibling) col.insertBefore(d, afterNode.nextSibling);
+            else col.appendChild(d);
+            afterNode = d;
           });
         }
-        // Insert sequentially after the card
-        let afterNode = card;
-        detailsToOpen.forEach((d) => {
-          if (afterNode.nextSibling) col.insertBefore(d, afterNode.nextSibling);
-          else col.appendChild(d);
-          afterNode = d;
-        });
       } else if (isProblemSolution) {
         // Build two separate details: Problem and Solution
         const body = card.querySelector('.text-body');
@@ -2359,20 +2455,29 @@
         let solutionHTML = '';
         if (body) {
           const labels = Array.from(body.querySelectorAll('.text-label'));
-          // Find the first non-label paragraph after each label as its content
-          const getContentAfter = (labelEl) => {
-            let n = labelEl ? labelEl.nextElementSibling : null;
-            while (n && (n.classList && n.classList.contains('text-label') || n.tagName === 'BR')) {
+          // Collect all elements after a label until the next label.
+          // This allows multi-paragraph content (used on TOM) to appear in the expanded details.
+          const getContentBlockAfter = (labelEl) => {
+            if (!labelEl) return '';
+            const parts = [];
+            let n = labelEl.nextElementSibling;
+            while (n) {
+              // Stop when we reach the next section label
+              if (n.classList && n.classList.contains('text-label')) break;
+              // Skip <br> tags; details layout can manage spacing itself
+              if (String(n.tagName || '').toUpperCase() !== 'BR') {
+                parts.push(n.outerHTML);
+              }
               n = n.nextElementSibling;
             }
-            return n && n.tagName === 'P' ? n.outerHTML : '';
+            return parts.join('');
           };
           const problemLabel = labels.find(l => (l.textContent || '').trim().toLowerCase() === 'problem');
           const solutionLabel = labels.find(l => (l.textContent || '').trim().toLowerCase() === 'solution');
-          const problemP = getContentAfter(problemLabel);
-          const solutionP = getContentAfter(solutionLabel);
-          problemHTML = `<p class="text-label">Problem</p>${problemP || ''}`;
-          solutionHTML = `<p class="text-label">Solution</p>${solutionP || ''}`;
+          const problemBlock = getContentBlockAfter(problemLabel);
+          const solutionBlock = getContentBlockAfter(solutionLabel);
+          problemHTML = `<p class="text-label">Problem</p>${problemBlock || ''}`;
+          solutionHTML = `<p class="text-label">Solution</p>${solutionBlock || ''}`;
         }
         // If we already created them once, reuse
         const existing = openDetails.get(card);
