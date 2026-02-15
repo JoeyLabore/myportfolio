@@ -282,6 +282,54 @@
     width: 24px;
     height: 24px;
   }
+}
+
+@media (max-width: 650px) {
+  .page[data-name="about page"] .nav-split {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--space-s);
+    z-index: 3;
+    pointer-events: none;
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
+  }
+  .page[data-name="about page"] .nav-split .nav-bar {
+    position: static !important;
+    top: auto !important;
+    pointer-events: auto;
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .page[data-name="about page"] .main {
+    padding-top: calc(var(--nav-card-height) + (2 * var(--space-s)));
+  }
+
+  .page[data-name="about page"] .about-heading {
+    font-size: 20px !important;
+  }
+
+  .page[data-name="about page"] .about-skill-list li span {
+    font-size: 12px !important;
+  }
+
+  .page[data-name="about page"] .about-logos img {
+    width: 40px !important;
+    height: 40px !important;
+  }
+
+  .page[data-name="about page"] .main .about-photo {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 600px;
+    aspect-ratio: 4 / 5;
+  }
+}
+
+@media (max-width: 600px) {
   /* Allow the Menu button to animate in (override earlier small-screen static overrides) */
   .page[data-name="home page"] .nav-right.nav-menu.intro-top-hidden {
     transform: translate3d(0, -100%, 0) !important;
@@ -487,6 +535,28 @@ p { margin: 0; }
   }
   /* Add top padding so content doesn't hide behind the fixed nav row */
   .page[data-name="home page"] .main {
+    padding-top: calc(var(--nav-card-height) + (2 * var(--space-s)));
+  }
+
+  .page[data-name="about page"] .nav-split {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--space-s);
+    z-index: 3;
+    pointer-events: none;
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
+  }
+  .page[data-name="about page"] .nav-split .nav-bar {
+    position: static !important;
+    top: auto !important;
+    pointer-events: auto;
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .page[data-name="about page"] .main {
     padding-top: calc(var(--nav-card-height) + (2 * var(--space-s)));
   }
 }
@@ -919,8 +989,31 @@ p { margin: 0; }
   align-items: flex-start; /* let card's content determine its own height */
   justify-content: center; /* center row within page */
   padding: var(--space-m);
+  padding-top: 120px;
   gap: var(--space-lg);
   flex-direction: row; /* place photo next to card */
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1050px) {
+  .page[data-name="about page"] .main {
+    flex-direction: column;
+    align-items: stretch;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .page[data-name="about page"] .main .about-card {
+    max-width: none !important;
+    width: 100% !important;
+  }
+  .page[data-name="about page"] .main .about-photo {
+    display: none;
+  }
+  .page[data-name="about page"] .main .about-photo img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
 }
 .page[data-name="about page"] .about-card {
   background: rgba(0, 0, 0, 0.38); /* match nav items glass tint */
@@ -1722,6 +1815,11 @@ p { margin: 0; }
     padding: var(--space-xs); /* 8px on all sides */
     gap: 0; /* keep tight vertical rhythm */
     align-items: stretch; /* make content span full width */
+  }
+
+  .page[data-name="about page"] .main {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
   }
 
   /* Constrain page-level horizontal scroll and move it to the cards row */
