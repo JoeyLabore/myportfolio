@@ -63,9 +63,15 @@
       })();
       if (!isHome) return;
 
+      const dismissedKey = 'jg_icon_legend_toast_dismissed_v1';
+
       const init = () => {
         const toast = document.getElementById('icon-legend-toast');
         if (!toast) return;
+
+        try {
+          if (localStorage.getItem(dismissedKey) === '1') return;
+        } catch (_) { /* ignore */ }
 
         const closeBtn = toast.querySelector('.toast__close');
         const hide = () => {
@@ -74,6 +80,8 @@
           setTimeout(() => {
             try { toast.hidden = true; } catch (_) {}
           }, 220);
+
+          try { localStorage.setItem(dismissedKey, '1'); } catch (_) {}
         };
 
         if (closeBtn) {
@@ -1091,6 +1099,9 @@
             try {
               const isSmall = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
               if (isSmall && toast && wasToastVisible) {
+                try {
+                  if (localStorage.getItem('jg_icon_legend_toast_dismissed_v1') === '1') return;
+                } catch (_) { /* ignore */ }
                 toast.hidden = false;
                 setTimeout(() => { try { toast.classList.add('toast--show'); } catch (_) {} }, 0);
               }
