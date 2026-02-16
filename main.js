@@ -63,15 +63,9 @@
       })();
       if (!isHome) return;
 
-      const dismissedKey = 'jg_icon_legend_toast_dismissed_v2';
-
       const init = () => {
         const toast = document.getElementById('icon-legend-toast');
         if (!toast) return;
-
-        try {
-          if (localStorage.getItem(dismissedKey) === '1') return;
-        } catch (_) { /* ignore */ }
 
         const closeBtn = toast.querySelector('.toast__close');
         const hide = () => {
@@ -80,7 +74,6 @@
           setTimeout(() => {
             try { toast.hidden = true; } catch (_) {}
           }, 220);
-          try { localStorage.setItem(dismissedKey, '1'); } catch (_) {}
         };
 
         if (closeBtn) {
@@ -1072,17 +1065,36 @@
           const overlay = document.querySelector('.mobile-menu-overlay');
           if (!menuCard || !overlay) return;
           const panel = overlay.querySelector('.mobile-menu-panel');
+          const toast = document.getElementById('icon-legend-toast');
+          let wasToastVisible = false;
 
           const open = () => {
             overlay.classList.add('open');
             try { overlay.setAttribute('aria-hidden', 'false'); } catch (_) {}
             // Prevent background scroll while open
             try { document.body.style.overflow = 'hidden'; } catch (_) {}
+
+            try {
+              const isSmall = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+              if (isSmall && toast) {
+                wasToastVisible = !toast.hidden && toast.classList.contains('toast--show');
+                toast.classList.remove('toast--show');
+                setTimeout(() => { try { toast.hidden = true; } catch (_) {} }, 220);
+              }
+            } catch (_) {}
           };
           const close = () => {
             overlay.classList.remove('open');
             try { overlay.setAttribute('aria-hidden', 'true'); } catch (_) {}
             try { document.body.style.overflow = ''; } catch (_) {}
+
+            try {
+              const isSmall = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+              if (isSmall && toast && wasToastVisible) {
+                toast.hidden = false;
+                setTimeout(() => { try { toast.classList.add('toast--show'); } catch (_) {} }, 0);
+              }
+            } catch (_) {}
           };
 
           menuCard.addEventListener('click', (e) => {

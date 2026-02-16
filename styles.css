@@ -524,7 +524,7 @@ p { margin: 0; }
   border-radius: 12px;
   object-fit: cover;
   flex: 0 0 auto;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.10);
+  box-shadow: none;
 }
 
 .toast__content {
@@ -584,6 +584,15 @@ p { margin: 0; }
 .toast__close:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 600px) {
+  .toast {
+    left: 24px;
+    right: 24px;
+    width: auto;
+    z-index: 4;
+  }
 }
 
 /* Layout */
@@ -799,7 +808,7 @@ p { margin: 0; }
 .mobile-menu-overlay {
   position: fixed;
   inset: 0;
-  z-index: 5; /* above nav */
+  z-index: 60; /* above nav + toast */
   display: flex;
   align-items: center;
   justify-content: center;
