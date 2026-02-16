@@ -417,6 +417,72 @@ body {
 img { display: block; max-width: 100%; height: auto; }
 p { margin: 0; }
 
+.site-footer {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #ffffff;
+}
+
+.site-footer__text {
+  font-family: var(--font-family-manrope);
+  font-size: 12px;
+  line-height: var(--line-height-base);
+  opacity: 0.5;
+  letter-spacing: 0.04em;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.site-footer__icons {
+  display: flex;
+  gap: 12px;
+}
+
+.site-footer__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  color: #ffffff;
+  text-decoration: none;
+  transition: background-color 160ms ease;
+}
+
+.site-footer__icon:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.site-footer__icon:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.site-footer__icon svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+
+.site-footer__icon .material-symbols-outlined {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.site-footer__icon:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.2);
+}
+
 /* Layout */
 .page {
   min-height: 100dvh;
@@ -986,13 +1052,48 @@ p { margin: 0; }
   --about-radius: 24px; /* single source of truth for rounding on card & photo */
 }
 .page[data-name="about page"] .main {
-  align-items: flex-start; /* let card's content determine its own height */
-  justify-content: center; /* center row within page */
+  align-items: center;
   padding: var(--space-m);
-  padding-top: 120px;
+  padding-top: 16vh;
   gap: var(--space-lg);
-  flex-direction: row; /* place photo next to card */
+  flex-direction: column;
+}
+
+.page[data-name="about page"] .about-layout {
+  display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--space-lg);
+  width: 100%;
+}
+
+.page[data-name="about page"] .about-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.page[data-name="about page"] .about-left > .about-card {
+  max-width: 650px;
+}
+
+.page[data-name="about page"] .about-photo {
+  align-self: stretch;
+}
+
+@media (min-width: 1051px) {
+  .page[data-name="about page"] .about-photo {
+    position: sticky;
+    top: 16px;
+    height: calc(100vh - 16px);
+  }
+}
+
+.page[data-name="about page"] .about-photo img {
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (max-width: 1050px) {
@@ -1001,6 +1102,14 @@ p { margin: 0; }
     align-items: stretch;
     padding-left: 16px;
     padding-right: 16px;
+  }
+  .page[data-name="about page"] .about-layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .page[data-name="about page"] .about-left > .about-card {
+    max-width: none;
+    width: 100%;
   }
   .page[data-name="about page"] .main .about-card {
     max-width: none !important;
@@ -1111,6 +1220,104 @@ p { margin: 0; }
   line-height: var(--line-height-base);
   color: #ffffff;
   opacity: 0.9;
+}
+
+.page[data-name="about page"] .about-awards__title {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-base);
+  color: #ffffff;
+  opacity: 0.5;
+}
+
+.page[data-name="about page"] .about-awards__divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.page[data-name="about page"] .about-awards__item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page[data-name="about page"] .about-awards__headline,
+.page[data-name="about page"] .about-awards__desc,
+.page[data-name="about page"] .about-awards__meta {
+  margin: 0;
+}
+
+.page[data-name="about page"] .about-awards__headline {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.page[data-name="about page"] a.about-awards__headline:hover {
+  text-decoration: underline;
+}
+
+.page[data-name="about page"] .about-awards__external {
+  width: 14px;
+  height: 14px;
+  margin-left: 6px;
+  vertical-align: -2px;
+  display: inline-block;
+}
+
+.page[data-name="about page"] a.about-awards__headline:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.2);
+  border-radius: 8px;
+}
+
+.page[data-name="about page"] .about-awards__desc {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+.page[data-name="about page"] .about-awards__meta {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-base);
+  color: #ffffff;
+  opacity: 0.75;
+}
+
+.page[data-name="about page"] .about-cv {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #ffffff;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition: background-color 160ms ease;
+}
+
+.page[data-name="about page"] .about-cv .material-symbols-outlined {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.page[data-name="about page"] .about-cv:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.page[data-name="about page"] .about-cv:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.page[data-name="about page"] .about-cv:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.2);
 }
 .page[data-name="about page"] .about-logos {
   display: flex;
