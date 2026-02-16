@@ -51,6 +51,70 @@
     try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch { return false; }
   })();
 
+  // Home page: first-load toast explaining lock/open icons
+  (function setupIconLegendToast() {
+    try {
+      const isHome = (() => {
+        try {
+          const p = String(location && location.pathname || '').toLowerCase();
+          const t = String(document && document.title || '').toLowerCase();
+          return p.endsWith('/index.html') || p === '/' || t.includes('home');
+        } catch (_) { return false; }
+      })();
+      if (!isHome) return;
+
+      const dismissedKey = 'jg_icon_legend_toast_dismissed_v2';
+
+      const init = () => {
+        const toast = document.getElementById('icon-legend-toast');
+        if (!toast) return;
+
+        try {
+          if (localStorage.getItem(dismissedKey) === '1') return;
+        } catch (_) { /* ignore */ }
+
+        const closeBtn = toast.querySelector('.toast__close');
+        const hide = () => {
+          try { toast.classList.remove('toast--show'); } catch (_) {}
+          // After transition, fully remove from accessibility tree
+          setTimeout(() => {
+            try { toast.hidden = true; } catch (_) {}
+          }, 220);
+          try { localStorage.setItem(dismissedKey, '1'); } catch (_) {}
+        };
+
+        if (closeBtn) {
+          closeBtn.addEventListener('click', (e) => {
+            try { e.preventDefault(); } catch (_) {}
+            try { e.stopPropagation(); } catch (_) {}
+            hide();
+          });
+        }
+
+        // Allow quick dismissal with Escape
+        const onKeyDown = (e) => {
+          if (e && e.key === 'Escape') {
+            hide();
+            try { window.removeEventListener('keydown', onKeyDown); } catch (_) {}
+          }
+        };
+        try { window.addEventListener('keydown', onKeyDown); } catch (_) {}
+
+        // Show after initial paint so it feels subtle
+        setTimeout(() => {
+          try { toast.hidden = false; } catch (_) {}
+          try { toast.classList.add('toast--show'); } catch (_) {}
+        }, 700);
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+      } else {
+        init();
+      }
+    } catch (_) { /* ignore toast errors */ }
+  })();
+
   // About page: subtle 3D tilt on the portrait when hovering with a mouse
   (function setupAboutPhotoTilt() {
     try {
@@ -352,6 +416,7 @@
         const getTileByProject = (name) => {
           try { return tiles.find((t) => t && t.dataset && String(t.dataset.project || '').toLowerCase() === String(name || '').toLowerCase()); } catch (_) { return null; }
         };
+        const OPEN_IN_NEW_PROJECTS = new Set(['medigo', 'apendito', 'kinti', 'dinobytes', 'kakaoala', 'skilldex']);
         // Helper: sort tiles by computed CSS order (fallback to DOM index)
         const sortByCssOrder = (list) => {
           try {
@@ -378,6 +443,7 @@
             placeholder: 'Branding, Freelance', // fallback for last tile if not renamed
             toyota: 'Enterprise UX, Product Design Lead',
           };
+          const GATED_PROJECTS = new Set(['relias', 'orion', 'toyota', 'placeholder']);
           tiles.forEach((tile) => {
             const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
             const list = TAGS[proj];
@@ -394,6 +460,20 @@
               span.textContent = label;
               container.appendChild(span);
             });
+
+            if (OPEN_IN_NEW_PROJECTS.has(proj)) {
+              const external = document.createElement('span');
+              external.className = 'tile-tag tile-tag--external';
+              external.innerHTML = '<svg class="tile-tag__external" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="currentColor" d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z"/><path fill="currentColor" d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3z"/></svg>';
+              container.appendChild(external);
+            }
+
+            if (GATED_PROJECTS.has(proj)) {
+              const locked = document.createElement('span');
+              locked.className = 'tile-tag tile-tag--locked';
+              locked.innerHTML = '<svg class="tile-tag__locked" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="currentColor" d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-9-2a3 3 0 0 1 6 0v2H9V6zm9 14H6V10h12v10z"/></svg>';
+              container.appendChild(locked);
+            }
             tile.appendChild(container);
             // Add a top-left flag for current project (Toyota)
             try {
@@ -401,13 +481,9 @@
                 const flag = document.createElement('div');
                 flag.className = 'tile-flag';
                 flag.setAttribute('aria-hidden', 'true');
-                const icon = document.createElement('span');
-                icon.className = 'material-symbols-outlined tile-flag-icon';
-                icon.textContent = 'lock';
                 const label = document.createElement('span');
                 label.className = 'tile-flag-label';
                 label.textContent = 'Current Project';
-                flag.appendChild(icon);
                 flag.appendChild(label);
                 tile.appendChild(flag);
               }
@@ -625,6 +701,7 @@
             if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
             if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
             if (proj === 'kakaoala') { try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+            if (proj === 'skilldex') { try { window.open('https://www.behance.net/gallery/120932085/Skilldex-UIUX-Branding', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
             // relias, orion, placeholder -> gated
             window.location.href = './password.html';
           });
@@ -668,6 +745,7 @@
               if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
               if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
               if (proj === 'kakaoala') { try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+              if (proj === 'skilldex') { try { window.open('https://www.behance.net/gallery/120932085/Skilldex-UIUX-Branding', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
               window.location.href = './password.html';
             }
           });
