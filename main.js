@@ -558,6 +558,7 @@
         let kintiVideo = null;
         let nestbankVideo = null;
         let logofolioVideo = null;
+        let skilldexVideo = null;
 
         // Make tiles focusable and clickable
         tiles.forEach((tile) => {
@@ -697,6 +698,35 @@
           // Attempt immediate play in case metadata already available
           try { v.play().catch(() => {}); } catch (_) {}
         }
+        
+        // Lazy-init the Skilldex video and attach to the Skilldex tile (by data-project)
+        function ensureSkilldexVideo() {
+          if (skilldexVideo) return;
+          const t = getTileByProject('skilldex');
+          if (!t) return;
+          const v = document.createElement('video');
+          v.src = './assets/thumbnails/skilldex.mp4';
+          v.muted = true;
+          v.loop = true;
+          v.playsInline = true;
+          try { v.preload = 'auto'; } catch (_) {}
+          v.autoplay = true;
+          v.setAttribute('aria-hidden', 'true');
+          const onMeta = () => {
+            try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
+            try { v.play().catch(() => {}); } catch (_) {}
+          };
+          v.addEventListener('loadedmetadata', onMeta, { once: true });
+          // Do NOT clear innerHTML; preserve tags/overlays
+          try {
+            t.insertBefore(v, t.firstChild || null);
+          } catch (_) {
+            try { t.appendChild(v); } catch (_) {}
+          }
+          skilldexVideo = v;
+          // Attempt immediate play in case metadata already available
+          try { v.play().catch(() => {}); } catch (_) {}
+        }
 
         const selectTile = (tile) => {
           // Clear any hover-proxy state when a selection occurs
@@ -820,6 +850,7 @@
         try { ensureLogofolioVideo(); } catch (_) {}
         try { ensureOrionVideo(); } catch (_) {}
         try { ensureKintiVideo(); } catch (_) {}
+        try { ensureSkilldexVideo(); } catch (_) {}
 
         // Hover-proxy: when cursor is in the gaps between tiles, slightly expand the nearest tile
         try {
