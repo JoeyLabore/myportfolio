@@ -1197,6 +1197,8 @@ p { margin: 0; }
 
 .page[data-name="about page"] .about-photo {
   align-self: stretch;
+  pointer-events: none;
+  cursor: default;
 }
 
 @media (min-width: 1051px) {
@@ -1210,6 +1212,9 @@ p { margin: 0; }
 .page[data-name="about page"] .about-photo img {
   height: 100%;
   object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 @media (max-width: 1050px) {
