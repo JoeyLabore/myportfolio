@@ -1758,7 +1758,7 @@
         || /(^|\/)20\.mp4$/i.test(srcPath)
         // TOM: keep specific frames from being cropped at <=600px
         || /(^|\/)2\.svg$/i.test(srcPath)
-        || /(^|\/)3\.jpg$/i.test(srcPath)
+        // Removed 3.jpg to match behavior of images 1, 4, and 5
         || /(^|\/)6\.svg$/i.test(srcPath)
         || /(^|\/)8\.jpg$/i.test(srcPath)
         || /(^|\/)9\.jpg$/i.test(srcPath)) {
