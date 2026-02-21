@@ -298,7 +298,14 @@
           return p.includes('tom.html') || t.includes('tom');
         } catch (_) { return false; }
       })();
-      const TOTAL_MS = IS_NESTBANK ? 3000 : (IS_TOM ? 3000 : 10000);      // total overlay duration
+      const IS_TOYOTA = (() => {
+        try {
+          const p = String(location && location.pathname || '').toLowerCase();
+          const t = String(document && document.title || '').toLowerCase();
+          return p.includes('toyota.html') || t.includes('toyota');
+        } catch (_) { return false; }
+      })();
+      const TOTAL_MS = IS_NESTBANK ? 3000 : (IS_TOM ? 3000 : (IS_TOYOTA ? 3500 : 10000));      // total overlay duration (Toyota: 65% reduction from 10000 to 3500)
       const TYPE_TOTAL_MS = Math.min(7000, Math.floor(TOTAL_MS * 0.7));   // typing window (~70%)
       const perLineWindow = (lines.length > 0) ? (TYPE_TOTAL_MS / lines.length) : 0;
 
@@ -407,11 +414,20 @@
     "./assets/tom/12.jpg",
   ];
 
+  const TRD_FILES = [
+    "./assets/trd/1.jpg",
+    "./assets/trd/2.svg",
+    "./assets/trd/3.jpg",
+    "./assets/trd/4.jpg",
+    "./assets/trd/5.jpg",
+  ];
+
   function getCaseStudyFiles() {
     try {
       const p = String(location && location.pathname || '').toLowerCase();
       const t = String(document && document.title || '').toLowerCase();
       if (p.includes('tom.html') || t.includes('tom')) return TOM_FILES;
+      if (p.includes('toyota.html') || t.includes('toyota')) return TRD_FILES;
       if (p.includes('nestbank.html') || t.includes('nestbank')) return NESTBANK_FILES;
     } catch (_) {}
     return NESTBANK_FILES;
@@ -481,7 +497,7 @@
             placeholder: 'Branding, Freelance', // fallback for last tile if not renamed
             toyota: 'Enterprise UX, Product Design Lead',
           };
-          const GATED_PROJECTS = new Set(['relias', 'orion', 'toyota', 'placeholder']);
+          const GATED_PROJECTS = new Set(['relias', 'orion', 'placeholder']);
           tiles.forEach((tile) => {
             const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
             const list = TAGS[proj];
@@ -519,10 +535,19 @@
                 const flag = document.createElement('div');
                 flag.className = 'tile-flag';
                 flag.setAttribute('aria-hidden', 'true');
+                
+                // Add live icon
+                const liveIcon = document.createElement('span');
+                liveIcon.className = 'live-icon';
+                liveIcon.innerHTML = '●';
+                flag.appendChild(liveIcon);
+                
+                // Add label with green text
                 const label = document.createElement('span');
-                label.className = 'tile-flag-label';
+                label.className = 'tile-flag-label green-text';
                 label.textContent = 'Current Project';
                 flag.appendChild(label);
+                
                 tile.appendChild(flag);
               }
             } catch (_) { /* ignore flag errors */ }
@@ -732,6 +757,7 @@
           tile.addEventListener('click', () => {
             const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
             if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
+            if (proj === 'toyota') { navigateWithOverlay('./toyota.html'); return; }
             if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
             if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
             if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
@@ -776,6 +802,7 @@
               e.preventDefault();
               const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
               if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
+              if (proj === 'toyota') { navigateWithOverlay('./toyota.html'); return; }
               if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
               if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
               if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
@@ -1792,11 +1819,13 @@
     try {
       const p = String(location && location.pathname || '').toLowerCase();
       const t = String(document && document.title || '').toLowerCase();
-      const isTom = p.includes('tom.html') || t.includes('tom');
-      if (isTom) {
+      if (p.includes('tom.html') || t.includes('tom')) {
         // Tom: start with 1.jpg fully visible, and 2.svg partially progressed
         // timeline is idx + progress, where idx=0 => first frame.
         return { index: 0, progress: 0.35 };
+      }
+      if (p.includes('toyota.html') || t.includes('toyota')) {
+        return { index: 0, progress: 0.25 }; // Start with 1.jpg and show 2.svg at 25% scroll
       }
     } catch (_) {}
     // Default: show 2nd image with 60% into next (3rd)
@@ -2432,7 +2461,7 @@
       const label = card.querySelector('.text-label')?.textContent ?? '';
       const bodyHTML = card.querySelector('.text-body')?.innerHTML ?? '';
 
-      const isImpact = (label || '').trim().toLowerCase() === 'impact';
+      const isImpact = (label || '').trim().toLowerCase() === 'impact' || (label || '').trim().toLowerCase() === 'intended impact';
       const isProblemSolution = (label || '').trim().toLowerCase() === 'problem & solution';
       const isDeliverables = (label || '').trim().toLowerCase() === 'deliverables';
 
@@ -2456,7 +2485,16 @@
       // For Impact, create three separate detail panels; for Problem & Solution, create two; for Deliverables, create three; otherwise single
       let detailsToOpen = [];
       if (isImpact) {
-        const titles = [
+        // Check if we're on the Toyota page
+        const isToyotaPage = window.location.pathname.includes('toyota.html') || document.title.toLowerCase().includes('toyota');
+        
+        // Use different titles based on the page
+        const titles = isToyotaPage ? [
+          'Reduce change cycle time by identifying impacts earlier',
+          'Lower risk by minimizing late-stage rework and disruption',
+          'Improve efficiency by reducing manual coordination and approval bottlenecks',
+          'Support scalable growth with a modern, extensible platform foundation'
+        ] : [
           '1,164,000+ loans disbursed digitally',
           '111,000+ active users',
           '97% of invited members registered',
@@ -2465,7 +2503,9 @@
         ];
         // If we already created them once, reuse
         const existing = openDetails.get(card);
-        if (existing && Array.isArray(existing) && existing.length === 5) {
+        // Check if we're on Toyota page to determine expected array length
+        const expectedLength = isToyotaPage ? 4 : 5;
+        if (existing && Array.isArray(existing) && existing.length === expectedLength) {
           detailsToOpen = existing;
           // Clear inline closed styles before reopening and enforce title-only
           detailsToOpen.forEach((d, i) => {
