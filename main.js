@@ -209,6 +209,43 @@
     } catch (_) { /* ignore about sync errors */ }
   })();
 
+  // About page: scroll-triggered animations for elements with the scroll-reveal class
+  (function setupScrollRevealAnimations() {
+    try {
+      const aboutPage = document.querySelector('.page[data-name="about page"]');
+      if (!aboutPage) return;
+      
+      // Get all elements with the scroll-reveal class
+      const revealElements = aboutPage.querySelectorAll('.scroll-reveal');
+      if (!revealElements.length) return;
+      
+      // Create an Intersection Observer
+      const observerOptions = {
+        root: null, // viewport
+        rootMargin: '0px',
+        threshold: 0.15 // 15% of the element needs to be visible
+      };
+      
+      const observerCallback = (entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            // Once revealed, no need to observe anymore
+            observer.unobserve(entry.target);
+          }
+        });
+      };
+      
+      const observer = new IntersectionObserver(observerCallback, observerOptions);
+      
+      // Observe each element
+      revealElements.forEach(element => {
+        observer.observe(element);
+      });
+      
+    } catch (_) { /* ignore scroll reveal errors */ }
+  })();
+
   // Case study: Intro overlay with typed text (e.g., NestBank)
   (function setupCaseStudyIntroOverlay() {
     try {
