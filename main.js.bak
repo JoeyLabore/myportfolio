@@ -2543,12 +2543,73 @@
         const isToyotaPage = window.location.pathname.includes('toyota.html') || document.title.toLowerCase().includes('toyota');
         const isVireliaPage = window.location.pathname.includes('virelia.html') || document.title.toLowerCase().includes('virelia');
         
+        // Special handling for Virelia page
+        if (isVireliaPage) {
+          // Use the detail-metrics structure that's already in the HTML
+          const detailCards = card.querySelectorAll('.detail-card');
+          if (detailCards && detailCards.length > 0) {
+            const titles = Array.from(detailCards).map(card => {
+              const label = card.querySelector('.text-label')?.textContent || '';
+              const body = card.querySelector('.text-body')?.textContent || '';
+              return { title: label, body: body };
+            });
+            
+            detailsToOpen = titles.map(({ title, body }) => {
+              const d = makeDetail(
+                `<p class="text-label">${title}</p><p>${body}</p>`,
+                `${title} details`
+              );
+              return d;
+            });
+            
+            // Insert sequentially after the card
+            let afterNode = card;
+            detailsToOpen.forEach((d) => {
+              if (afterNode.nextSibling) col.insertBefore(d, afterNode.nextSibling);
+              else col.appendChild(d);
+              afterNode = d;
+            });
+            
+            // Mark state
+            card.setAttribute('aria-expanded', 'true');
+            openDetails.set(card, detailsToOpen);
+            openCards.add(card);
+            
+            // Animate open for each detail
+            detailsToOpen.forEach((detail) => {
+              detail.style.pointerEvents = 'auto';
+              detail.style.height = '0px';
+              requestAnimationFrame(() => {
+                detail.classList.add('open');
+                detail.style.height = '';
+                detail.style.marginTop = '16px';
+                detail.style.opacity = '1';
+              });
+            });
+            
+            return;
+          }
+        }
+        
         // Use different titles based on the page
-        const titles = isVireliaPage ? [
+        const vireliaImpactTitles = ["
+Reduced transcript creation time by shifting from manual drafting to AI-first generation",
+"Accelerated time to market for new educational content",
+"Decreased rework and mistakes across writing, QA, and compliance.",
+"An established, cohesive, and scalable visual direction."
+];
+const vireliaImpactContent = [
+"The transition to AI-assisted content creation dramatically improved efficiency in the transcript production process.",
+"New educational content could be developed and deployed much faster, meeting the growing demand for healthcare training.",
+"The new validation processes significantly reduced errors and eliminated redundant work throughout the content pipeline.",
+"The comprehensive design system ensured visual consistency while enabling rapid development of new interface components."
+];
+
+const titles = isVireliaPage ? [
           'Reduced transcript creation time by shifting from manual drafting to AI-first generation',
           'Accelerated time to market for new educational content',
-          'Decreased rework and errors across writing, QA, and compliance',
-          'Enabled faster feature development through a scalable visual direction and design system'
+          'Decreased rework and mistakes across writing, QA, and compliance.',
+          'An established, cohesive, and scalable visual direction.'
         ] : isToyotaPage ? [
           'Reduce change cycle time by identifying impacts earlier',
           'Lower risk by minimizing late-stage rework and disruption',

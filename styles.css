@@ -1742,8 +1742,8 @@ p { margin: 0; }
   line-height: 1;
 }
 /* Home thumbnails by project (attribute selectors so DOM order can change safely) */
-.page[data-name="home page"] .tile-grid .tile[data-project="relias"] {
-  background-image: url('./assets/thumbnails/relias.jpg');
+.page[data-name="home page"] .tile-grid .tile[data-project="virelia"] {
+  background-image: url('./assets/thumbnails/virelia.jpg');
   background-size: cover; background-position: center; background-repeat: no-repeat;
 }
 .page[data-name="home page"] .tile-grid .tile[data-project="orion"] {
