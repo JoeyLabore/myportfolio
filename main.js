@@ -575,6 +575,7 @@
         let nestbankVideo = null;
         let logofolioVideo = null;
         let skilldexVideo = null;
+        let vireliaVideo = null;
 
         // Make tiles focusable and clickable
         tiles.forEach((tile) => {
@@ -743,6 +744,35 @@
           // Attempt immediate play in case metadata already available
           try { v.play().catch(() => {}); } catch (_) {}
         }
+        
+        // Lazy-init the Virelia image and attach to the Virelia tile (by data-project)
+        function ensureVireliaVideo() {
+          if (vireliaVideo) return;
+          const t = getTileByProject('virelia');
+          if (!t) return;
+          
+          // For Virelia, use an image instead of video
+          const img = document.createElement('img');
+          img.src = './assets/thumbnails/virelia.jpg';
+          img.setAttribute('aria-hidden', 'true');
+          img.style.position = 'absolute';
+          img.style.top = '0';
+          img.style.left = '0';
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          img.style.zIndex = '0';
+          
+          // Do NOT clear innerHTML; preserve tags/overlays
+          try {
+            t.insertBefore(img, t.firstChild || null);
+          } catch (_) {
+            try { t.appendChild(img); } catch (_) {}
+          }
+          
+          // Store reference to prevent duplicate initialization
+          vireliaVideo = img;
+        }
 
         const selectTile = (tile) => {
           // Clear any hover-proxy state when a selection occurs
@@ -768,6 +798,7 @@
             try { if (orionVideo && orionVideo.paused) orionVideo.play().catch(() => {}); } catch (_) {}
             try { if (!kintiVideo) ensureKintiVideo(); } catch (_) {}
             try { if (kintiVideo && kintiVideo.paused) kintiVideo.play().catch(() => {}); } catch (_) {}
+            try { if (!vireliaVideo) ensureVireliaVideo(); } catch (_) {}
           } catch (_) { /* ignore */ }
         };
         // Make selection callable from other modules (e.g., filtering) and init guard flag
@@ -869,6 +900,7 @@
         try { ensureOrionVideo(); } catch (_) {}
         try { ensureKintiVideo(); } catch (_) {}
         try { ensureSkilldexVideo(); } catch (_) {}
+        try { ensureVireliaVideo(); } catch (_) {}
 
         // Hover-proxy: when cursor is in the gaps between tiles, slightly expand the nearest tile
         try {
