@@ -10,6 +10,22 @@
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
+    
+    // Handle browser back button to fix black screen issue
+    window.addEventListener('popstate', function() {
+      // Check if we're on the home page and remove the overlay if present
+      const isHomePage = document.querySelector('.page[data-name="home page"]');
+      const overlay = document.querySelector('.intro-overlay');
+      if (isHomePage && overlay) {
+        // Remove any classes that might cause the overlay to be visible
+        overlay.classList.remove('enter');
+        overlay.classList.add('fade-out');
+        // Force remove the overlay after a short delay
+        setTimeout(() => {
+          try { overlay.style.display = 'none'; } catch (_) {}
+        }, 50);
+      }
+    });
   } catch (_) { /* ignore */ }
   try {
     const resetScroll = () => {
