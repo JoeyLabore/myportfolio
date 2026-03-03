@@ -517,7 +517,7 @@
           const TAGS = {
             virelia: 'Enterprise UX, Product Design Lead',
             orion: 'Consumer UX, Sr. Product Designer',
-            nestbank: 'Consumer UX, UI Lead',
+            nestbank: 'Consumer UX, Visual & UI Design Lead',
             medigo: 'Consumer UX, UI Lead',
             logofolio: 'Branding, Freelance',
             tom: 'Branding, Visual Design Lead',
@@ -599,6 +599,109 @@
           tile.setAttribute('role', 'button');
           tile.setAttribute('aria-pressed', 'false');
         });
+
+        try {
+          const prewarmed = new Set();
+          const projectToUrl = {
+            nestbank: './nestbank.html',
+            toyota: './toyota.html',
+            virelia: './virelia.html',
+            tom: './tom.html',
+            logofolio: './logofolio.html',
+          };
+          const projectToFiles = {
+            nestbank: (typeof NESTBANK_FILES !== 'undefined' ? NESTBANK_FILES : null),
+            toyota: (typeof TRD_FILES !== 'undefined' ? TRD_FILES : null),
+            virelia: (typeof VIRELIA_FILES !== 'undefined' ? VIRELIA_FILES : null),
+            tom: (typeof TOM_FILES !== 'undefined' ? TOM_FILES : null),
+          };
+
+          const prewarmProject = (proj) => {
+            if (!proj || prewarmed.has(proj)) return;
+            prewarmed.add(proj);
+
+            const url = projectToUrl[proj];
+            if (url) {
+              try {
+                fetch(url, { credentials: 'same-origin' })
+                  .then((r) => { try { return r.text(); } catch (_) { return null; } })
+                  .catch(() => {});
+              } catch (_) {}
+            }
+
+            const files = projectToFiles[proj];
+            if (files && Array.isArray(files)) {
+              try {
+                files
+                  .filter((src) => typeof src === 'string' && !/\.mp4(\?|$)/i.test(src))
+                  .slice(0, 3)
+                  .forEach((src) => {
+                    try {
+                      const img = new Image();
+                      img.decoding = 'async';
+                      img.src = src;
+                    } catch (_) {}
+                  });
+              } catch (_) {}
+            }
+          };
+
+          const schedulePrewarm = (proj) => {
+            try {
+              const run = () => prewarmProject(proj);
+              if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: 800 });
+              else setTimeout(run, 0);
+            } catch (_) {}
+          };
+
+          tiles.forEach((tile) => {
+            const proj = (tile && tile.dataset && tile.dataset.project) ? String(tile.dataset.project || '').toLowerCase() : '';
+            if (!proj) return;
+            if (!projectToUrl[proj] && !projectToFiles[proj]) return;
+            try { tile.addEventListener('mouseenter', () => schedulePrewarm(proj)); } catch (_) {}
+            try { tile.addEventListener('focusin', () => schedulePrewarm(proj)); } catch (_) {}
+            try { tile.addEventListener('touchstart', () => schedulePrewarm(proj), { passive: true }); } catch (_) {}
+          });
+        } catch (_) {}
+
+        try {
+          let aboutPrewarmed = false;
+          const prewarmAbout = () => {
+            if (aboutPrewarmed) return;
+            aboutPrewarmed = true;
+            try {
+              fetch('./about.html', { credentials: 'same-origin' })
+                .then((r) => { try { return r.text(); } catch (_) { return null; } })
+                .catch(() => {});
+            } catch (_) {}
+            try {
+              [
+                './assets/me.jpg',
+                './assets/profile-photo.jpg',
+                './assets/brand-logos/toyota.png',
+                './assets/brand-logos/relias.png',
+              ].forEach((src) => {
+                try {
+                  const img = new Image();
+                  img.decoding = 'async';
+                  img.src = src;
+                } catch (_) {}
+              });
+            } catch (_) {}
+          };
+          const scheduleAbout = () => {
+            try {
+              if (window.requestIdleCallback) window.requestIdleCallback(prewarmAbout, { timeout: 800 });
+              else setTimeout(prewarmAbout, 0);
+            } catch (_) {}
+          };
+          const aboutLinks = Array.from(document.querySelectorAll('a[href*="about.html"]'));
+          aboutLinks.forEach((a) => {
+            try { a.addEventListener('mouseenter', scheduleAbout); } catch (_) {}
+            try { a.addEventListener('focusin', scheduleAbout); } catch (_) {}
+            try { a.addEventListener('touchstart', scheduleAbout, { passive: true }); } catch (_) {}
+          });
+        } catch (_) {}
 
         // Intro animation: slide tiles in from the left with a small stagger
         try {
