@@ -67,71 +67,6 @@
     try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch { return false; }
   })();
 
-  // Home page: first-load toast explaining lock/open icons
-  (function setupIconLegendToast() {
-    try {
-      const isHome = (() => {
-        try {
-          const p = String(location && location.pathname || '').toLowerCase();
-          const t = String(document && document.title || '').toLowerCase();
-          return p.endsWith('/index.html') || p === '/' || t.includes('home');
-        } catch (_) { return false; }
-      })();
-      if (!isHome) return;
-
-      const dismissedKey = 'jg_icon_legend_toast_dismissed_v1';
-
-      const init = () => {
-        const toast = document.getElementById('icon-legend-toast');
-        if (!toast) return;
-
-        try {
-          if (localStorage.getItem(dismissedKey) === '1') return;
-        } catch (_) { /* ignore */ }
-
-        const closeBtn = toast.querySelector('.toast__close');
-        const hide = () => {
-          try { toast.classList.remove('toast--show'); } catch (_) {}
-          // After transition, fully remove from accessibility tree
-          setTimeout(() => {
-            try { toast.hidden = true; } catch (_) {}
-          }, 220);
-
-          try { localStorage.setItem(dismissedKey, '1'); } catch (_) {}
-        };
-
-        if (closeBtn) {
-          closeBtn.addEventListener('click', (e) => {
-            try { e.preventDefault(); } catch (_) {}
-            try { e.stopPropagation(); } catch (_) {}
-            hide();
-          });
-        }
-
-        // Allow quick dismissal with Escape
-        const onKeyDown = (e) => {
-          if (e && e.key === 'Escape') {
-            hide();
-            try { window.removeEventListener('keydown', onKeyDown); } catch (_) {}
-          }
-        };
-        try { window.addEventListener('keydown', onKeyDown); } catch (_) {}
-
-        // Show after initial paint so it feels subtle
-        setTimeout(() => {
-          try { toast.hidden = false; } catch (_) {}
-          try { toast.classList.add('toast--show'); } catch (_) {}
-        }, 700);
-      };
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init, { once: true });
-      } else {
-        init();
-      }
-    } catch (_) { /* ignore toast errors */ }
-  })();
-
   // About page: subtle 3D tilt on the portrait when hovering with a mouse
   (function setupAboutPhotoTilt() {
     try {
@@ -392,6 +327,21 @@
   })();
   const LITE_MODE = IS_SMALL_SCREEN || SAVE_DATA;
 
+  const DEV_NOCACHE_ASSETS = (() => {
+    try {
+      const proto = String(location && location.protocol || '');
+      const host = String(location && location.hostname || '');
+      return proto === 'file:' || host === 'localhost' || host === '127.0.0.1';
+    } catch (_) { return false; }
+  })();
+  const DEV_ASSET_BUST = DEV_NOCACHE_ASSETS ? String(Date.now()) : '';
+  function withDevAssetBust(src) {
+    if (!DEV_NOCACHE_ASSETS) return src;
+    if (!src || typeof src !== 'string') return src;
+    const sep = src.includes('?') ? '&' : '?';
+    return `${src}${sep}v=${DEV_ASSET_BUST}`;
+  }
+
   const NESTBANK_FILES = [
     // Ordered to match assets/nestbank folder including videos
     // Sequence follows numeric filenames, with fractional steps like 4.5, 12.5, 16
@@ -435,7 +385,9 @@
     "./assets/trd/2.svg",
     "./assets/trd/3.jpg",
     "./assets/trd/4.jpg",
-    "./assets/trd/5.jpg",
+    "./assets/trd/5.png",
+    "./assets/trd/6.jpg",
+    "./assets/trd/7.jpg",
   ];
 
   const VIRELIA_FILES = [
@@ -639,7 +591,7 @@
                     try {
                       const img = new Image();
                       img.decoding = 'async';
-                      img.src = src;
+                      img.src = withDevAssetBust(src);
                     } catch (_) {}
                   });
               } catch (_) {}
@@ -1337,39 +1289,17 @@
           const overlay = document.querySelector('.mobile-menu-overlay');
           if (!menuCard || !overlay) return;
           const panel = overlay.querySelector('.mobile-menu-panel');
-          const toast = document.getElementById('icon-legend-toast');
-          let wasToastVisible = false;
 
           const open = () => {
             overlay.classList.add('open');
             try { overlay.setAttribute('aria-hidden', 'false'); } catch (_) {}
             // Prevent background scroll while open
             try { document.body.style.overflow = 'hidden'; } catch (_) {}
-
-            try {
-              const isSmall = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
-              if (isSmall && toast) {
-                wasToastVisible = !toast.hidden && toast.classList.contains('toast--show');
-                toast.classList.remove('toast--show');
-                setTimeout(() => { try { toast.hidden = true; } catch (_) {} }, 220);
-              }
-            } catch (_) {}
           };
           const close = () => {
             overlay.classList.remove('open');
             try { overlay.setAttribute('aria-hidden', 'true'); } catch (_) {}
             try { document.body.style.overflow = ''; } catch (_) {}
-
-            try {
-              const isSmall = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
-              if (isSmall && toast && wasToastVisible) {
-                try {
-                  if (localStorage.getItem('jg_icon_legend_toast_dismissed_v1') === '1') return;
-                } catch (_) { /* ignore */ }
-                toast.hidden = false;
-                setTimeout(() => { try { toast.classList.add('toast--show'); } catch (_) {} }, 0);
-              }
-            } catch (_) {}
           };
 
           menuCard.addEventListener('click', (e) => {
@@ -1858,9 +1788,11 @@
   // --- Preload all media before initializing ---
   function preloadFile(src) {
     return new Promise((resolve) => {
-      if (src.endsWith(".mp4")) {
+      const isVideo = /\.mp4(\?|$)/i.test(String(src || ''));
+      const requestSrc = withDevAssetBust(src);
+      if (isVideo) {
         const v = document.createElement("video");
-        v.src = src;
+        v.src = requestSrc;
         v.preload = "auto";
         let timeoutId;
         const done = () => { if (timeoutId) clearTimeout(timeoutId); resolve({ type: "video", el: v }); };
@@ -1873,7 +1805,7 @@
         timeoutId = setTimeout(done, 7000);
       } else {
         const img = new Image();
-        img.src = src;
+        img.src = requestSrc;
         img.decoding = "async";
         let timeoutId;
         const done = async () => {
