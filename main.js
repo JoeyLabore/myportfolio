@@ -331,7 +331,7 @@
     try {
       const proto = String(location && location.protocol || '');
       const host = String(location && location.hostname || '');
-      return proto === 'file:' || host === 'localhost' || host === '127.0.0.1';
+      return proto === 'file:' || host === 'localhost' || host === '127.0.0.1' || host === '::';
     } catch (_) { return false; }
   })();
   const DEV_ASSET_BUST = DEV_NOCACHE_ASSETS ? String(Date.now()) : '';
@@ -466,77 +466,110 @@
         };
         // Inject small category/role tags per tile keeping site style
         try {
-          const TAGS = {
-            virelia: 'Enterprise UX, Product Design Lead',
-            orion: 'Consumer UX, Sr. Product Designer',
-            nestbank: 'Consumer UX, Visual & UI Design Lead',
-            medigo: 'Consumer UX, UI Lead',
-            logofolio: 'Branding, Freelance',
-            tom: 'Branding, Visual Design Lead',
-            apendito: 'Branding, Freelance', // note: tile key is "apendito"
-            kinti: 'Branding, Freelance',
-            dinobytes: 'Branding, Freelance',
-            kakaoala: 'Branding, Freelance',
-            skilldex: 'Branding, Visual Design Lead',
-            placeholder: 'Branding, Freelance', // fallback for last tile if not renamed
-            toyota: 'Enterprise UX, Product Design Lead',
-          };
-          const GATED_PROJECTS = new Set(['orion', 'placeholder']);
           tiles.forEach((tile) => {
-            const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
-            const list = TAGS[proj];
-            if (!list) return;
-            // Avoid duplicating if re-run
-            if (tile.querySelector('.tile-tags')) return;
-            const container = document.createElement('div');
-            container.className = 'tile-tags';
-            container.setAttribute('aria-hidden', 'true');
-            // Split by comma and trim
-            list.split(',').map((s) => s.trim()).filter(Boolean).forEach((label) => {
-              const span = document.createElement('span');
-              span.className = 'tile-tag';
-              span.textContent = label;
-              container.appendChild(span);
-            });
-
-            if (OPEN_IN_NEW_PROJECTS.has(proj)) {
-              const external = document.createElement('span');
-              external.className = 'tile-tag tile-tag--external';
-              external.innerHTML = '<svg class="tile-tag__external" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="currentColor" d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z"/><path fill="currentColor" d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3z"/></svg>';
-              container.appendChild(external);
-            }
-
-            if (GATED_PROJECTS.has(proj)) {
-              const locked = document.createElement('span');
-              locked.className = 'tile-tag tile-tag--locked';
-              locked.innerHTML = '<svg class="tile-tag__locked" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="currentColor" d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2zm-9-2a3 3 0 0 1 6 0v2H9V6zm9 14H6V10h12v10z"/></svg>';
-              container.appendChild(locked);
-            }
-            tile.appendChild(container);
-            // Add a top-left flag for current project (Toyota)
             try {
-              if (proj === 'toyota' && !tile.querySelector('.tile-flag')) {
-                const flag = document.createElement('div');
-                flag.className = 'tile-flag';
-                flag.setAttribute('aria-hidden', 'true');
-                
-                // Add live icon
-                const liveIcon = document.createElement('span');
-                liveIcon.className = 'live-icon';
-                liveIcon.innerHTML = '●';
-                flag.appendChild(liveIcon);
-                
-                // Add label with green text
-                const label = document.createElement('span');
-                label.className = 'tile-flag-label green-text';
-                label.textContent = 'Current Project';
-                flag.appendChild(label);
-                
-                tile.appendChild(flag);
-              }
+              const tags = tile.querySelector('.tile-tags');
+              if (tags) tags.remove();
+              const flag = tile.querySelector('.tile-flag');
+              if (flag) flag.remove();
             } catch (_) { /* ignore flag errors */ }
           });
         } catch (_) { /* ignore tag injection errors */ }
+
+        try {
+          const categoryLabel = (cat) => {
+            const c = String(cat || '').toLowerCase();
+            if (c === 'ux') return 'Product';
+            if (c === 'branding') return 'Branding';
+            return c ? c : '';
+          };
+
+          const arrowSvg = '<svg class="tile-hover-overlay__arrow-icon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M7 17L17 7"></path><path d="M10 7h7v7"></path></svg>';
+
+          tiles.forEach((tile) => {
+            try {
+              if (!tile || tile.querySelector('.tile-hover-overlay')) return;
+              const proj = (tile.dataset && tile.dataset.project) ? String(tile.dataset.project || '') : '';
+              const title = (tile.dataset && tile.dataset.title) ? String(tile.dataset.title || '') : '';
+              const industry = (tile.dataset && tile.dataset.industry) ? String(tile.dataset.industry || '') : '';
+              const desc = (tile.dataset && tile.dataset.desc) ? String(tile.dataset.desc || '') : '';
+              const cat = categoryLabel(tile.dataset ? tile.dataset.category : '');
+
+              const overlay = document.createElement('div');
+              overlay.className = 'tile-hover-overlay';
+              overlay.setAttribute('aria-hidden', 'true');
+              try {
+                overlay.style.position = 'absolute';
+                overlay.style.inset = '0';
+                overlay.style.zIndex = '2';
+                overlay.style.display = 'flex';
+                overlay.style.flexDirection = 'column';
+                overlay.style.justifyContent = 'space-between';
+                overlay.style.padding = '40px';
+                overlay.style.color = '#fff';
+                overlay.style.background = '#000';
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 160ms ease';
+                overlay.style.pointerEvents = 'none';
+                overlay.style.borderRadius = 'inherit';
+                overlay.style.fontFamily = "'Montserrat', sans-serif";
+              } catch (_) {}
+
+              const header = document.createElement('div');
+              header.className = 'tile-hover-overlay__header';
+
+              const h = document.createElement('div');
+              h.className = 'tile-hover-overlay__title';
+              h.textContent = title || proj;
+              header.appendChild(h);
+
+              const arrow = document.createElement('div');
+              arrow.className = 'tile-hover-overlay__arrow';
+              arrow.innerHTML = arrowSvg;
+              header.appendChild(arrow);
+
+              const body = document.createElement('div');
+              body.className = 'tile-hover-overlay__body';
+
+              if (desc) {
+                const descEl = document.createElement('div');
+                descEl.className = 'tile-hover-overlay__desc';
+                descEl.textContent = desc;
+                body.appendChild(descEl);
+              }
+
+              const tags = document.createElement('div');
+              tags.className = 'tile-hover-overlay__tags';
+              const role = (tile.dataset && tile.dataset.role) ? String(tile.dataset.role || '') : '';
+
+              const tagParts = [];
+              if (industry) tagParts.push(industry);
+              const roleValue = role || cat;
+              if (roleValue) tagParts.push(roleValue);
+
+              tagParts.forEach((txt) => {
+                const t = document.createElement('div');
+                t.className = 'tile-hover-overlay__tag';
+                t.textContent = txt;
+                tags.appendChild(t);
+              });
+              if (tags.childNodes && tags.childNodes.length) body.appendChild(tags);
+
+              overlay.appendChild(header);
+              overlay.appendChild(body);
+              tile.appendChild(overlay);
+
+              try {
+                const show = () => { overlay.style.opacity = '1'; };
+                const hide = () => { overlay.style.opacity = '0'; };
+                tile.addEventListener('mouseenter', show);
+                tile.addEventListener('mouseleave', hide);
+                tile.addEventListener('focusin', show);
+                tile.addEventListener('focusout', hide);
+              } catch (_) {}
+            } catch (_) { /* ignore overlay errors */ }
+          });
+        } catch (_) {}
         // Optional: home tile 4 video (Orion) and tile 7 video (Kinti)
         let orionVideo = null;
         let kintiVideo = null;
@@ -821,28 +854,9 @@
           if (vireliaVideo) return;
           const t = getTileByProject('virelia');
           if (!t) return;
-          
-          // For Virelia, use an image instead of video
-          const img = document.createElement('img');
-          img.src = './assets/thumbnails/virelia.jpg';
-          img.setAttribute('aria-hidden', 'true');
-          img.style.position = 'absolute';
-          img.style.top = '0';
-          img.style.left = '0';
-          img.style.width = '100%';
-          img.style.height = '100%';
-          img.style.objectFit = 'cover';
-          img.style.zIndex = '0';
-          
-          // Do NOT clear innerHTML; preserve tags/overlays
-          try {
-            t.insertBefore(img, t.firstChild || null);
-          } catch (_) {
-            try { t.appendChild(img); } catch (_) {}
-          }
-          
-          // Store reference to prevent duplicate initialization
-          vireliaVideo = img;
+
+          // Virelia is rendered via CSS thumbnail plate; keep a truthy ref to prevent re-init
+          vireliaVideo = true;
         }
 
         const selectTile = (tile) => {
@@ -934,8 +948,6 @@
                 const tiltX = (-dy * MAX_TILT).toFixed(2) + 'deg';     // up/down => rotateX (invert for natural feel)
                 tile.style.setProperty('--tiltX', tiltX);
                 tile.style.setProperty('--tiltY', tiltY);
-                // Force transform inline to ensure visibility over any CSS rule
-                tile.style.transform = 'translateX(var(--slideX)) translateY(var(--introY)) perspective(800px) rotateX(var(--tiltX)) rotateY(var(--tiltY))';
               };
               const onLeave = () => {
                 tile.style.setProperty('--tiltX', '0deg');
