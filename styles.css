@@ -66,6 +66,8 @@
     display: grid; /* override flex */
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-xs); /* 8px between tiles */
+    width: 100%;
+    justify-items: stretch;
     height: auto; /* let rows grow naturally and allow page to scroll */
     overflow: visible; /* let body handle scrolling so sticky nav works */
   }
@@ -76,6 +78,9 @@
   }
   .page[data-name="home page"] .tile-grid .tile {
     margin: 0; /* remove horizontal margins from flex layout */
+    width: 100%;
+    min-width: 0;
+    justify-self: stretch;
     aspect-ratio: 1 / 1; /* force perfect squares */
     height: auto; /* governed by aspect-ratio */
     align-self: stretch;
@@ -2486,6 +2491,7 @@ p { margin: 0; }
     display: grid !important; /* override previous flex/carousel */
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-xs);
+    justify-items: stretch;
     height: auto !important;
     overflow: visible !important;
     padding-left: 0 !important;  /* avoid double padding so tiles fill full container */
@@ -2500,6 +2506,9 @@ p { margin: 0; }
   }
   .page[data-name="home page"] .tile-grid .tile {
     margin: 0 !important;
+    width: 100%;
+    min-width: 0;
+    justify-self: stretch;
     aspect-ratio: 1 / 1;
     height: auto !important;
     flex: initial !important; /* neutralize flex-basis behaviors */
@@ -2518,6 +2527,7 @@ p { margin: 0; }
     display: grid !important; /* override previous flex column */
     grid-template-columns: 1fr;
     gap: var(--space-xs);
+    justify-items: stretch;
     height: auto !important;
     overflow: visible !important;
     margin-left: 0 !important;
@@ -2525,6 +2535,9 @@ p { margin: 0; }
   }
   .page[data-name="home page"] .tile-grid .tile {
     margin: 0 !important;
+    width: 100%;
+    min-width: 0;
+    justify-self: stretch;
     aspect-ratio: 1 / 1;
     height: auto !important;
     flex: initial !important; /* neutralize flex-basis animations */
