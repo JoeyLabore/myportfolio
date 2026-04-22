@@ -113,8 +113,8 @@
 .tile-grid .tile.filtered-out { display: none !important; }
 
 /* CSS fallback filtering by category to guard against any JS/class timing issues */
-.page[data-name="home page"] .tile-grid.filter-ux .tile[data-category]:not([data-category="ux"]) { display: none !important; }
-.page[data-name="home page"] .tile-grid.filter-branding .tile[data-category]:not([data-category="branding"]) { display: none !important; }
+.page[data-name="home page"] .tile-grid.filter-ux .tile[data-category]:not([data-category~="ux"]) { display: none !important; }
+.page[data-name="home page"] .tile-grid.filter-branding .tile[data-category]:not([data-category~="branding"]) { display: none !important; }
 .page[data-name="home page"] .tile-grid.filter-all .tile[data-category] { display: block !important; }
 
 /* When UX filter is active, remove margins on the 9th tile on large screens only */
@@ -331,6 +331,12 @@
     max-width: none !important;
     min-height: 600px;
     aspect-ratio: 4 / 5;
+  }
+}
+
+@media (max-width: 600px) {
+  .page[data-name="about page"] .about-heading {
+    padding-left: 0;
   }
 }
 
@@ -1261,7 +1267,7 @@ p { margin: 0; }
   max-width: 650px;
   display: grid;               /* grid keeps height to content */
   grid-auto-rows: max-content; /* each row hugs its content */
-  row-gap: var(--space-lg);    /* 32px between content sections */
+  row-gap: 48px;               /* 48px between content sections */
   position: static;            /* participate in normal document flow */
   height: auto;                /* hug content */
   min-height: 0;               /* prevent inherited min-heights */
@@ -1325,13 +1331,20 @@ p { margin: 0; }
 
 .page[data-name="about page"] .about-heading {
   font-family: var(--font-family-manrope);
-  font-weight: var(--font-weight-semiBold);
+  font-weight: 600;
   font-size: 40px; /* about page title size */
   line-height: 1.4;
   color: #ffffff;
   margin: 0; /* remove default top/bottom margins */
+  padding-left: 8px;
   padding-top: 0; /* ensure no top padding */
   padding-bottom: 0; /* ensure no bottom padding */
+}
+
+@media (max-width: 600px) {
+  .page[data-name="about page"] .about-heading {
+    padding-left: 0;
+  }
 }
 
 /* --- Spline Viewer (About page right side) --- */
@@ -1393,6 +1406,7 @@ p { margin: 0; }
   margin: 0;
   font-size: var(--font-size-xs);
   line-height: var(--line-height-base);
+  font-weight: 500;
   color: #ffffff;
   opacity: 0.5;
   margin-bottom: 0;
@@ -1406,17 +1420,9 @@ p { margin: 0; }
   padding: 0;
 }
 
-/* Remove spacing around divider */
+/* Use direct grid spacing between the Awards heading and content */
 .page[data-name="about page"] .about-card.about-awards-card {
-  row-gap: 0;
-}
-
-.page[data-name="about page"] .about-card.about-awards-card h2 + .about-awards__divider {
-  margin-top: 16px;
-}
-
-.page[data-name="about page"] .about-card.about-awards-card .about-awards__divider + .about-awards__item {
-  margin-top: 24px;
+  row-gap: 16px;
 }
 
 .page[data-name="about page"] .about-awards__item {
@@ -1720,7 +1726,7 @@ p { margin: 0; }
 }
 
 .tile-grid .tile .tile-hover-overlay__desc {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-family-manrope);
   font-size: 18px;
   line-height: 1.6;
   font-weight: 400;
@@ -1743,11 +1749,17 @@ p { margin: 0; }
 }
 
 .tile-grid .tile .tile-hover-overlay__title {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-family-manrope);
   font-size: 18px;
-  line-height: normal;
+  line-height: 160%;
   font-weight: 600;
-  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -1756,7 +1768,7 @@ p { margin: 0; }
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-family-manrope);
   font-size: 14px;
   line-height: normal;
   font-weight: 400;

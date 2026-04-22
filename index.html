@@ -8,12 +8,13 @@
     <!-- Manrope font to match Figma token font/family/manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,100..900&display=swap" rel="stylesheet" />
     <!-- Material Symbols for MUI icons (lock) -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=32" />
+    <link rel="stylesheet" href="./styles.css?v=34" />
     <style>
       /* Disable hover/pressed/selected widen and tilt on home page tiles */
       .page[data-name="home page"] .tile-grid .tile.selected {
@@ -25,17 +26,14 @@
       .page[data-name="home page"] .tile-grid .tile:not(.selected):focus-visible {
         flex: initial !important;
       }
-      /* Keep subtle 3D tilt on the hovered/focused tile; ensure it overrides prior rules */
+      /* Keep hover/focus lift without any tilt */
       .page[data-name="home page"] .tile-grid .tile:hover,
       .page[data-name="home page"] .tile-grid .tile:focus-visible {
-        transform: translateX(calc(var(--slideX) - 8px)) translateY(calc(var(--introY) - 8px)) perspective(800px) rotateX(var(--tiltX)) rotateY(var(--tiltY)) !important;
+        transform: translateX(calc(var(--slideX) - 8px)) translateY(calc(var(--introY) - 8px)) !important;
       }
       .page[data-name="home page"] .tile-grid .tile:active {
-        --tiltX: 0deg;
-        --tiltY: 0deg;
-        transform: translateX(var(--slideX)) translateY(var(--introY)) perspective(800px) rotateX(0deg) rotateY(0deg) !important;
+        transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
       }
-      .page[data-name="home page"] .tile-grid .tile { --tiltX: 0deg; --tiltY: 0deg; }
     </style>
   </head>
   <body>
@@ -104,15 +102,15 @@
           <div class="tile" data-category="ux" data-project="toyota" data-title="Toyota Racing Development" data-desc="Designing the operational backbone behind Toyota Racing Development. From complex legacy systems to a unified operational platform." data-industry="Motorsports" data-role="Lead Product Designer"></div>
           <div class="tile" data-category="ux" data-project="virelia" data-title="Virelia Content Studio" data-desc="Building the content creation platform behind enterprise learning. Transforming Virelia workflows into an AI-powered production system." data-industry="EdTech" data-role="Lead Product Designer"></div>
           <div class="tile" data-category="ux" data-project="orion" data-title="Orion Mortgage Platform" data-desc="Rebuilding the product foundation at Orion. Transforming fragmented experiences into a scalable design system and cohesive brand identity." data-industry="Fintech" data-role="Senior Product Designer"></div>
-          <div class="tile" data-category="ux" data-project="nestbank" data-title="NestBank Mobile App" data-desc="Designing a mobile platform for underserved communities. Transforming in-person lending processes into a scalable digital experience." data-industry="FinTech" data-role="Senior Product Designer"></div>
+          <div class="tile" data-category="ux" data-project="nestbank" data-title="NestBank Mobile App" data-desc="Designing a mobile platform for underserved communities. Transforming in-person lending processes into a scalable digital experience." data-industry="FinTech" data-role="Visual Design Lead &amp; Product Designer"></div>
           <div class="tile" data-category="ux" data-project="medigo" data-title="Medigo Physiotherapy Mobile App" data-desc="Designing a patient-centered rehabilitation experience. Using user insights to improve recovery through a redesigned mobile platform." data-industry="Healthcare" data-role="Product Designer"></div>
           <div class="tile" data-category="branding" data-project="logofolio" data-title="Logofolio" data-desc="Purpose in Form. A study in clarity, symbolism, and identity." data-industry="Brand Identity Design" data-role="Visual Design Lead"></div>
           <div class="tile" data-category="branding" data-project="tom" data-title="TOM DevOps Platform" data-desc="Designing a more accessible DevOps experience. Transforming complex workflows into automated, user-friendly processes." data-industry="Developer Tools" data-role="Visual Design Lead"></div>
-          <div class="tile" data-category="branding" data-project="apendito" data-title="Apendito" data-desc="Project Description" data-industry="Industry" data-role="My Role"></div>
-          <div class="tile" data-category="branding" data-project="kinti" data-title="Kinti" data-desc="Project Description" data-industry="Industry" data-role="My Role"></div>
-          <div class="tile" data-category="branding" data-project="dinobytes" data-title="DinoBytes" data-desc="Project Description" data-industry="Industry" data-role="My Role"></div>
-          <div class="tile" data-category="branding" data-project="kakaoala" data-title="Kakaoala" data-desc="Project Description" data-industry="Industry" data-role="My Role"></div>
-          <div class="tile" data-category="branding" data-project="skilldex" data-title="Skilldex" data-desc="Project Description" data-industry="Industry" data-role="My Role"></div>
+          <div class="tile" data-category="branding" data-project="apendito" data-title="Aprendito Early Learning Brand Identity" data-desc="Designing a brand for early childhood development. Translating care, trust, and growth into a clear visual identity." data-industry="Education" data-role="Brand Identity Designer"></div>
+          <div class="tile" data-category="branding" data-project="kinti" data-title="Kinti Brand Identity" data-desc="Designing a contemporary ceramics brand rooted in Andean heritage. Translating culture, craft, and symbolism into a refined visual identity." data-industry="Ceramics / Craft" data-role="Brand Identity Designer"></div>
+          <div class="tile" data-category="branding" data-project="dinobytes" data-title="DinoBytes Brand Identity" data-desc="Designing a playful coding experience for kids. Turning programming concepts into engaging, bite-sized learning moments." data-industry="EdTech" data-role="Brand Identity Designer"></div>
+          <div class="tile" data-category="branding" data-project="kakaoala" data-title="Kakaoala Brand Identity" data-desc="Designing a playful cacao drink for kids. Blending wellness, energy, and comfort into a joyful visual identity." data-industry="Food & Beverage" data-role="Brand Identitiy Designer"></div>
+          <div class="tile" data-category="ux branding" data-project="skilldex" data-title="Skilldex Career Growth Platform" data-desc="Designing a learning platform that helps employees discover the right certifications and courses to grow their careers." data-industry="EdTech" data-role="Brand Identity & Product Designer"></div>
         </div>
       </main>
       <footer class="site-footer" aria-label="Footer">
@@ -136,4 +134,3 @@
     <script src="./main.js?v=10"></script>
   </body>
 </html>
-

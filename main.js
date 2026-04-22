@@ -512,7 +512,6 @@
                 overlay.style.transition = 'opacity 160ms ease';
                 overlay.style.pointerEvents = 'none';
                 overlay.style.borderRadius = 'inherit';
-                overlay.style.fontFamily = "'Montserrat', sans-serif";
               } catch (_) {}
 
               const header = document.createElement('div');
@@ -933,31 +932,6 @@
             window.location.href = './password.html';
           });
 
-          // Mouse tilt effect for hover-capable pointers
-          try {
-            const supportsHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-            if (supportsHover) {
-              const MAX_TILT = 2; // degrees (subtle)
-              const onMove = (e) => {
-                const r = tile.getBoundingClientRect();
-                const x = (e.clientX - r.left) / r.width;  // 0..1
-                const y = (e.clientY - r.top) / r.height;  // 0..1
-                const dx = (x - 0.5) * 2; // -1..1
-                const dy = (y - 0.5) * 2; // -1..1
-                const tiltY = (dx * MAX_TILT).toFixed(2) + 'deg';      // left/right => rotateY
-                const tiltX = (-dy * MAX_TILT).toFixed(2) + 'deg';     // up/down => rotateX (invert for natural feel)
-                tile.style.setProperty('--tiltX', tiltX);
-                tile.style.setProperty('--tiltY', tiltY);
-              };
-              const onLeave = () => {
-                tile.style.setProperty('--tiltX', '0deg');
-                tile.style.setProperty('--tiltY', '0deg');
-                tile.style.transform = ''; // allow CSS to reset
-              };
-              tile.addEventListener('mousemove', onMove);
-              tile.addEventListener('mouseleave', onLeave);
-            }
-          } catch (_) { /* ignore tilt errors */ }
           tile.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
@@ -1158,6 +1132,10 @@
           const grid = document.querySelector('.tile-grid');
           if (!tiles.length) return;
           const want = (category || 'all').toLowerCase();
+          const getCategories = (tile) => {
+            const raw = (tile && tile.dataset && tile.dataset.category) ? String(tile.dataset.category || '').toLowerCase() : '';
+            return raw.split(/\s+/).filter(Boolean);
+          };
 
           // Full reset for all tiles; rely on CSS grid class to hide non-matching
           tiles.forEach((t) => {
@@ -1175,8 +1153,8 @@
           try {
             const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             const visibleNow = tiles.filter((t) => {
-              const cat = (t.dataset && t.dataset.category) ? t.dataset.category.toLowerCase() : '';
-              return want === 'all' || cat === want;
+              const categories = getCategories(t);
+              return want === 'all' || categories.includes(want);
             });
             if (prefersReduced) {
               visibleNow.forEach((t) => { t.classList.remove('intro-hidden'); t.classList.add('intro-visible'); });
@@ -1193,8 +1171,8 @@
           // Auto-select the first visible tile in the requested category
           requestAnimationFrame(() => {
             const firstVisible = tiles.find((t) => {
-              const cat = (t.dataset && t.dataset.category) ? t.dataset.category.toLowerCase() : '';
-              return want === 'all' || cat === want;
+              const categories = getCategories(t);
+              return want === 'all' || categories.includes(want);
             });
             if (!firstVisible) return;
             try {
@@ -2727,58 +2705,24 @@
             afterNode = d;
           });
         } else {
-          // Fallback: NestBank-style hardcoded deliverable panels
-          const items = [
-            {
-              title: "NestBank's Visual Identity",
-              body: 'Defined the brand’s core visual language, including colour palette, typography, iconography, and imagery style.',
-            },
-            {
-              title: 'Design System',
-              body: 'Built a scalable component library to ensure consistency and efficiency across design and development.',
-            },
-            {
-              title: 'Mobile App Interface Design',
-              body: 'Designed end-to-end user flows covering onboarding, loan management, payments, and financial tracking.',
-            },
-            {
-              title: 'User Research & Testing',
-              body: 'Analysed user groups, current loan journeys, and brand perception to identify opportunities for a digital-first experience.',
-            },
-          ];
-          // If we already created them once, reuse
-          const existing = openDetails.get(card);
-          if (existing && Array.isArray(existing) && existing.length === items.length) {
-            detailsToOpen = existing;
-            detailsToOpen.forEach((d, i) => {
-              d.classList.remove('open');
-              d.style.marginTop = '';
-              d.style.opacity = '';
-              d.style.pointerEvents = '';
-              const inner = d.querySelector('.paragraph-detail__inner') || d;
-              // Ensure regular weight for deliverables
-              inner.classList.remove('emphasize');
-              const itm = items[i] || { title: '', body: '' };
-              inner.innerHTML = `<p class="text-label">${itm.title}</p>`;
-            });
+          let detail = openDetails.get(card);
+          if (!detail || Array.isArray(detail)) detail = null;
+          if (!detail) {
+            detail = makeDetail(bodyHTML, label ? `${label} details` : 'Details');
+            detail.querySelector('.paragraph-detail__inner')?.classList.remove('emphasize');
           } else {
-            detailsToOpen = items.map(({ title, body }) => {
-              const d = makeDetail(
-                `<p class=\"text-label\">${title}</p>`,
-                `${title} details`
-              );
-              // Ensure regular weight for deliverables
-              d.querySelector('.paragraph-detail__inner')?.classList.remove('emphasize');
-              return d;
-            });
+            const inner = detail.querySelector('.paragraph-detail__inner') || detail;
+            inner.classList.remove('emphasize');
+            inner.innerHTML = bodyHTML || '<div style="opacity:.8">No details available.</div>';
           }
-          // Insert sequentially after the card
-          let afterNode = card;
-          detailsToOpen.forEach((d) => {
-            if (afterNode.nextSibling) col.insertBefore(d, afterNode.nextSibling);
-            else col.appendChild(d);
-            afterNode = d;
-          });
+          detail.classList.remove('open');
+          detail.style.marginTop = '';
+          detail.style.opacity = '';
+          detail.style.pointerEvents = '';
+
+          if (card.nextSibling) col.insertBefore(detail, card.nextSibling);
+          else col.appendChild(detail);
+          detailsToOpen = [detail];
         }
       } else if (isProblemSolution) {
         // Build two separate details: Problem and Solution
@@ -3012,7 +2956,12 @@
         if (!canExitUI) return;
         if (openCards.size === 0 && !insideNav) {
           // Disable hide-on-background-click for the NestBank page
-          try { if (/nestbank\.html$/i.test(window.location.pathname)) return; } catch (_) {}
+          try {
+            if (/nestbank\.html$/i.test(window.location.pathname)) {
+              const introOverlayStillPresent = !!document.querySelector('.intro-overlay');
+              if (introOverlayStillPresent) return;
+            }
+          } catch (_) {}
           document.documentElement.classList.add('ui-exited');
           const nav = document.querySelector('.nav-bar');
           const cardsArr = Array.from(document.querySelectorAll('.paragraph'));
