@@ -523,8 +523,6 @@
           let isGameOver = false;
           let mobileTapReleaseTimer = 0;
           let lastMobileTouchImpulseAt = 0;
-          let mobileGameScrollLocked = false;
-          let mobileGameScrollY = 0;
           const MAX_SPEED = 4.5;
           const ACCELERATION = 0.42;
           const FRICTION = 0.84;
@@ -533,29 +531,6 @@
           let nextAsteroidSpawnIn = ASTEROID_SPAWN_MIN + Math.random() * (ASTEROID_SPAWN_MAX - ASTEROID_SPAWN_MIN);
           const isSmallGameBreakpoint = () => {
             try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
-          };
-          const syncMobileGameScrollLock = () => {
-            try {
-              const shouldLock = hasStartedGame && !isGameOver && isSmallGameBreakpoint();
-              document.documentElement.classList.toggle('home-game-scroll-lock', shouldLock);
-              if (shouldLock && !mobileGameScrollLocked) {
-                mobileGameScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-                document.body.style.position = 'fixed';
-                document.body.style.top = `-${mobileGameScrollY}px`;
-                document.body.style.left = '0';
-                document.body.style.right = '0';
-                document.body.style.width = '100%';
-                mobileGameScrollLocked = true;
-              } else if (!shouldLock && mobileGameScrollLocked) {
-                document.body.style.position = '';
-                document.body.style.top = '';
-                document.body.style.left = '';
-                document.body.style.right = '';
-                document.body.style.width = '';
-                mobileGameScrollLocked = false;
-                window.scrollTo(0, mobileGameScrollY || 0);
-              }
-            } catch (_) {}
           };
           const applyRocketOffset = () => {
             rocket.style.setProperty('--rocket-offset-y', `${rocketOffsetY}px`);
@@ -573,7 +548,6 @@
             lastAsteroidTick = gameStartedAt;
             lastSpawnAt = gameStartedAt;
             stage.classList.add('has-started');
-            syncMobileGameScrollLock();
           };
           const syncPausedState = () => {
             stage.classList.toggle('is-paused', isPaused);
@@ -683,7 +657,6 @@
             mobileTapReleaseTimer = 0;
             syncPausedState();
             syncGameOverState();
-            syncMobileGameScrollLock();
           };
           const resetGame = () => {
             const restartAt = performance.now();
@@ -713,7 +686,6 @@
             stage.classList.add('has-started');
             syncPausedState();
             syncGameOverState();
-            syncMobileGameScrollLock();
             applyRocketOffset();
             syncRocketFrame(true);
             try { void rocketWrap.offsetWidth; } catch (_) {}
@@ -912,7 +884,6 @@
           window.addEventListener('resize', () => {
             rocketOffsetY = clampRocketOffset(rocketOffsetY);
             applyRocketOffset();
-            syncMobileGameScrollLock();
           });
 
           window.addEventListener('keydown', (e) => {
@@ -993,7 +964,6 @@
             if (isGameOver) return;
             if (e.target && e.target.closest && e.target.closest('.home-game-hint__play, .home-game-over__replay')) return;
             if (typeof e.button === 'number' && e.button !== 0) return;
-            if (hasStartedGame && isSmallGameBreakpoint()) e.preventDefault();
             activePointerId = e.pointerId;
             pointerStartedGame = false;
             if (!hasStartedGame) {
@@ -1013,7 +983,6 @@
           });
           stage.addEventListener('pointermove', (e) => {
             if (activePointerId == null || e.pointerId !== activePointerId || isGameOver) return;
-            if (hasStartedGame && isSmallGameBreakpoint()) e.preventDefault();
             if (activePointerIntent === 'neutral' && pointerDirection === 'neutral') return;
             const nextIntent = getPointerMoveIntent(e.clientY);
             activePointerIntent = nextIntent;
@@ -1021,7 +990,6 @@
           });
           stage.addEventListener('pointerup', (e) => {
             if (activePointerId == null || e.pointerId !== activePointerId) return;
-            if (hasStartedGame && isSmallGameBreakpoint()) e.preventDefault();
             activePointerId = null;
             activePointerIntent = 'neutral';
             pointerStartedGame = false;
@@ -1030,40 +998,12 @@
           });
           stage.addEventListener('pointercancel', (e) => {
             if (activePointerId == null || e.pointerId !== activePointerId) return;
-            if (hasStartedGame && isSmallGameBreakpoint()) e.preventDefault();
             activePointerId = null;
             activePointerIntent = 'neutral';
             pointerStartedGame = false;
             if (!isSmallGameBreakpoint()) setPointerDirection('neutral');
             try { stage.releasePointerCapture && stage.releasePointerCapture(e.pointerId); } catch (_) {}
           });
-          const isMobileGameTouchLocked = (e) => {
-            if (!hasStartedGame || isGameOver || !isSmallGameBreakpoint()) return;
-            if (e.target && e.target.closest && e.target.closest('.home-game-over__replay')) return;
-            return true;
-          };
-          const handleMobileGameTouchStart = (e) => {
-            if (!isMobileGameTouchLocked(e)) return;
-            e.preventDefault();
-            const touch = e.changedTouches && e.changedTouches[0];
-            if (!touch) return;
-            const nextIntent = getMobileTapIntent(touch.clientY);
-            activePointerIntent = nextIntent;
-            if (isPaused) togglePause();
-            applyMobileTapImpulse(nextIntent);
-            lastMobileTouchImpulseAt = performance.now();
-          };
-          const preventMobileGameTouchScroll = (e) => {
-            if (!isMobileGameTouchLocked(e)) return;
-            e.preventDefault();
-          };
-          stage.addEventListener('touchstart', handleMobileGameTouchStart, { passive: false });
-          stage.addEventListener('touchmove', preventMobileGameTouchScroll, { passive: false });
-          stage.addEventListener('touchend', preventMobileGameTouchScroll, { passive: false });
-          document.addEventListener('touchstart', preventMobileGameTouchScroll, { passive: false, capture: true });
-          document.addEventListener('touchmove', preventMobileGameTouchScroll, { passive: false, capture: true });
-          document.addEventListener('touchend', preventMobileGameTouchScroll, { passive: false, capture: true });
-          document.addEventListener('gesturestart', preventMobileGameTouchScroll, { passive: false, capture: true });
           stage.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
               e.preventDefault();

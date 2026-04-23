@@ -766,6 +766,30 @@
     padding-left: 0;
   }
 
+  .tile-grid .tile:hover,
+  .tile-grid .tile:focus-visible {
+    --liftX: 0px;
+    --liftY: 0px;
+    z-index: 1;
+  }
+
+  .tile-grid .tile:hover::after,
+  .tile-grid .tile:focus-visible::after,
+  .tile-grid .tile:hover .tile-hover-overlay,
+  .tile-grid .tile:focus-visible .tile-hover-overlay {
+    opacity: 0;
+  }
+
+  .tile-grid .tile:active {
+    --liftX: 0px;
+    --liftY: 0px;
+  }
+
+  .tile-grid .tile:active::after,
+  .tile-grid .tile:active .tile-hover-overlay {
+    opacity: 0;
+  }
+
   .page[data-name="home page"] .home-game-stage {
     margin-bottom: var(--space-xs);
   }
@@ -777,11 +801,6 @@
     touch-action: pan-y;
     overscroll-behavior: auto;
     -webkit-touch-callout: none;
-  }
-
-  .page[data-name="home page"] .home-game-stage__inner.has-started:not(.is-game-over) {
-    touch-action: none;
-    overscroll-behavior: contain;
   }
 
   .page[data-name="home page"] .home-game-score {
@@ -913,11 +932,6 @@
 /* Base reset-ish */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-html.home-game-scroll-lock,
-html.home-game-scroll-lock body {
-  overflow: hidden !important;
-  overscroll-behavior: none;
-}
 body {
   margin: 0;
   background: #0F0F0F; /* fixed background color for home */
