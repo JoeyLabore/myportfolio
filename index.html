@@ -14,7 +14,7 @@
     <!-- Material Symbols for MUI icons (lock) -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=34" />
+    <link rel="stylesheet" href="./styles.css?v=36" />
     <style>
       /* Disable hover/pressed/selected widen and tilt on home page tiles */
       .page[data-name="home page"] .tile-grid .tile.selected {
@@ -98,6 +98,34 @@
         </div>
         <!-- Page transition overlay (used when navigating to case studies) -->
         <div class="nav-transition" aria-hidden="true"></div>
+        <section class="home-game-stage" aria-label="Rocket game area">
+          <div class="home-game-stage__inner" tabindex="0" role="button" aria-pressed="false" aria-label="Rocket game area, click to pause or resume">
+            <div class="home-game-score" aria-live="polite" aria-atomic="true">Score: 0</div>
+            <div class="home-game-hint" aria-hidden="true">
+              <span class="home-game-hint__title">Great ideas deserve momentum.</span>
+              <span class="home-game-hint__body">Visual &amp; Product designer who works closely with startups and growing teams to create clear, functional, and well-crafted experiences.</span>
+              <button class="home-game-hint__play" type="button">Play</button>
+            </div>
+            <div class="home-game-pause">Paused</div>
+            <div class="home-game-over" aria-live="polite" aria-atomic="true">
+              <div class="home-game-over__card">
+                <button class="home-game-over__replay" type="button" aria-label="Play again">
+                  <span class="material-symbols-outlined" aria-hidden="true">replay</span>
+                </button>
+              </div>
+            </div>
+            <div class="home-game-asteroid-layer" aria-hidden="true"></div>
+            <div class="home-game-rocket-wrap">
+              <img
+                class="home-game-rocket"
+                src="./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png"
+                alt="Animated rocket"
+                width="128"
+                height="128"
+              />
+            </div>
+          </div>
+        </section>
         <div class="tile-grid filter-all">
           <div class="tile" data-category="ux" data-project="toyota" data-title="Toyota Racing Development" data-desc="Designing the operational backbone behind Toyota Racing Development. From complex legacy systems to a unified operational platform." data-industry="Motorsports" data-role="Lead Product Designer"></div>
           <div class="tile" data-category="ux" data-project="virelia" data-title="Virelia Content Studio" data-desc="Building the content creation platform behind enterprise learning. Transforming Virelia workflows into an AI-powered production system." data-industry="EdTech" data-role="Lead Product Designer"></div>

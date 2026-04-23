@@ -447,6 +447,565 @@
         });
       }
 
+      (function setupHomeGameStage() {
+        try {
+          const stage = document.querySelector('.home-game-stage__inner');
+          const scoreEl = document.querySelector('.home-game-score');
+          const hintEl = document.querySelector('.home-game-hint');
+          const playHintBtn = document.querySelector('.home-game-hint__play');
+          const gameOverEl = document.querySelector('.home-game-over');
+          const playAgainBtn = document.querySelector('.home-game-over__replay');
+          const asteroidLayer = document.querySelector('.home-game-asteroid-layer');
+          const rocketWrap = document.querySelector('.home-game-rocket-wrap');
+          const rocket = document.querySelector('.home-game-rocket');
+          if (!stage || !scoreEl || !hintEl || !playHintBtn || !gameOverEl || !playAgainBtn || !asteroidLayer || !rocketWrap || !rocket) return;
+          try { rocket.setAttribute('draggable', 'false'); } catch (_) {}
+          try { rocket.addEventListener('dragstart', (e) => e.preventDefault()); } catch (_) {}
+
+          const frameSets = {
+            idle: [
+              './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png',
+              './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png',
+              './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-03.png',
+            ],
+            up: [
+              './assets/rocketgame/costumes/rocket/rocket-up/rocket-up-01.png',
+              './assets/rocketgame/costumes/rocket/rocket-up/rocket-up-02.png',
+              './assets/rocketgame/costumes/rocket/rocket-up/rocket-up-03.png',
+            ],
+            down: [
+              './assets/rocketgame/costumes/rocket/rocket-down/rocket-down-01.png',
+              './assets/rocketgame/costumes/rocket/rocket-down/rocket-down-02.png',
+              './assets/rocketgame/costumes/rocket/rocket-down/rocket-down-03.png',
+            ],
+          };
+          const asteroidSprites = [
+            './assets/rocketgame/costumes/asteroids/asteroid-small.png',
+            './assets/rocketgame/costumes/asteroids/asteroid-medium.png',
+          ];
+
+          Object.values(frameSets).flat().forEach((src) => {
+            try {
+              const img = new Image();
+              img.decoding = 'async';
+              img.src = src;
+            } catch (_) {}
+          });
+          asteroidSprites.forEach((src) => {
+            try {
+              const img = new Image();
+              img.decoding = 'async';
+              img.src = src;
+            } catch (_) {}
+          });
+
+          let rocketOffsetY = 0;
+          let rocketVelocityY = 0;
+          let movementRAF = 0;
+          const pressedKeys = new Set();
+          let pointerDirection = 'neutral';
+          let activePointerId = null;
+          let activePointerIntent = 'neutral';
+          let pointerStartedGame = false;
+          let activeFrameSet = 'idle';
+          let frameIndex = 0;
+          const asteroids = [];
+          let asteroidLoopRAF = 0;
+          let lastAsteroidTick = 0;
+          let lastSpawnAt = 0;
+          let spawnsSinceRocketLane = 0;
+          let gameStartedAt = 0;
+          let pauseStartedAt = 0;
+          let isDangerPhase = false;
+          let isPaused = false;
+          let hasStartedGame = false;
+          let currentScore = 0;
+          let isGameOver = false;
+          const MAX_SPEED = 4.5;
+          const ACCELERATION = 0.42;
+          const FRICTION = 0.84;
+          const ASTEROID_SPAWN_MIN = 480;
+          const ASTEROID_SPAWN_MAX = 1050;
+          let nextAsteroidSpawnIn = ASTEROID_SPAWN_MIN + Math.random() * (ASTEROID_SPAWN_MAX - ASTEROID_SPAWN_MIN);
+          const applyRocketOffset = () => {
+            rocket.style.setProperty('--rocket-offset-y', `${rocketOffsetY}px`);
+          };
+          const resetAsteroids = () => {
+            asteroids.forEach((asteroid) => {
+              try { asteroid.el.remove(); } catch (_) {}
+            });
+            asteroids.length = 0;
+          };
+          const markGameStarted = () => {
+            if (hasStartedGame) return;
+            hasStartedGame = true;
+            gameStartedAt = performance.now();
+            lastAsteroidTick = gameStartedAt;
+            lastSpawnAt = gameStartedAt;
+            stage.classList.add('has-started');
+          };
+          const syncPausedState = () => {
+            stage.classList.toggle('is-paused', isPaused);
+            stage.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
+          };
+          const syncGameOverState = () => {
+            stage.classList.toggle('is-game-over', isGameOver);
+          };
+          const updateScore = (elapsedMs) => {
+            const score = Math.floor(elapsedMs / 10);
+            scoreEl.textContent = `Score: ${score}`;
+            return score;
+          };
+          const getMovementState = () => {
+            const movingUp = pressedKeys.has('ArrowUp') || pointerDirection === 'up';
+            const movingDown = pressedKeys.has('ArrowDown') || pointerDirection === 'down';
+            return { movingUp, movingDown };
+          };
+          const getActiveFrameSet = () => {
+            const { movingUp, movingDown } = getMovementState();
+            if (movingUp && !movingDown) return 'up';
+            if (movingDown && !movingUp) return 'down';
+            return 'idle';
+          };
+          const syncRocketFrame = (forceReset = false) => {
+            const nextFrameSet = getActiveFrameSet();
+            if (forceReset || nextFrameSet !== activeFrameSet) {
+              activeFrameSet = nextFrameSet;
+              frameIndex = 0;
+            }
+            const frames = frameSets[activeFrameSet] || frameSets.idle;
+            rocket.src = frames[frameIndex % frames.length];
+          };
+          const clampRocketOffset = (next) => {
+            try {
+              const stageHeight = stage.clientHeight || 0;
+              const rocketHeight = rocket.getBoundingClientRect().height || 0;
+              const availableTravel = Math.max(0, stageHeight - rocketHeight);
+              const maxOffset = availableTravel / 2;
+              if (!maxOffset) return 0;
+              return Math.max(-maxOffset, Math.min(maxOffset, next));
+            } catch (_) {
+              return next;
+            }
+          };
+          const moveRocket = () => {
+            const { movingUp, movingDown } = getMovementState();
+
+            if (movingUp && !movingDown) rocketVelocityY -= ACCELERATION;
+            else if (movingDown && !movingUp) rocketVelocityY += ACCELERATION;
+            else rocketVelocityY *= FRICTION;
+
+            rocketVelocityY = Math.max(-MAX_SPEED, Math.min(MAX_SPEED, rocketVelocityY));
+            if (Math.abs(rocketVelocityY) < 0.05 && !movingUp && !movingDown) rocketVelocityY = 0;
+
+            rocketOffsetY = clampRocketOffset(rocketOffsetY + rocketVelocityY);
+            applyRocketOffset();
+          };
+          const getPointerMoveIntent = (clientY) => {
+            try {
+              const rocketRect = rocket.getBoundingClientRect();
+              const rocketCenterY = rocketRect.top + (rocketRect.height / 2);
+              const neutralBand = Math.max(18, rocketRect.height * 0.38);
+              if (clientY < rocketCenterY - neutralBand) return 'up';
+              if (clientY > rocketCenterY + neutralBand) return 'down';
+            } catch (_) {}
+            return 'neutral';
+          };
+          const setPointerDirection = (direction) => {
+            pointerDirection = direction === 'up' || direction === 'down' ? direction : 'neutral';
+            syncRocketFrame();
+            if (pointerDirection !== 'neutral') ensureMovementLoop();
+          };
+          const endGame = () => {
+            if (isGameOver) return;
+            isGameOver = true;
+            isPaused = false;
+            pressedKeys.clear();
+            pointerDirection = 'neutral';
+            activePointerId = null;
+            activePointerIntent = 'neutral';
+            pointerStartedGame = false;
+            rocketVelocityY = 0;
+            syncPausedState();
+            syncGameOverState();
+          };
+          const resetGame = () => {
+            const restartAt = performance.now();
+            isGameOver = false;
+            isPaused = false;
+            isDangerPhase = false;
+            hasStartedGame = true;
+            currentScore = 0;
+            rocketOffsetY = 0;
+            rocketVelocityY = 0;
+            pressedKeys.clear();
+            pointerDirection = 'neutral';
+            activePointerId = null;
+            activePointerIntent = 'neutral';
+            pointerStartedGame = false;
+            lastAsteroidTick = restartAt;
+            lastSpawnAt = restartAt;
+            spawnsSinceRocketLane = 0;
+            gameStartedAt = restartAt;
+            pauseStartedAt = 0;
+            nextAsteroidSpawnIn = ASTEROID_SPAWN_MIN + Math.random() * (ASTEROID_SPAWN_MAX - ASTEROID_SPAWN_MIN);
+            resetAsteroids();
+            scoreEl.textContent = 'Score: 0';
+            stage.classList.remove('is-danger', 'is-ready');
+            stage.classList.add('has-started');
+            syncPausedState();
+            syncGameOverState();
+            applyRocketOffset();
+            syncRocketFrame(true);
+            try { void rocketWrap.offsetWidth; } catch (_) {}
+            requestAnimationFrame(() => {
+              window.setTimeout(() => {
+                try { stage.classList.add('is-ready'); } catch (_) {}
+              }, 80);
+            });
+          };
+          const isColliding = (a, b) => {
+            return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+          };
+          const insetRect = (rect, inset) => {
+            return {
+              left: rect.left + (inset.left || 0),
+              right: rect.right - (inset.right || 0),
+              top: rect.top + (inset.top || 0),
+              bottom: rect.bottom - (inset.bottom || 0),
+            };
+          };
+          const getRocketHitRect = (rect) => {
+            const w = rect.right - rect.left;
+            const h = rect.bottom - rect.top;
+            return {
+              left: rect.left + (w * 0.42),
+              right: rect.right - (w * 0.18),
+              top: rect.top + (h * 0.2),
+              bottom: rect.bottom - (h * 0.2),
+            };
+          };
+          const getAsteroidHitRect = (rect) => {
+            const w = rect.right - rect.left;
+            const h = rect.bottom - rect.top;
+            return {
+              left: rect.left + (w * 0.16),
+              right: rect.right - (w * 0.16),
+              top: rect.top + (h * 0.16),
+              bottom: rect.bottom - (h * 0.16),
+            };
+          };
+          const getRocketLaneSpawnY = (size, stageHeight) => {
+            try {
+              const rocketRect = rocket.getBoundingClientRect();
+              const stageRect = stage.getBoundingClientRect();
+              const rocketCenterY = rocketRect.top + (rocketRect.height / 2);
+              const stageCenterY = stageRect.top + (stageRect.height / 2);
+              const variance = (Math.random() - 0.5) * Math.min(56, stageHeight * 0.14);
+              const centeredY = (rocketCenterY - stageCenterY) - (size / 2) + variance;
+              const minY = -((stageHeight - size) / 2);
+              const maxY = (stageHeight - size) / 2;
+              return Math.max(minY, Math.min(maxY, centeredY));
+            } catch (_) {
+              return 0;
+            }
+          };
+          const spawnAsteroid = () => {
+            try {
+              const stageWidth = stage.clientWidth || 0;
+              const stageHeight = stage.clientHeight || 0;
+              if (!stageWidth || !stageHeight) return;
+
+              const sprite = asteroidSprites[Math.floor(Math.random() * asteroidSprites.length)] || asteroidSprites[0];
+              const baseSize = sprite.includes('medium') ? 42 : 24;
+              const scoreSizeMultiplier = currentScore >= 15000 ? 2.25 : currentScore >= 10000 ? 1.5 : 1;
+              const size = Math.round(baseSize * (1 + Math.random() * 0.75) * scoreSizeMultiplier);
+              const el = document.createElement('div');
+              const spriteEl = document.createElement('img');
+              const travelRange = Math.max(0, stageHeight - size);
+              const shouldBiasToRocketLane = spawnsSinceRocketLane >= 3 || (spawnsSinceRocketLane >= 1 && Math.random() < 0.24);
+              const randomSpawnY = travelRange ? Math.round(Math.random() * travelRange) - (stageHeight - size) / 2 : 0;
+              const spawnY = shouldBiasToRocketLane ? getRocketLaneSpawnY(size, stageHeight) : randomSpawnY;
+              const spawnX = stageWidth + size + 40 + Math.round(Math.random() * 80);
+              const asteroid = {
+                el,
+                spriteEl,
+                x: spawnX,
+                y: spawnY,
+                speed: 1.6 + Math.random() * 1.6,
+                rotation: Math.random() * 360,
+                rotationSpeed: (Math.random() * 1.6 + 0.3) * (Math.random() > 0.5 ? 1 : -1),
+                size,
+              };
+
+              el.className = 'home-game-asteroid';
+              spriteEl.className = 'home-game-asteroid-sprite';
+              spriteEl.src = sprite;
+              spriteEl.alt = '';
+              spriteEl.decoding = 'async';
+              spriteEl.draggable = false;
+              try { spriteEl.addEventListener('dragstart', (e) => e.preventDefault()); } catch (_) {}
+              spawnsSinceRocketLane = shouldBiasToRocketLane ? 0 : spawnsSinceRocketLane + 1;
+              el.style.setProperty('--asteroid-size', `${size}px`);
+              el.style.setProperty('--asteroid-x', `${spawnX}px`);
+              el.style.setProperty('--asteroid-y', `${spawnY}px`);
+              spriteEl.style.setProperty('--asteroid-rotation', `${asteroid.rotation}deg`);
+              el.appendChild(spriteEl);
+              asteroidLayer.appendChild(el);
+              asteroids.push(asteroid);
+            } catch (_) {}
+          };
+          const tickAsteroids = (now) => {
+            if (!lastAsteroidTick) lastAsteroidTick = now;
+            if (!hasStartedGame) {
+              updateScore(0);
+              lastAsteroidTick = now;
+              asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
+              return;
+            }
+            if (isGameOver) {
+              lastAsteroidTick = now;
+              asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
+              return;
+            }
+            if (isPaused) {
+              lastAsteroidTick = now;
+              asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
+              return;
+            }
+            const delta = Math.min(32, now - lastAsteroidTick);
+            lastAsteroidTick = now;
+            const elapsedMs = now - gameStartedAt;
+            const score = updateScore(elapsedMs);
+            currentScore = score;
+            isDangerPhase = score > 5000;
+            stage.classList.toggle('is-danger', isDangerPhase);
+            const targetDangerMultiplier = 2.2;
+            const progressToDanger = Math.min(1, score / 5000);
+            const speedRampMultiplier = 1 + ((targetDangerMultiplier - 1) * progressToDanger);
+            const baseDifficultyMultiplier = Math.min(2.4, 1 + (elapsedMs / 1000) * 0.015);
+            const difficultyMultiplier = baseDifficultyMultiplier * speedRampMultiplier;
+            const spawnIntervalMultiplier = score >= 15000 ? 0.3 : score >= 8000 ? 0.48 : 1;
+
+            if (!lastSpawnAt) lastSpawnAt = now;
+            if (now - lastSpawnAt >= nextAsteroidSpawnIn * spawnIntervalMultiplier) {
+              spawnAsteroid();
+              lastSpawnAt = now;
+              nextAsteroidSpawnIn = ASTEROID_SPAWN_MIN + Math.random() * (ASTEROID_SPAWN_MAX - ASTEROID_SPAWN_MIN);
+            }
+
+            for (let i = asteroids.length - 1; i >= 0; i -= 1) {
+              const asteroid = asteroids[i];
+              asteroid.x -= asteroid.speed * difficultyMultiplier * (delta / 16.6667);
+              asteroid.rotation += asteroid.rotationSpeed * (delta / 16.6667);
+              asteroid.el.style.setProperty('--asteroid-x', `${asteroid.x}px`);
+              asteroid.el.style.setProperty('--asteroid-y', `${asteroid.y}px`);
+              asteroid.spriteEl.style.setProperty('--asteroid-rotation', `${asteroid.rotation}deg`);
+
+              const rocketRect = rocket.getBoundingClientRect();
+              const asteroidRect = asteroid.spriteEl.getBoundingClientRect();
+              const adjustedRocketRect = getRocketHitRect(rocketRect);
+              const adjustedAsteroidRect = getAsteroidHitRect(asteroidRect);
+              if (isColliding(adjustedRocketRect, adjustedAsteroidRect)) {
+                endGame();
+                break;
+              }
+
+              if (asteroid.x < -asteroid.size - 80) {
+                try { asteroid.el.remove(); } catch (_) {}
+                asteroids.splice(i, 1);
+              }
+            }
+
+            asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
+          };
+
+          const tickMovement = () => {
+            if (isPaused || isGameOver) {
+              movementRAF = 0;
+              return;
+            }
+            moveRocket();
+            if (pressedKeys.size || Math.abs(rocketVelocityY) > 0.05) {
+              movementRAF = requestAnimationFrame(tickMovement);
+            } else {
+              movementRAF = 0;
+            }
+          };
+
+          const ensureMovementLoop = () => {
+            if (movementRAF) return;
+            movementRAF = requestAnimationFrame(tickMovement);
+          };
+
+          applyRocketOffset();
+          syncRocketFrame(true);
+          syncPausedState();
+          syncGameOverState();
+          asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
+
+          requestAnimationFrame(() => {
+            window.setTimeout(() => {
+              try { stage.classList.add('is-ready'); } catch (_) {}
+            }, 80);
+          });
+
+          window.addEventListener('resize', () => {
+            rocketOffsetY = clampRocketOffset(rocketOffsetY);
+            applyRocketOffset();
+          });
+
+          window.addEventListener('keydown', (e) => {
+            if (e.defaultPrevented) return;
+            const target = e.target;
+            const isTypingTarget = !!(target && (
+              target.tagName === 'INPUT' ||
+              target.tagName === 'TEXTAREA' ||
+              target.tagName === 'SELECT' ||
+              target.isContentEditable
+            ));
+            if (isTypingTarget) return;
+            if (isGameOver && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === ' ')) {
+              e.preventDefault();
+              return;
+            }
+            if (e.key === ' ') {
+              e.preventDefault();
+              if (!hasStartedGame) {
+                markGameStarted();
+              } else {
+                togglePause();
+              }
+              return;
+            }
+            if (isPaused && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+              togglePause();
+            }
+            if (isPaused || isGameOver) return;
+            if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              markGameStarted();
+              pressedKeys.add('ArrowUp');
+              syncRocketFrame();
+              ensureMovementLoop();
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              markGameStarted();
+              pressedKeys.add('ArrowDown');
+              syncRocketFrame();
+              ensureMovementLoop();
+            }
+          });
+
+          window.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+              pressedKeys.delete(e.key);
+              syncRocketFrame();
+              ensureMovementLoop();
+            }
+          });
+
+          const togglePause = () => {
+            if (isGameOver) return;
+            const now = performance.now();
+            isPaused = !isPaused;
+            if (isPaused) {
+              pauseStartedAt = now;
+              pressedKeys.clear();
+              pointerDirection = 'neutral';
+              activePointerIntent = 'neutral';
+              rocketVelocityY = 0;
+            } else if (pauseStartedAt && gameStartedAt) {
+              const pausedDuration = now - pauseStartedAt;
+              gameStartedAt += pausedDuration;
+              lastSpawnAt += pausedDuration;
+              lastAsteroidTick = now;
+              pauseStartedAt = 0;
+            }
+            syncPausedState();
+            if (!isPaused) ensureMovementLoop();
+          };
+
+          stage.addEventListener('pointerdown', (e) => {
+            if (isGameOver) return;
+            if (e.target && e.target.closest && e.target.closest('.home-game-hint__play, .home-game-over__replay')) return;
+            if (typeof e.button === 'number' && e.button !== 0) return;
+            activePointerId = e.pointerId;
+            pointerStartedGame = false;
+            if (!hasStartedGame) {
+              markGameStarted();
+              pointerStartedGame = true;
+            }
+            activePointerIntent = getPointerMoveIntent(e.clientY);
+            if (activePointerIntent !== 'neutral') {
+              if (isPaused) togglePause();
+              setPointerDirection(activePointerIntent);
+              try { stage.setPointerCapture && stage.setPointerCapture(e.pointerId); } catch (_) {}
+            }
+          });
+          stage.addEventListener('pointermove', (e) => {
+            if (activePointerId == null || e.pointerId !== activePointerId || isGameOver) return;
+            if (activePointerIntent === 'neutral' && pointerDirection === 'neutral') return;
+            const nextIntent = getPointerMoveIntent(e.clientY);
+            activePointerIntent = nextIntent;
+            setPointerDirection(nextIntent);
+          });
+          stage.addEventListener('pointerup', (e) => {
+            if (activePointerId == null || e.pointerId !== activePointerId) return;
+            activePointerId = null;
+            activePointerIntent = 'neutral';
+            pointerStartedGame = false;
+            setPointerDirection('neutral');
+            try { stage.releasePointerCapture && stage.releasePointerCapture(e.pointerId); } catch (_) {}
+          });
+          stage.addEventListener('pointercancel', (e) => {
+            if (activePointerId == null || e.pointerId !== activePointerId) return;
+            activePointerId = null;
+            activePointerIntent = 'neutral';
+            pointerStartedGame = false;
+            setPointerDirection('neutral');
+            try { stage.releasePointerCapture && stage.releasePointerCapture(e.pointerId); } catch (_) {}
+          });
+          stage.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (!hasStartedGame) {
+                markGameStarted();
+              }
+            }
+          });
+          playHintBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            markGameStarted();
+          });
+          playAgainBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            resetGame();
+          });
+
+          const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (prefersReduced) {
+            syncRocketFrame(true);
+            return;
+          }
+
+          window.setInterval(() => {
+            if (isPaused) return;
+            const frames = frameSets[getActiveFrameSet()] || frameSets.idle;
+            const nextFrameSet = getActiveFrameSet();
+            if (nextFrameSet !== activeFrameSet) {
+              activeFrameSet = nextFrameSet;
+              frameIndex = 0;
+            } else {
+              frameIndex = (frameIndex + 1) % frames.length;
+            }
+            rocket.src = frames[frameIndex];
+          }, 160);
+        } catch (_) { /* ignore home game stage errors */ }
+      })();
+
       // Minimal home interactivity: selectable tiles that expand when focused/selected
       (function setupTiles() {
         const tiles = Array.from(document.querySelectorAll('.tile-grid .tile'));
@@ -1184,6 +1743,21 @@
           });
         }
 
+        const maybeScrollToTileGrid = (category) => {
+          try {
+            const want = String(category || 'all').toLowerCase();
+            if (want !== 'all' && want !== 'ux' && want !== 'branding') return;
+            const grid = document.querySelector('.tile-grid');
+            if (!grid) return;
+            const rect = grid.getBoundingClientRect();
+            const targetTop = window.scrollY + rect.top - 120;
+            window.scrollTo({
+              top: Math.max(0, targetTop),
+              behavior: 'smooth',
+            });
+          } catch (_) { /* ignore scroll errors */ }
+        };
+
         const setActive = (idx) => {
           tabs.forEach((t, i) => {
             const active = i === idx;
@@ -1219,6 +1793,7 @@
             e.preventDefault();
             current = i;
             setActive(current);
+            maybeScrollToTileGrid((t && t.dataset) ? t.dataset.tab : 'all');
             t.focus();
           });
         });
@@ -1234,6 +1809,7 @@
             if (key === 'Home') current = 0;
             if (key === 'End') current = last;
             setActive(current);
+            maybeScrollToTileGrid((tabs[current] && tabs[current].dataset) ? tabs[current].dataset.tab : 'all');
             tabs[current].focus();
           }
         });
