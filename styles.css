@@ -766,30 +766,6 @@
     padding-left: 0;
   }
 
-  .tile-grid .tile:hover,
-  .tile-grid .tile:focus-visible {
-    --liftX: 0px;
-    --liftY: 0px;
-    z-index: 1;
-  }
-
-  .tile-grid .tile:hover::after,
-  .tile-grid .tile:focus-visible::after,
-  .tile-grid .tile:hover .tile-hover-overlay,
-  .tile-grid .tile:focus-visible .tile-hover-overlay {
-    opacity: 0;
-  }
-
-  .tile-grid .tile:active {
-    --liftX: 0px;
-    --liftY: 0px;
-  }
-
-  .tile-grid .tile:active::after,
-  .tile-grid .tile:active .tile-hover-overlay {
-    opacity: 0;
-  }
-
   .page[data-name="home page"] .home-game-stage {
     margin-bottom: var(--space-xs);
   }
@@ -845,6 +821,41 @@
 
   .page[data-name="home page"] .home-game-rocket {
     width: 28px;
+  }
+}
+
+@media (max-width: 600px) and (hover: none), (max-width: 600px) and (pointer: coarse) {
+  .tile-grid .tile:hover,
+  .tile-grid .tile:focus-visible,
+  .tile-grid .tile.selected,
+  .tile-grid .tile.hover-proxy {
+    --liftX: 0px;
+    --liftY: 0px;
+    z-index: 1;
+    flex: initial !important;
+    transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
+  }
+
+  .tile-grid .tile:hover::after,
+  .tile-grid .tile:focus-visible::after,
+  .tile-grid .tile.selected::after,
+  .tile-grid .tile.hover-proxy::after,
+  .tile-grid .tile:hover .tile-hover-overlay,
+  .tile-grid .tile:focus-visible .tile-hover-overlay,
+  .tile-grid .tile.selected .tile-hover-overlay,
+  .tile-grid .tile.hover-proxy .tile-hover-overlay {
+    opacity: 0 !important;
+  }
+
+  .tile-grid .tile:active {
+    --liftX: 0px;
+    --liftY: 0px;
+    transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
+  }
+
+  .tile-grid .tile:active::after,
+  .tile-grid .tile:active .tile-hover-overlay {
+    opacity: 0 !important;
   }
 }
 
