@@ -7,6 +7,13 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     <title>Joey Greenwood - NestBank</title>
+    <script>
+      try {
+        if (sessionStorage.getItem('nb_from_home') === '1') {
+          document.documentElement.classList.add('route-handoff-pending');
+        }
+      } catch (_) {}
+    </script>
     <link rel="icon" href="./assets/favicon.png" type="image/png" />
     <!-- Manrope font to match Figma token font/family/manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

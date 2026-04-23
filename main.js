@@ -10,22 +10,46 @@
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
-    
-    // Handle browser back button to fix black screen issue
-    window.addEventListener('popstate', function() {
-      // Check if we're on the home page and remove the overlay if present
-      const isHomePage = document.querySelector('.page[data-name="home page"]');
-      const overlay = document.querySelector('.intro-overlay');
-      if (isHomePage && overlay) {
-        // Remove any classes that might cause the overlay to be visible
-        overlay.classList.remove('enter');
-        overlay.classList.add('fade-out');
-        // Force remove the overlay after a short delay
-        setTimeout(() => {
-          try { overlay.style.display = 'none'; } catch (_) {}
-        }, 50);
-      }
-    });
+
+    const restoreHomePageVisualState = () => {
+      try {
+        const homePage = document.querySelector('.page[data-name="home page"]');
+        if (!homePage) return;
+
+        const introOverlay = document.querySelector('.intro-overlay');
+        const navTransition = document.querySelector('.nav-transition');
+
+        try { document.documentElement.classList.remove('preloading'); } catch (_) {}
+
+        if (introOverlay) {
+          try {
+            introOverlay.classList.remove('enter', 'fade-out');
+            introOverlay.style.display = '';
+            introOverlay.style.transform = '';
+            introOverlay.style.opacity = '';
+            introOverlay.style.pointerEvents = '';
+          } catch (_) {}
+        }
+
+        if (navTransition) {
+          try {
+            navTransition.classList.remove('open');
+            navTransition.style.opacity = '0';
+            navTransition.style.pointerEvents = 'none';
+          } catch (_) {}
+        }
+
+        try {
+          homePage.style.visibility = 'visible';
+          homePage.style.opacity = '1';
+        } catch (_) {}
+      } catch (_) {}
+    };
+
+    // Handle browser back/forward restores for the home page.
+    window.addEventListener('popstate', restoreHomePageVisualState);
+    window.addEventListener('pageshow', restoreHomePageVisualState);
+    window.addEventListener('load', restoreHomePageVisualState, { once: true });
   } catch (_) { /* ignore */ }
   try {
     const resetScroll = () => {
@@ -229,6 +253,7 @@
           void overlay.offsetHeight;
           overlay.style.transition = prev;
         } catch (_) {}
+        try { document.documentElement.classList.remove('route-handoff-pending'); } catch (_) {}
         try { sessionStorage.removeItem('nb_from_home'); } catch (_) {}
       } else {
         try { overlay.classList.add('enter'); } catch (_) {}
