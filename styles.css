@@ -794,6 +794,7 @@
     width: 100%;
     max-width: 100%;
     gap: 24px;
+    top: 56%;
   }
 
   .page[data-name="home page"] .home-game-hint__title {
@@ -810,13 +811,23 @@
 
   .page[data-name="home page"] .home-game-stage__inner:not(.has-started) .home-game-rocket-wrap {
     position: absolute;
-    top: 16px;
+    top: 40px;
     left: 50%;
     transform: translate3d(calc(-50% + var(--rocket-entry-x)), 0, 0);
   }
 
   .page[data-name="home page"] .home-game-rocket {
     width: 28px;
+  }
+}
+
+@media (min-width: 475px) and (max-width: 600px) {
+  .page[data-name="home page"] .home-game-hint__title {
+    font-size: 34px;
+  }
+
+  .page[data-name="home page"] .home-game-hint__body {
+    font-size: 15px;
   }
 }
 

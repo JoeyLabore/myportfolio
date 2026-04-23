@@ -527,6 +527,9 @@
           const ASTEROID_SPAWN_MIN = 480;
           const ASTEROID_SPAWN_MAX = 1050;
           let nextAsteroidSpawnIn = ASTEROID_SPAWN_MIN + Math.random() * (ASTEROID_SPAWN_MAX - ASTEROID_SPAWN_MIN);
+          const isSmallGameBreakpoint = () => {
+            try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
+          };
           const applyRocketOffset = () => {
             rocket.style.setProperty('--rocket-offset-y', `${rocketOffsetY}px`);
           };
@@ -871,6 +874,7 @@
             }
             if (e.key === ' ') {
               e.preventDefault();
+              if (!hasStartedGame && isSmallGameBreakpoint()) return;
               if (!hasStartedGame) {
                 markGameStarted();
               } else {
@@ -884,12 +888,14 @@
             if (isPaused || isGameOver) return;
             if (e.key === 'ArrowUp') {
               e.preventDefault();
+              if (!hasStartedGame && isSmallGameBreakpoint()) return;
               markGameStarted();
               pressedKeys.add('ArrowUp');
               syncRocketFrame();
               ensureMovementLoop();
             } else if (e.key === 'ArrowDown') {
               e.preventDefault();
+              if (!hasStartedGame && isSmallGameBreakpoint()) return;
               markGameStarted();
               pressedKeys.add('ArrowDown');
               syncRocketFrame();
@@ -933,6 +939,7 @@
             activePointerId = e.pointerId;
             pointerStartedGame = false;
             if (!hasStartedGame) {
+              if (isSmallGameBreakpoint()) return;
               markGameStarted();
               pointerStartedGame = true;
             }
@@ -969,6 +976,7 @@
           stage.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
+              if (!hasStartedGame && isSmallGameBreakpoint()) return;
               if (!hasStartedGame) {
                 markGameStarted();
               }
