@@ -936,6 +936,7 @@
             if (isGameOver) return;
             if (e.target && e.target.closest && e.target.closest('.home-game-hint__play, .home-game-over__replay')) return;
             if (typeof e.button === 'number' && e.button !== 0) return;
+            if (hasStartedGame && isSmallGameBreakpoint()) e.preventDefault();
             activePointerId = e.pointerId;
             pointerStartedGame = false;
             if (!hasStartedGame) {
@@ -952,6 +953,7 @@
           });
           stage.addEventListener('pointermove', (e) => {
             if (activePointerId == null || e.pointerId !== activePointerId || isGameOver) return;
+            if (hasStartedGame && isSmallGameBreakpoint()) e.preventDefault();
             if (activePointerIntent === 'neutral' && pointerDirection === 'neutral') return;
             const nextIntent = getPointerMoveIntent(e.clientY);
             activePointerIntent = nextIntent;
@@ -973,6 +975,14 @@
             setPointerDirection('neutral');
             try { stage.releasePointerCapture && stage.releasePointerCapture(e.pointerId); } catch (_) {}
           });
+          const preventMobileGameTouchScroll = (e) => {
+            if (!hasStartedGame || isGameOver || !isSmallGameBreakpoint()) return;
+            if (e.target && e.target.closest && e.target.closest('.home-game-over__replay')) return;
+            e.preventDefault();
+          };
+          stage.addEventListener('touchstart', preventMobileGameTouchScroll, { passive: false });
+          stage.addEventListener('touchmove', preventMobileGameTouchScroll, { passive: false });
+          stage.addEventListener('touchend', preventMobileGameTouchScroll, { passive: false });
           stage.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
               e.preventDefault();

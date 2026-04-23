@@ -774,6 +774,9 @@
     min-height: 420px;
     padding: 20px;
     border-radius: 0;
+    touch-action: none;
+    overscroll-behavior: contain;
+    -webkit-touch-callout: none;
   }
 
   .page[data-name="home page"] .home-game-score {
