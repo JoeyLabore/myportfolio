@@ -521,6 +521,10 @@
           let hasStartedGame = false;
           let currentScore = 0;
           let isGameOver = false;
+          let mobileTapReleaseTimer = 0;
+          let lastMobileTouchImpulseAt = 0;
+          let mobileGameScrollLocked = false;
+          let mobileGameScrollY = 0;
           const MAX_SPEED = 4.5;
           const ACCELERATION = 0.42;
           const FRICTION = 0.84;
@@ -529,6 +533,29 @@
           let nextAsteroidSpawnIn = ASTEROID_SPAWN_MIN + Math.random() * (ASTEROID_SPAWN_MAX - ASTEROID_SPAWN_MIN);
           const isSmallGameBreakpoint = () => {
             try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
+          };
+          const syncMobileGameScrollLock = () => {
+            try {
+              const shouldLock = hasStartedGame && !isGameOver && isSmallGameBreakpoint();
+              document.documentElement.classList.toggle('home-game-scroll-lock', shouldLock);
+              if (shouldLock && !mobileGameScrollLocked) {
+                mobileGameScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+                document.body.style.position = 'fixed';
+                document.body.style.top = `-${mobileGameScrollY}px`;
+                document.body.style.left = '0';
+                document.body.style.right = '0';
+                document.body.style.width = '100%';
+                mobileGameScrollLocked = true;
+              } else if (!shouldLock && mobileGameScrollLocked) {
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.left = '';
+                document.body.style.right = '';
+                document.body.style.width = '';
+                mobileGameScrollLocked = false;
+                window.scrollTo(0, mobileGameScrollY || 0);
+              }
+            } catch (_) {}
           };
           const applyRocketOffset = () => {
             rocket.style.setProperty('--rocket-offset-y', `${rocketOffsetY}px`);
@@ -546,6 +573,7 @@
             lastAsteroidTick = gameStartedAt;
             lastSpawnAt = gameStartedAt;
             stage.classList.add('has-started');
+            syncMobileGameScrollLock();
           };
           const syncPausedState = () => {
             stage.classList.toggle('is-paused', isPaused);
@@ -614,10 +642,32 @@
             } catch (_) {}
             return 'neutral';
           };
+          const getMobileTapIntent = (clientY) => {
+            try {
+              const rocketRect = rocket.getBoundingClientRect();
+              const rocketCenterY = rocketRect.top + (rocketRect.height / 2);
+              return clientY < rocketCenterY ? 'up' : 'down';
+            } catch (_) {
+              return 'neutral';
+            }
+          };
           const setPointerDirection = (direction) => {
             pointerDirection = direction === 'up' || direction === 'down' ? direction : 'neutral';
             syncRocketFrame();
             if (pointerDirection !== 'neutral') ensureMovementLoop();
+          };
+          const applyMobileTapImpulse = (direction) => {
+            if (direction !== 'up' && direction !== 'down') return;
+            if (mobileTapReleaseTimer) window.clearTimeout(mobileTapReleaseTimer);
+            rocketVelocityY = direction === 'up' ? -MAX_SPEED : MAX_SPEED;
+            rocketOffsetY = clampRocketOffset(rocketOffsetY + (direction === 'up' ? -18 : 18));
+            applyRocketOffset();
+            setPointerDirection(direction);
+            mobileTapReleaseTimer = window.setTimeout(() => {
+              pointerDirection = 'neutral';
+              syncRocketFrame();
+              mobileTapReleaseTimer = 0;
+            }, 120);
           };
           const endGame = () => {
             if (isGameOver) return;
@@ -629,8 +679,11 @@
             activePointerIntent = 'neutral';
             pointerStartedGame = false;
             rocketVelocityY = 0;
+            if (mobileTapReleaseTimer) window.clearTimeout(mobileTapReleaseTimer);
+            mobileTapReleaseTimer = 0;
             syncPausedState();
             syncGameOverState();
+            syncMobileGameScrollLock();
           };
           const resetGame = () => {
             const restartAt = performance.now();
@@ -646,6 +699,8 @@
             activePointerId = null;
             activePointerIntent = 'neutral';
             pointerStartedGame = false;
+            if (mobileTapReleaseTimer) window.clearTimeout(mobileTapReleaseTimer);
+            mobileTapReleaseTimer = 0;
             lastAsteroidTick = restartAt;
             lastSpawnAt = restartAt;
             spawnsSinceRocketLane = 0;
@@ -658,6 +713,7 @@
             stage.classList.add('has-started');
             syncPausedState();
             syncGameOverState();
+            syncMobileGameScrollLock();
             applyRocketOffset();
             syncRocketFrame(true);
             try { void rocketWrap.offsetWidth; } catch (_) {}
@@ -856,6 +912,7 @@
           window.addEventListener('resize', () => {
             rocketOffsetY = clampRocketOffset(rocketOffsetY);
             applyRocketOffset();
+            syncMobileGameScrollLock();
           });
 
           window.addEventListener('keydown', (e) => {
@@ -944,10 +1001,13 @@
               markGameStarted();
               pointerStartedGame = true;
             }
-            activePointerIntent = getPointerMoveIntent(e.clientY);
+            activePointerIntent = isSmallGameBreakpoint() ? getMobileTapIntent(e.clientY) : getPointerMoveIntent(e.clientY);
             if (activePointerIntent !== 'neutral') {
               if (isPaused) togglePause();
-              setPointerDirection(activePointerIntent);
+              if (isSmallGameBreakpoint()) {
+                if (performance.now() - lastMobileTouchImpulseAt > 80) applyMobileTapImpulse(activePointerIntent);
+              }
+              else setPointerDirection(activePointerIntent);
               try { stage.setPointerCapture && stage.setPointerCapture(e.pointerId); } catch (_) {}
             }
           });
@@ -961,28 +1021,49 @@
           });
           stage.addEventListener('pointerup', (e) => {
             if (activePointerId == null || e.pointerId !== activePointerId) return;
+            if (hasStartedGame && isSmallGameBreakpoint()) e.preventDefault();
             activePointerId = null;
             activePointerIntent = 'neutral';
             pointerStartedGame = false;
-            setPointerDirection('neutral');
+            if (!isSmallGameBreakpoint()) setPointerDirection('neutral');
             try { stage.releasePointerCapture && stage.releasePointerCapture(e.pointerId); } catch (_) {}
           });
           stage.addEventListener('pointercancel', (e) => {
             if (activePointerId == null || e.pointerId !== activePointerId) return;
+            if (hasStartedGame && isSmallGameBreakpoint()) e.preventDefault();
             activePointerId = null;
             activePointerIntent = 'neutral';
             pointerStartedGame = false;
-            setPointerDirection('neutral');
+            if (!isSmallGameBreakpoint()) setPointerDirection('neutral');
             try { stage.releasePointerCapture && stage.releasePointerCapture(e.pointerId); } catch (_) {}
           });
-          const preventMobileGameTouchScroll = (e) => {
+          const isMobileGameTouchLocked = (e) => {
             if (!hasStartedGame || isGameOver || !isSmallGameBreakpoint()) return;
             if (e.target && e.target.closest && e.target.closest('.home-game-over__replay')) return;
+            return true;
+          };
+          const handleMobileGameTouchStart = (e) => {
+            if (!isMobileGameTouchLocked(e)) return;
+            e.preventDefault();
+            const touch = e.changedTouches && e.changedTouches[0];
+            if (!touch) return;
+            const nextIntent = getMobileTapIntent(touch.clientY);
+            activePointerIntent = nextIntent;
+            if (isPaused) togglePause();
+            applyMobileTapImpulse(nextIntent);
+            lastMobileTouchImpulseAt = performance.now();
+          };
+          const preventMobileGameTouchScroll = (e) => {
+            if (!isMobileGameTouchLocked(e)) return;
             e.preventDefault();
           };
-          stage.addEventListener('touchstart', preventMobileGameTouchScroll, { passive: false });
+          stage.addEventListener('touchstart', handleMobileGameTouchStart, { passive: false });
           stage.addEventListener('touchmove', preventMobileGameTouchScroll, { passive: false });
           stage.addEventListener('touchend', preventMobileGameTouchScroll, { passive: false });
+          document.addEventListener('touchstart', preventMobileGameTouchScroll, { passive: false, capture: true });
+          document.addEventListener('touchmove', preventMobileGameTouchScroll, { passive: false, capture: true });
+          document.addEventListener('touchend', preventMobileGameTouchScroll, { passive: false, capture: true });
+          document.addEventListener('gesturestart', preventMobileGameTouchScroll, { passive: false, capture: true });
           stage.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
               e.preventDefault();

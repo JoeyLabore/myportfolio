@@ -908,6 +908,11 @@
 /* Base reset-ish */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
+html.home-game-scroll-lock,
+html.home-game-scroll-lock body {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
 body {
   margin: 0;
   background: #0F0F0F; /* fixed background color for home */
