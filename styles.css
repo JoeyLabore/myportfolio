@@ -474,8 +474,42 @@
 
 /* XL screens: switch to 4 columns at >=1596px */
 @media (min-width: 1596px) {
+  .page[data-name="home page"] .home-game-stage__inner {
+    min-height: 640px;
+  }
+
+  .page[data-name="home page"] .home-game-hint {
+    max-width: min(1040px, calc(100% - 64px));
+  }
+
+  .page[data-name="home page"] .home-game-hint__title {
+    font-size: 84px;
+  }
+
+  .page[data-name="home page"] .home-game-hint__body {
+    font-size: 22px;
+  }
+
+  .page[data-name="home page"] .home-game-hint__play {
+    padding: 18px 36px;
+    font-size: 20px;
+  }
+
   .page[data-name="home page"] .main .tile-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* XXL screens: increase thumbnail typography at >=1850px */
+@media (min-width: 1850px) {
+  .page[data-name="home page"] .tile-grid .tile .tile-hover-overlay__desc,
+  .page[data-name="home page"] .tile-grid .tile .tile-hover-overlay__title {
+    font-size: 22px;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile .tile-hover-overlay__tags,
+  .page[data-name="home page"] .tile-grid .tile .tile-tag {
+    font-size: 16px;
   }
 }
 
@@ -707,6 +741,26 @@
   }
 }
 
+@media (max-width: 1100px) {
+  .page[data-name="home page"] .home-game-hint__title {
+    font-size: 48px;
+  }
+
+  .page[data-name="home page"] .home-game-hint__body {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 720px) {
+  .page[data-name="home page"] .home-game-hint__title {
+    font-size: 36px;
+  }
+
+  .page[data-name="home page"] .home-game-hint__body {
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 600px) {
   .page[data-name="about page"] .about-heading {
     padding-left: 0;
@@ -737,20 +791,28 @@
   }
 
   .page[data-name="home page"] .home-game-hint {
-    max-width: calc(100% - 40px);
-    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+    gap: 24px;
   }
 
   .page[data-name="home page"] .home-game-hint__title {
-    font-size: 16px;
+    font-size: 30px;
   }
 
   .page[data-name="home page"] .home-game-hint__body {
-    font-size: 13px;
+    font-size: 13.5px;
   }
 
   .page[data-name="home page"] .home-game-rocket-wrap {
     left: 8%;
+  }
+
+  .page[data-name="home page"] .home-game-stage__inner:not(.has-started) .home-game-rocket-wrap {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translate3d(calc(-50% + var(--rocket-entry-x)), 0, 0);
   }
 
   .page[data-name="home page"] .home-game-rocket {
