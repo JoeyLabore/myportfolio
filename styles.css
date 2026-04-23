@@ -825,36 +825,30 @@
 }
 
 @media (max-width: 600px) and (hover: none), (max-width: 600px) and (pointer: coarse) {
-  .tile-grid .tile:hover,
-  .tile-grid .tile:focus-visible,
-  .tile-grid .tile.selected,
-  .tile-grid .tile.hover-proxy {
+  .page[data-name="home page"] .tile-grid .tile,
+  .page[data-name="home page"] .tile-grid .tile:hover,
+  .page[data-name="home page"] .tile-grid .tile:focus-visible,
+  .page[data-name="home page"] .tile-grid .tile:active,
+  .page[data-name="home page"] .tile-grid .tile.selected,
+  .page[data-name="home page"] .tile-grid .tile.hover-proxy {
     --liftX: 0px;
     --liftY: 0px;
-    z-index: 1;
+    z-index: 1 !important;
     flex: initial !important;
+    box-shadow: none !important;
     transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
   }
 
-  .tile-grid .tile:hover::after,
-  .tile-grid .tile:focus-visible::after,
-  .tile-grid .tile.selected::after,
-  .tile-grid .tile.hover-proxy::after,
-  .tile-grid .tile:hover .tile-hover-overlay,
-  .tile-grid .tile:focus-visible .tile-hover-overlay,
-  .tile-grid .tile.selected .tile-hover-overlay,
-  .tile-grid .tile.hover-proxy .tile-hover-overlay {
-    opacity: 0 !important;
-  }
-
-  .tile-grid .tile:active {
-    --liftX: 0px;
-    --liftY: 0px;
-    transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
-  }
-
-  .tile-grid .tile:active::after,
-  .tile-grid .tile:active .tile-hover-overlay {
+  .page[data-name="home page"] .tile-grid .tile:hover::after,
+  .page[data-name="home page"] .tile-grid .tile:focus-visible::after,
+  .page[data-name="home page"] .tile-grid .tile:active::after,
+  .page[data-name="home page"] .tile-grid .tile.selected::after,
+  .page[data-name="home page"] .tile-grid .tile.hover-proxy::after,
+  .page[data-name="home page"] .tile-grid .tile:hover .tile-hover-overlay,
+  .page[data-name="home page"] .tile-grid .tile:focus-visible .tile-hover-overlay,
+  .page[data-name="home page"] .tile-grid .tile:active .tile-hover-overlay,
+  .page[data-name="home page"] .tile-grid .tile.selected .tile-hover-overlay,
+  .page[data-name="home page"] .tile-grid .tile.hover-proxy .tile-hover-overlay {
     opacity: 0 !important;
   }
 }
