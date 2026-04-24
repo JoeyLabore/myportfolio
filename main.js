@@ -562,6 +562,7 @@
           const isSmallGameBreakpoint = () => {
             try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
           };
+          const getButtonActionDelay = () => isSmallGameBreakpoint() ? 250 : 0;
           const applyRocketOffset = () => {
             rocket.style.setProperty('--rocket-offset-y', `${rocketOffsetY}px`);
           };
@@ -603,7 +604,7 @@
               pressTimer = window.setTimeout(() => {
                 wrap.classList.remove('is-touch-press');
                 pressTimer = 0;
-              }, 110);
+              }, Math.max(110, getButtonActionDelay()));
             });
             wrap.addEventListener('pointercancel', clearTouchState);
             wrap.addEventListener('lostpointercapture', clearTouchState);
@@ -1124,24 +1125,42 @@
           try {
             document.querySelectorAll('.home-game-over__cta-wrap').forEach((wrap) => attachTouchButtonFeedback(wrap));
           } catch (_) {}
+          const runButtonAction = (action) => {
+            const delay = getButtonActionDelay();
+            if (!delay) {
+              action();
+              return;
+            }
+            window.setTimeout(action, delay);
+          };
           playHintBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            markGameStarted();
+            runButtonAction(() => {
+              markGameStarted();
+            });
           });
           playHintWrap.addEventListener('click', (e) => {
             if (e.target === playHintBtn) return;
             e.preventDefault();
             e.stopPropagation();
-            markGameStarted();
+            runButtonAction(() => {
+              markGameStarted();
+            });
           });
           playAgainBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            resetGame();
+            runButtonAction(() => {
+              resetGame();
+            });
           });
           gameOverTalkLink.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
+            runButtonAction(() => {
+              try { window.location.href = gameOverTalkLink.href; } catch (_) {}
+            });
           });
 
           const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
