@@ -571,6 +571,43 @@
             });
             asteroids.length = 0;
           };
+          const attachTouchButtonFeedback = (wrap) => {
+            if (!wrap) return;
+            let hoverTimer = 0;
+            let pressTimer = 0;
+            const clearTouchState = () => {
+              if (hoverTimer) window.clearTimeout(hoverTimer);
+              if (pressTimer) window.clearTimeout(pressTimer);
+              hoverTimer = 0;
+              pressTimer = 0;
+              wrap.classList.remove('is-touch-hover', 'is-touch-press');
+            };
+            wrap.addEventListener('pointerdown', (e) => {
+              if (e.pointerType !== 'touch') return;
+              clearTouchState();
+              wrap.classList.add('is-touch-hover');
+              hoverTimer = window.setTimeout(() => {
+                wrap.classList.remove('is-touch-hover');
+                wrap.classList.add('is-touch-press');
+                hoverTimer = 0;
+              }, 70);
+            });
+            wrap.addEventListener('pointerup', () => {
+              if (!wrap.classList.contains('is-touch-hover') && !wrap.classList.contains('is-touch-press')) return;
+              if (hoverTimer) {
+                window.clearTimeout(hoverTimer);
+                hoverTimer = 0;
+                wrap.classList.remove('is-touch-hover');
+                wrap.classList.add('is-touch-press');
+              }
+              pressTimer = window.setTimeout(() => {
+                wrap.classList.remove('is-touch-press');
+                pressTimer = 0;
+              }, 110);
+            });
+            wrap.addEventListener('pointercancel', clearTouchState);
+            wrap.addEventListener('lostpointercapture', clearTouchState);
+          };
           const syncCrashScene = (hitAsteroid = null) => {
             asteroids.forEach((asteroid) => {
               try {
@@ -1083,6 +1120,10 @@
               if (!hasStartedGame) return;
             }
           });
+          attachTouchButtonFeedback(playHintWrap);
+          try {
+            document.querySelectorAll('.home-game-over__cta-wrap').forEach((wrap) => attachTouchButtonFeedback(wrap));
+          } catch (_) {}
           playHintBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();

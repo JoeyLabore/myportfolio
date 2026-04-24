@@ -250,7 +250,7 @@
   justify-content: center;
   gap: 24px;
   width: 100%;
-  margin-top: 4px;
+  margin-top: 16px;
 }
 
 .page[data-name="home page"] .home-game-over__cta-wrap {
@@ -305,6 +305,7 @@
 }
 
 .page[data-name="home page"] .home-game-over__cta-wrap:hover:not(:active) .home-game-over__cta:not(:active),
+.page[data-name="home page"] .home-game-over__cta-wrap.is-touch-hover .home-game-over__cta:not(:active),
 .page[data-name="home page"] .home-game-over__cta:hover:not(:active) {
   transform: translate(-8px, -8px);
 }
@@ -318,6 +319,7 @@
 }
 
 .page[data-name="home page"] .home-game-over__cta-wrap:hover:not(:active)::after,
+.page[data-name="home page"] .home-game-over__cta-wrap.is-touch-hover::after,
 .page[data-name="home page"] .home-game-over__cta-wrap:focus-within::after {
   opacity: 1;
 }
@@ -326,7 +328,15 @@
   transform: translate(0, 0);
 }
 
+.page[data-name="home page"] .home-game-over__cta-wrap.is-touch-press .home-game-over__cta {
+  transform: translate(0, 0);
+}
+
 .page[data-name="home page"] .home-game-over__cta-wrap:active::after {
+  opacity: 0;
+}
+
+.page[data-name="home page"] .home-game-over__cta-wrap.is-touch-press::after {
   opacity: 0;
 }
 
@@ -425,6 +435,7 @@
 }
 
 .page[data-name="home page"] .home-game-hint__play-wrap:hover:not(:active) .home-game-hint__play:not(:active),
+.page[data-name="home page"] .home-game-hint__play-wrap.is-touch-hover .home-game-hint__play:not(:active),
 .page[data-name="home page"] .home-game-hint__play:focus-visible,
 .page[data-name="home page"] .home-game-hint__play:hover:not(:active) {
   background: #ffffff;
@@ -433,6 +444,7 @@
 }
 
 .page[data-name="home page"] .home-game-hint__play-wrap:hover:not(:active)::after,
+.page[data-name="home page"] .home-game-hint__play-wrap.is-touch-hover::after,
 .page[data-name="home page"] .home-game-hint__play-wrap:focus-within::after {
   opacity: 1;
 }
@@ -445,11 +457,15 @@
   transform: translate(0, 0);
 }
 
+.page[data-name="home page"] .home-game-hint__play-wrap.is-touch-press .home-game-hint__play {
+  transform: translate(0, 0);
+}
+
 .page[data-name="home page"] .home-game-hint__play-wrap:active::after {
   opacity: 0;
 }
 
-.page[data-name="home page"] .home-game-hint__play-wrap:active .home-game-hint__play::after {
+.page[data-name="home page"] .home-game-hint__play-wrap.is-touch-press::after {
   opacity: 0;
 }
 
