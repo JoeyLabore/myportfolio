@@ -562,7 +562,10 @@
           const isSmallGameBreakpoint = () => {
             try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
           };
-          const getButtonActionDelay = () => isSmallGameBreakpoint() ? 250 : 0;
+          const isButtonTouchBreakpoint = () => {
+            try { return window.matchMedia && window.matchMedia('(max-width: 1000px)').matches; } catch (_) { return false; }
+          };
+          const getButtonActionDelay = () => isButtonTouchBreakpoint() ? 250 : 0;
           const applyRocketOffset = () => {
             rocket.style.setProperty('--rocket-offset-y', `${rocketOffsetY}px`);
           };

@@ -932,6 +932,16 @@
   }
 }
 
+@media (min-width: 721px) and (max-width: 900px) {
+  .page[data-name="home page"] .home-game-hint__title {
+    font-size: 42px;
+  }
+
+  .page[data-name="home page"] .home-game-hint__body {
+    font-size: 15px;
+  }
+}
+
 @media (max-width: 720px) {
   .page[data-name="home page"] .home-game-hint__title {
     font-size: 36px;
@@ -939,6 +949,38 @@
 
   .page[data-name="home page"] .home-game-hint__body {
     font-size: 14px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 700px) {
+  .page[data-name="home page"] .home-game-over__title {
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .page[data-name="home page"] .home-game-hint__play-wrap::after,
+  .page[data-name="home page"] .home-game-over__cta-wrap::after {
+    opacity: 1;
+  }
+
+  .page[data-name="home page"] .home-game-hint__play,
+  .page[data-name="home page"] .home-game-over__cta {
+    transform: translate(-8px, -8px);
+  }
+
+  .page[data-name="home page"] .home-game-hint__play-wrap:active::after,
+  .page[data-name="home page"] .home-game-hint__play-wrap.is-touch-press::after,
+  .page[data-name="home page"] .home-game-over__cta-wrap:active::after,
+  .page[data-name="home page"] .home-game-over__cta-wrap.is-touch-press::after {
+    opacity: 0;
+  }
+
+  .page[data-name="home page"] .home-game-hint__play-wrap:active .home-game-hint__play,
+  .page[data-name="home page"] .home-game-hint__play-wrap.is-touch-press .home-game-hint__play,
+  .page[data-name="home page"] .home-game-over__cta:active,
+  .page[data-name="home page"] .home-game-over__cta-wrap.is-touch-press .home-game-over__cta {
+    transform: translate(0, 0);
   }
 }
 
@@ -980,36 +1022,13 @@
   }
 
   .page[data-name="home page"] .home-game-over__actions {
-    flex-direction: column;
+    flex-direction: column-reverse;
+    gap: 24px;
   }
 
   .page[data-name="home page"] .home-game-over__cta {
     width: 100%;
     min-width: 0;
-  }
-
-  .page[data-name="home page"] .home-game-hint__play-wrap::after,
-  .page[data-name="home page"] .home-game-over__cta-wrap::after {
-    opacity: 1;
-  }
-
-  .page[data-name="home page"] .home-game-hint__play,
-  .page[data-name="home page"] .home-game-over__cta {
-    transform: translate(-8px, -8px);
-  }
-
-  .page[data-name="home page"] .home-game-hint__play-wrap:active::after,
-  .page[data-name="home page"] .home-game-hint__play-wrap.is-touch-press::after,
-  .page[data-name="home page"] .home-game-over__cta-wrap:active::after,
-  .page[data-name="home page"] .home-game-over__cta-wrap.is-touch-press::after {
-    opacity: 0;
-  }
-
-  .page[data-name="home page"] .home-game-hint__play-wrap:active .home-game-hint__play,
-  .page[data-name="home page"] .home-game-hint__play-wrap.is-touch-press .home-game-hint__play,
-  .page[data-name="home page"] .home-game-over__cta:active,
-  .page[data-name="home page"] .home-game-over__cta-wrap.is-touch-press .home-game-over__cta {
-    transform: translate(0, 0);
   }
 
   .page[data-name="home page"] .home-game-hint {
