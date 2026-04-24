@@ -477,13 +477,16 @@
           const stage = document.querySelector('.home-game-stage__inner');
           const scoreEl = document.querySelector('.home-game-score');
           const hintEl = document.querySelector('.home-game-hint');
+          const playHintWrap = document.querySelector('.home-game-hint__play-wrap');
           const playHintBtn = document.querySelector('.home-game-hint__play');
           const gameOverEl = document.querySelector('.home-game-over');
+          const gameOverScoreEl = document.querySelector('.home-game-over__eyebrow');
           const playAgainBtn = document.querySelector('.home-game-over__replay');
+          const gameOverTalkLink = document.querySelector('.home-game-over__cta--secondary');
           const asteroidLayer = document.querySelector('.home-game-asteroid-layer');
           const rocketWrap = document.querySelector('.home-game-rocket-wrap');
           const rocket = document.querySelector('.home-game-rocket');
-          if (!stage || !scoreEl || !hintEl || !playHintBtn || !gameOverEl || !playAgainBtn || !asteroidLayer || !rocketWrap || !rocket) return;
+          if (!stage || !scoreEl || !hintEl || !playHintWrap || !playHintBtn || !gameOverEl || !gameOverScoreEl || !playAgainBtn || !gameOverTalkLink || !asteroidLayer || !rocketWrap || !rocket) return;
           try { rocket.setAttribute('draggable', 'false'); } catch (_) {}
           try { rocket.addEventListener('dragstart', (e) => e.preventDefault()); } catch (_) {}
 
@@ -544,10 +547,12 @@
           let isDangerPhase = false;
           let isPaused = false;
           let hasStartedGame = false;
+          let isRelaunching = false;
           let currentScore = 0;
           let isGameOver = false;
           let mobileTapReleaseTimer = 0;
           let lastMobileTouchImpulseAt = 0;
+          let relaunchTimer = 0;
           const MAX_SPEED = 4.5;
           const ACCELERATION = 0.42;
           const FRICTION = 0.84;
@@ -566,8 +571,27 @@
             });
             asteroids.length = 0;
           };
+          const syncCrashScene = (hitAsteroid = null) => {
+            asteroids.forEach((asteroid) => {
+              try {
+                asteroid.el.classList.toggle('is-hidden-on-crash', !!hitAsteroid && asteroid !== hitAsteroid);
+              } catch (_) {}
+            });
+          };
+          const resetGameButtonStates = () => {
+            try {
+              const activeEl = document.activeElement;
+              if (activeEl && activeEl.blur && (
+                activeEl.closest('.home-game-hint__play-wrap') ||
+                activeEl.closest('.home-game-over__cta-wrap')
+              )) {
+                activeEl.blur();
+              }
+            } catch (_) {}
+          };
           const markGameStarted = () => {
             if (hasStartedGame) return;
+            resetGameButtonStates();
             hasStartedGame = true;
             gameStartedAt = performance.now();
             lastAsteroidTick = gameStartedAt;
@@ -580,6 +604,19 @@
           };
           const syncGameOverState = () => {
             stage.classList.toggle('is-game-over', isGameOver);
+          };
+          const finishRelaunch = () => {
+            isRelaunching = false;
+            hasStartedGame = true;
+            const startAt = performance.now();
+            gameStartedAt = startAt;
+            lastAsteroidTick = startAt;
+            lastSpawnAt = startAt;
+            spawnsSinceRocketLane = 0;
+            stage.classList.add('has-started', 'is-ready');
+            requestAnimationFrame(() => {
+              try { rocketWrap.classList.remove('is-relaunching'); } catch (_) {}
+            });
           };
           const updateScore = (elapsedMs) => {
             const score = Math.floor(elapsedMs / 10);
@@ -668,10 +705,12 @@
               mobileTapReleaseTimer = 0;
             }, 120);
           };
-          const endGame = () => {
+          const endGame = (hitAsteroid = null) => {
             if (isGameOver) return;
             isGameOver = true;
             isPaused = false;
+            gameOverScoreEl.textContent = `Score: ${currentScore}`;
+            syncCrashScene(hitAsteroid);
             pressedKeys.clear();
             pointerDirection = 'neutral';
             activePointerId = null;
@@ -684,11 +723,12 @@
             syncGameOverState();
           };
           const resetGame = () => {
-            const restartAt = performance.now();
+            resetGameButtonStates();
             isGameOver = false;
             isPaused = false;
             isDangerPhase = false;
-            hasStartedGame = true;
+            hasStartedGame = false;
+            isRelaunching = true;
             currentScore = 0;
             rocketOffsetY = 0;
             rocketVelocityY = 0;
@@ -699,26 +739,33 @@
             pointerStartedGame = false;
             if (mobileTapReleaseTimer) window.clearTimeout(mobileTapReleaseTimer);
             mobileTapReleaseTimer = 0;
-            lastAsteroidTick = restartAt;
-            lastSpawnAt = restartAt;
+            if (relaunchTimer) window.clearTimeout(relaunchTimer);
+            relaunchTimer = 0;
+            lastAsteroidTick = 0;
+            lastSpawnAt = 0;
             spawnsSinceRocketLane = 0;
-            gameStartedAt = restartAt;
+            gameStartedAt = 0;
             pauseStartedAt = 0;
             nextAsteroidSpawnIn = ASTEROID_SPAWN_MIN + Math.random() * (ASTEROID_SPAWN_MAX - ASTEROID_SPAWN_MIN);
             resetAsteroids();
+            syncCrashScene(null);
             scoreEl.textContent = 'Score: 0';
+            gameOverScoreEl.textContent = 'Score: 0';
             stage.classList.remove('is-danger', 'is-ready');
             stage.classList.add('has-started');
             syncPausedState();
             syncGameOverState();
             applyRocketOffset();
             syncRocketFrame(true);
-            try { void rocketWrap.offsetWidth; } catch (_) {}
-            requestAnimationFrame(() => {
-              window.setTimeout(() => {
-                try { stage.classList.add('is-ready'); } catch (_) {}
-              }, 80);
-            });
+            try {
+              rocketWrap.classList.remove('is-relaunching');
+              void rocketWrap.offsetWidth;
+              rocketWrap.classList.add('is-relaunching');
+            } catch (_) {}
+            relaunchTimer = window.setTimeout(() => {
+              relaunchTimer = 0;
+              finishRelaunch();
+            }, 820);
           };
           const isColliding = (a, b) => {
             return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
@@ -819,6 +866,12 @@
               asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
               return;
             }
+            if (isRelaunching) {
+              updateScore(0);
+              lastAsteroidTick = now;
+              asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
+              return;
+            }
             if (isGameOver) {
               lastAsteroidTick = now;
               asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
@@ -863,7 +916,7 @@
               const adjustedRocketRect = getRocketHitRect(rocketRect);
               const adjustedAsteroidRect = getAsteroidHitRect(asteroidRect);
               if (isColliding(adjustedRocketRect, adjustedAsteroidRect)) {
-                endGame();
+                endGame(asteroid);
                 break;
               }
 
@@ -921,18 +974,19 @@
               target.isContentEditable
             ));
             if (isTypingTarget) return;
+            if (!hasStartedGame) {
+              if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter') {
+                e.preventDefault();
+              }
+              return;
+            }
             if (isGameOver && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === ' ')) {
               e.preventDefault();
               return;
             }
             if (e.key === ' ') {
               e.preventDefault();
-              if (!hasStartedGame && isSmallGameBreakpoint()) return;
-              if (!hasStartedGame) {
-                markGameStarted();
-              } else {
-                togglePause();
-              }
+              togglePause();
               return;
             }
             if (isPaused && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
@@ -941,15 +995,11 @@
             if (isPaused || isGameOver) return;
             if (e.key === 'ArrowUp') {
               e.preventDefault();
-              if (!hasStartedGame && isSmallGameBreakpoint()) return;
-              markGameStarted();
               pressedKeys.add('ArrowUp');
               syncRocketFrame();
               ensureMovementLoop();
             } else if (e.key === 'ArrowDown') {
               e.preventDefault();
-              if (!hasStartedGame && isSmallGameBreakpoint()) return;
-              markGameStarted();
               pressedKeys.add('ArrowDown');
               syncRocketFrame();
               ensureMovementLoop();
@@ -987,15 +1037,13 @@
 
           stage.addEventListener('pointerdown', (e) => {
             if (isGameOver) return;
-            if (e.target && e.target.closest && e.target.closest('.home-game-hint__play, .home-game-over__replay')) return;
+            if (e.target && e.target.closest && e.target.closest('.home-game-hint__play, .home-game-over__cta')) return;
             if (typeof e.button === 'number' && e.button !== 0) return;
+            if (!hasStartedGame) {
+              return;
+            }
             activePointerId = e.pointerId;
             pointerStartedGame = false;
-            if (!hasStartedGame) {
-              if (isSmallGameBreakpoint()) return;
-              markGameStarted();
-              pointerStartedGame = true;
-            }
             activePointerIntent = isSmallGameBreakpoint() ? getMobileTapIntent(e.clientY) : getPointerMoveIntent(e.clientY);
             if (activePointerIntent !== 'neutral') {
               if (isPaused) togglePause();
@@ -1032,13 +1080,16 @@
           stage.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              if (!hasStartedGame && isSmallGameBreakpoint()) return;
-              if (!hasStartedGame) {
-                markGameStarted();
-              }
+              if (!hasStartedGame) return;
             }
           });
           playHintBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            markGameStarted();
+          });
+          playHintWrap.addEventListener('click', (e) => {
+            if (e.target === playHintBtn) return;
             e.preventDefault();
             e.stopPropagation();
             markGameStarted();
@@ -1047,6 +1098,9 @@
             e.preventDefault();
             e.stopPropagation();
             resetGame();
+          });
+          gameOverTalkLink.addEventListener('click', (e) => {
+            e.stopPropagation();
           });
 
           const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
