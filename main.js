@@ -550,6 +550,7 @@
           let isRelaunching = false;
           let currentScore = 0;
           let isGameOver = false;
+          let isCrashPending = false;
           let mobileTapReleaseTimer = 0;
           let lastMobileTouchImpulseAt = 0;
           let relaunchTimer = 0;
@@ -747,10 +748,9 @@
             }, 120);
           };
           const endGame = (hitAsteroid = null) => {
-            if (isGameOver) return;
-            isGameOver = true;
+            if (isGameOver || isCrashPending) return;
+            isCrashPending = true;
             isPaused = false;
-            gameOverScoreEl.textContent = `Score: ${currentScore}`;
             syncCrashScene(hitAsteroid);
             pressedKeys.clear();
             pointerDirection = 'neutral';
@@ -761,11 +761,15 @@
             if (mobileTapReleaseTimer) window.clearTimeout(mobileTapReleaseTimer);
             mobileTapReleaseTimer = 0;
             syncPausedState();
+            isCrashPending = false;
+            isGameOver = true;
+            gameOverScoreEl.textContent = `Score: ${currentScore}`;
             syncGameOverState();
           };
           const resetGame = () => {
             resetGameButtonStates();
             isGameOver = false;
+            isCrashPending = false;
             isPaused = false;
             isDangerPhase = false;
             hasStartedGame = false;
@@ -913,7 +917,7 @@
               asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
               return;
             }
-            if (isGameOver) {
+            if (isCrashPending || isGameOver) {
               lastAsteroidTick = now;
               asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
               return;
@@ -971,7 +975,7 @@
           };
 
           const tickMovement = () => {
-            if (isPaused || isGameOver) {
+            if (isPaused || isCrashPending || isGameOver) {
               movementRAF = 0;
               return;
             }
@@ -1021,7 +1025,7 @@
               }
               return;
             }
-            if (isGameOver && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === ' ')) {
+            if ((isCrashPending || isGameOver) && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === ' ')) {
               e.preventDefault();
               return;
             }
@@ -1033,7 +1037,7 @@
             if (isPaused && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
               togglePause();
             }
-            if (isPaused || isGameOver) return;
+            if (isPaused || isCrashPending || isGameOver) return;
             if (e.key === 'ArrowUp') {
               e.preventDefault();
               pressedKeys.add('ArrowUp');
@@ -1056,7 +1060,7 @@
           });
 
           const togglePause = () => {
-            if (isGameOver) return;
+            if (isCrashPending || isGameOver) return;
             const now = performance.now();
             isPaused = !isPaused;
             if (isPaused) {
@@ -1077,7 +1081,7 @@
           };
 
           stage.addEventListener('pointerdown', (e) => {
-            if (isGameOver) return;
+            if (isCrashPending || isGameOver) return;
             if (e.target && e.target.closest && e.target.closest('.home-game-hint__play, .home-game-over__cta')) return;
             if (typeof e.button === 'number' && e.button !== 0) return;
             if (!hasStartedGame) {
@@ -1096,7 +1100,7 @@
             }
           });
           stage.addEventListener('pointermove', (e) => {
-            if (activePointerId == null || e.pointerId !== activePointerId || isGameOver) return;
+            if (activePointerId == null || e.pointerId !== activePointerId || isCrashPending || isGameOver) return;
             if (activePointerIntent === 'neutral' && pointerDirection === 'neutral') return;
             const nextIntent = getPointerMoveIntent(e.clientY);
             activePointerIntent = nextIntent;
@@ -1204,7 +1208,7 @@
               .map((x) => x.el);
           } catch (_) { return list; }
         };
-        // Inject small category/role tags per tile keeping site style
+        // Inject thumbnail tags using each project's role
         try {
           tiles.forEach((tile) => {
             try {
@@ -1212,6 +1216,27 @@
               if (tags) tags.remove();
               const flag = tile.querySelector('.tile-flag');
               if (flag) flag.remove();
+              const role = (tile.dataset && tile.dataset.role) ? String(tile.dataset.role || '').trim() : '';
+              const industry = (tile.dataset && tile.dataset.industry) ? String(tile.dataset.industry || '').trim() : '';
+              if (!role && !industry) return;
+
+              const tagsWrap = document.createElement('div');
+              tagsWrap.className = 'tile-tags';
+
+              if (industry) {
+                const industryTag = document.createElement('div');
+                industryTag.className = 'tile-tag tile-tag--industry';
+                industryTag.textContent = industry;
+                tagsWrap.appendChild(industryTag);
+              }
+
+              if (role) {
+                const roleTag = document.createElement('div');
+                roleTag.className = 'tile-tag tile-tag--role';
+                roleTag.textContent = role;
+                tagsWrap.appendChild(roleTag);
+              }
+              tile.appendChild(tagsWrap);
             } catch (_) { /* ignore flag errors */ }
           });
         } catch (_) { /* ignore tag injection errors */ }

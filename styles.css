@@ -307,7 +307,7 @@
 .page[data-name="home page"] .home-game-over__cta-wrap:hover:not(:active) .home-game-over__cta:not(:active),
 .page[data-name="home page"] .home-game-over__cta-wrap.is-touch-hover .home-game-over__cta:not(:active),
 .page[data-name="home page"] .home-game-over__cta:hover:not(:active) {
-  transform: translate(-8px, -8px);
+  transform: translate(-6px, -6px);
 }
 
 .page[data-name="home page"] .home-game-over__cta--primary:hover {
@@ -440,7 +440,7 @@
 .page[data-name="home page"] .home-game-hint__play:hover:not(:active) {
   background: #ffffff;
   color: #0f0f0f;
-  transform: translate(-8px, -8px);
+  transform: translate(-6px, -6px);
 }
 
 .page[data-name="home page"] .home-game-hint__play-wrap:hover:not(:active)::after,
@@ -973,7 +973,7 @@
 
   .page[data-name="home page"] .home-game-hint__play,
   .page[data-name="home page"] .home-game-over__cta {
-    transform: translate(-8px, -8px);
+    transform: translate(-6px, -6px);
   }
 
   .page[data-name="home page"] .home-game-hint__play-wrap:active::after,
@@ -2564,7 +2564,7 @@ p { margin: 0; }
   bottom: 16px;
   right: 16px;
   left: 16px; /* allow wrap within tile with side padding */
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end; /* align pills to the right */
@@ -2576,18 +2576,27 @@ p { margin: 0; }
   pointer-events: none; /* ensure entire tile remains clickable */
   display: inline-flex;
   align-items: center;
-  padding: 8px 12px; /* 8px top/bottom, 12px left/right */
-  border-radius: 8px;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
+  justify-content: center;
+  min-height: 34px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
   line-height: 1;
-  color: #ffffff;
-  /* Match nav items pill background */
-  background: rgba(0, 0, 0, 0.38);
-  border: none;
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  backdrop-filter: blur(12px) saturate(140%);
+  letter-spacing: 0.01em;
+  border: 0;
+  box-shadow: 2px 2px 0 0 rgba(255, 255, 255, 0.92);
   white-space: nowrap;
+}
+
+.tile-grid .tile .tile-tag--role,
+.tile-grid .tile .tile-tag--industry {
+  background: #0f0f0f;
+  color: #ffffff;
+  box-shadow:
+    inset 0 0 0 1px #ffffff,
+    2px 2px 0 0 rgba(255, 255, 255, 0.92);
 }
 
 .tile-grid .tile .tile-tag--external {
@@ -2608,6 +2617,12 @@ p { margin: 0; }
   width: 16px;
   height: 16px;
   display: block;
+}
+
+@media (max-width: 1050px) {
+  .tile-grid .tile .tile-tags {
+    display: flex;
+  }
 }
 
 /* Top-left project flag (e.g., 'Current Project' for Toyota) */
