@@ -1150,9 +1150,27 @@
     transition: flex-basis 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 360ms ease;
     will-change: flex-basis;
   }
-  /* On small screens: make the expanded (selected) tile fill 50% of the viewport height */
+  /* On small screens: use the selected tile as the scroll-following hover state */
   .page[data-name="home page"] .tile-grid .tile.selected {
-    --tile-basis: 40vh; /* animate to 40% of the viewport height */
+    --tile-basis: 64px;
+    --liftX: -8px;
+    --liftY: -8px;
+    z-index: 3 !important;
+    transform: translateX(calc(var(--slideX) - 8px)) translateY(calc(var(--introY) - 8px)) !important;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.selected::after {
+    opacity: 1 !important;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.selected:active {
+    --liftX: 0px;
+    --liftY: 0px;
+    transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.selected:active::after {
+    opacity: 0 !important;
   }
 
   /* On small screens: use vertical spacing instead of horizontal margins */

@@ -1650,11 +1650,97 @@
             try { if (!vireliaVideo) ensureVireliaVideo(); } catch (_) {}
           } catch (_) { /* ignore */ }
         };
+        const clearSelectedTiles = () => {
+          tiles.forEach((t) => {
+            t.classList.remove('selected');
+            t.setAttribute('aria-pressed', 'false');
+          });
+        };
         // Make selection callable from other modules (e.g., filtering) and init guard flag
         try {
           window.__homeSelectTile = selectTile;
           if (typeof window.__autoSelecting === 'undefined') window.__autoSelecting = false;
         } catch (_) { /* ignore */ }
+
+        // On the <=600px stacked layout, promote exactly one tile at a time
+        // based on which card has crossed into the top half of the viewport.
+        try {
+          const isSmallHomeStack = () => {
+            try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
+          };
+
+          const getVisibleScrollableTiles = () => tiles.filter((tile) => {
+            if (!tile || !tile.isConnected) return false;
+            if (tile.classList.contains('filtered-out') || tile.classList.contains('filter-hiding')) return false;
+            const style = window.getComputedStyle(tile);
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            return true;
+          });
+
+          const getScrollActiveTile = () => {
+            const visibleTiles = getVisibleScrollableTiles();
+            if (!visibleTiles.length) return null;
+
+            const viewportHeight = Math.max(window.innerHeight || 0, 1);
+            const topHalfBottom = viewportHeight * 0.5;
+            let best = null;
+            let bestRatio = 0;
+            let bestTop = -Infinity;
+            let bestOverall = null;
+            let bestOverallRatio = -1;
+            let bestOverallTop = -Infinity;
+            let firstVisible = null;
+
+            for (const tile of visibleTiles) {
+              const rect = tile.getBoundingClientRect();
+              if (rect.bottom <= 0 || rect.top >= viewportHeight) continue;
+              if (!firstVisible) firstVisible = tile;
+              const overlapTop = Math.max(rect.top, 0);
+              const overlapBottom = Math.min(rect.bottom, topHalfBottom);
+              const overlap = overlapBottom - overlapTop;
+              const ratio = overlap > 0 ? (overlap / Math.max(rect.height, 1)) : 0;
+
+              if (ratio > bestOverallRatio || (ratio === bestOverallRatio && rect.top > bestOverallTop)) {
+                bestOverall = tile;
+                bestOverallRatio = ratio;
+                bestOverallTop = rect.top;
+              }
+
+              if (ratio >= 0.35 && (ratio > bestRatio || (ratio === bestRatio && rect.top > bestTop))) {
+                best = tile;
+                bestRatio = ratio;
+                bestTop = rect.top;
+              }
+            }
+
+            return best || bestOverall || firstVisible || visibleTiles[0] || null;
+          };
+
+          let scrollSelectionRaf = 0;
+          const applyScrollDrivenSelection = () => {
+            scrollSelectionRaf = 0;
+            if (!isSmallHomeStack()) return;
+            if ((window.scrollY || 0) <= 8) {
+              clearSelectedTiles();
+              return;
+            }
+            const nextTile = getScrollActiveTile();
+            if (!nextTile || nextTile.classList.contains('selected')) return;
+            selectTile(nextTile);
+          };
+
+          const requestScrollDrivenSelection = () => {
+            if (!isSmallHomeStack()) return;
+            if (scrollSelectionRaf) return;
+            scrollSelectionRaf = window.requestAnimationFrame(applyScrollDrivenSelection);
+          };
+
+          try { window.__homeSyncScrollTile = requestScrollDrivenSelection; } catch (_) { /* ignore */ }
+          window.addEventListener('scroll', requestScrollDrivenSelection, { passive: true });
+          window.addEventListener('resize', requestScrollDrivenSelection, { passive: true });
+          window.addEventListener('orientationchange', requestScrollDrivenSelection, { passive: true });
+          requestAnimationFrame(applyScrollDrivenSelection);
+        } catch (_) { /* ignore scroll-selected tile errors */ }
 
         // Helper: trigger home overlay, then navigate to a URL
         function navigateWithOverlay(url) {
@@ -1935,6 +2021,12 @@
 
           // Auto-select the first visible tile in the requested category
           requestAnimationFrame(() => {
+            const smallHome = !!(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
+            if (smallHome && (window.scrollY || 0) <= 8) {
+              clearSelectedTiles();
+              try { if (typeof window.__homeSyncScrollTile === 'function') window.__homeSyncScrollTile(); } catch (_) { /* ignore */ }
+              return;
+            }
             const firstVisible = tiles.find((t) => {
               const categories = getCategories(t);
               return want === 'all' || categories.includes(want);
@@ -1946,6 +2038,7 @@
               else if (typeof selectTile === 'function') selectTile(firstVisible);
             } catch (_) { /* ignore */ }
             finally { setTimeout(() => { try { window.__autoSelecting = false; } catch (_) {} }, 0); }
+            try { if (typeof window.__homeSyncScrollTile === 'function') window.__homeSyncScrollTile(); } catch (_) { /* ignore */ }
           });
         }
 

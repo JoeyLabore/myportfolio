@@ -17,9 +17,11 @@
     <link rel="stylesheet" href="./styles.css?v=37" />
     <style>
       /* Disable hover/pressed/selected widen and tilt on home page tiles */
-      .page[data-name="home page"] .tile-grid .tile.selected {
-        flex: initial !important;
-        transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
+      @media (min-width: 601px) {
+        .page[data-name="home page"] .tile-grid .tile.selected {
+          flex: initial !important;
+          transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
+        }
       }
       .page[data-name="home page"] .tile-grid .tile:not(.selected):hover,
       .page[data-name="home page"] .tile-grid .tile.hover-proxy:not(.selected),
