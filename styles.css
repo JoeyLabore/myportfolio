@@ -608,6 +608,13 @@
   -webkit-user-drag: none;
   pointer-events: none;
 }
+
+@media (max-width: 1149px) {
+  .page[data-name="home page"] .home-game-stage__inner.is-game-over .home-game-rocket-wrap,
+  .page[data-name="home page"] .home-game-stage__inner.is-game-over .home-game-asteroid-layer {
+    display: none;
+  }
+}
 /* Home page: remove side margins so tiles fit within the padded container exactly */
 .page[data-name="home page"] .tile-grid .tile {
   margin-left: 0 !important;
@@ -901,7 +908,7 @@
   }
 
   .page[data-name="about page"] .about-heading {
-    font-size: 20px !important;
+    font-size: 24px !important;
   }
 
   .page[data-name="about page"] .about-skill-list li span {
