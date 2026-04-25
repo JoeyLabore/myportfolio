@@ -1019,13 +1019,18 @@
               target.isContentEditable
             ));
             if (isTypingTarget) return;
+            const isArrowKey = e.key === 'ArrowUp' || e.key === 'ArrowDown';
+            const isActivelyPlaying = hasStartedGame && !isPaused && !isCrashPending && !isGameOver;
             if (!hasStartedGame) {
-              if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'Enter') {
+              if (e.key === ' ' || e.key === 'Enter') {
                 e.preventDefault();
               }
               return;
             }
-            if ((isCrashPending || isGameOver) && (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === ' ')) {
+            if (!isActivelyPlaying && isArrowKey) {
+              return;
+            }
+            if ((isCrashPending || isGameOver) && e.key === ' ') {
               e.preventDefault();
               return;
             }
@@ -1033,9 +1038,6 @@
               e.preventDefault();
               togglePause();
               return;
-            }
-            if (isPaused && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
-              togglePause();
             }
             if (isPaused || isCrashPending || isGameOver) return;
             if (e.key === 'ArrowUp') {
