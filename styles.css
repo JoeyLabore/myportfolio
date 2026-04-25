@@ -1069,7 +1069,7 @@
   }
 }
 
-@media (max-width: 600px) and (hover: none), (max-width: 600px) and (pointer: coarse) {
+@media (max-width: 600px) {
   .page[data-name="home page"] .tile-grid .tile,
   .page[data-name="home page"] .tile-grid .tile:hover,
   .page[data-name="home page"] .tile-grid .tile:focus-visible,
@@ -1086,15 +1086,58 @@
 
   .page[data-name="home page"] .tile-grid .tile:hover::after,
   .page[data-name="home page"] .tile-grid .tile:focus-visible::after,
-  .page[data-name="home page"] .tile-grid .tile:active::after,
-  .page[data-name="home page"] .tile-grid .tile.selected::after,
   .page[data-name="home page"] .tile-grid .tile.hover-proxy::after,
   .page[data-name="home page"] .tile-grid .tile:hover .tile-hover-overlay,
   .page[data-name="home page"] .tile-grid .tile:focus-visible .tile-hover-overlay,
-  .page[data-name="home page"] .tile-grid .tile:active .tile-hover-overlay,
-  .page[data-name="home page"] .tile-grid .tile.selected .tile-hover-overlay,
   .page[data-name="home page"] .tile-grid .tile.hover-proxy .tile-hover-overlay {
     opacity: 0 !important;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.selected .tile-hover-overlay {
+    opacity: 1 !important;
+    box-shadow: inset 0 0 0 1px var(--tile-outline-color);
+    transform: translate3d(-10px, -10px, 0);
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.selected.tap-pressed .tile-hover-overlay {
+    opacity: 1 !important;
+    box-shadow: inset 0 0 0 1px var(--tile-outline-color);
+    transform: translate3d(0, 0, 0) !important;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.selected.tap-pressed::after {
+    opacity: 0 !important;
+  }
+}
+
+@media (max-width: 600px) and (hover: hover) and (pointer: fine) {
+  .page[data-name="home page"] .tile-grid .tile:hover::after,
+  .page[data-name="home page"] .tile-grid .tile:focus-visible::after {
+    opacity: 1 !important;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile:hover .tile-hover-overlay,
+  .page[data-name="home page"] .tile-grid .tile:focus-visible .tile-hover-overlay {
+    opacity: 1 !important;
+  }
+}
+
+@media (max-width: 600px) and (hover: none), (max-width: 600px) and (pointer: coarse) {
+  .page[data-name="home page"] .tile-grid .tile.selected .tile-hover-overlay,
+  .page[data-name="home page"] .tile-grid .tile.selected.tap-pressed .tile-hover-overlay {
+    opacity: 0 !important;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.selected::before,
+  .page[data-name="home page"] .tile-grid .tile.selected > video {
+    box-shadow: inset 0 0 0 1px var(--tile-outline-color);
+    transform: translate3d(-10px, -10px, 0);
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.selected.tap-pressed::before,
+  .page[data-name="home page"] .tile-grid .tile.selected.tap-pressed > video {
+    box-shadow: inset 0 0 0 1px var(--tile-outline-color);
+    transform: translate3d(0, 0, 0) !important;
   }
 }
 
@@ -1153,10 +1196,10 @@
   /* On small screens: use the selected tile as the scroll-following hover state */
   .page[data-name="home page"] .tile-grid .tile.selected {
     --tile-basis: 64px;
-    --liftX: -8px;
-    --liftY: -8px;
+    --liftX: 0px;
+    --liftY: 0px;
     z-index: 3 !important;
-    transform: translateX(calc(var(--slideX) - 8px)) translateY(calc(var(--introY) - 8px)) !important;
+    transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
   }
 
   .page[data-name="home page"] .tile-grid .tile.selected::after {

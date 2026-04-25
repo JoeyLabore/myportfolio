@@ -1604,6 +1604,7 @@
         const selectTile = (tile) => {
           // Clear any hover-proxy state when a selection occurs
           tiles.forEach((t) => t.classList.remove('hover-proxy'));
+          tiles.forEach((t) => t.classList.remove('tap-pressed'));
           tiles.forEach((t) => {
             if (t === tile) {
               t.classList.add('selected');
@@ -1643,6 +1644,7 @@
         // On the <=600px stacked layout, promote exactly one tile at a time
         // based on which card has crossed into the top half of the viewport.
         try {
+          const ENABLE_SMALL_SCROLL_AUTO_SELECT = false;
           const isSmallHomeStack = () => {
             try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
           };
@@ -1697,6 +1699,7 @@
           let scrollSelectionRaf = 0;
           const applyScrollDrivenSelection = () => {
             scrollSelectionRaf = 0;
+            if (!ENABLE_SMALL_SCROLL_AUTO_SELECT) return;
             if (!isSmallHomeStack()) return;
             if ((window.scrollY || 0) <= 8) {
               clearSelectedTiles();
@@ -1708,16 +1711,19 @@
           };
 
           const requestScrollDrivenSelection = () => {
+            if (!ENABLE_SMALL_SCROLL_AUTO_SELECT) return;
             if (!isSmallHomeStack()) return;
             if (scrollSelectionRaf) return;
             scrollSelectionRaf = window.requestAnimationFrame(applyScrollDrivenSelection);
           };
 
           try { window.__homeSyncScrollTile = requestScrollDrivenSelection; } catch (_) { /* ignore */ }
-          window.addEventListener('scroll', requestScrollDrivenSelection, { passive: true });
-          window.addEventListener('resize', requestScrollDrivenSelection, { passive: true });
-          window.addEventListener('orientationchange', requestScrollDrivenSelection, { passive: true });
-          requestAnimationFrame(applyScrollDrivenSelection);
+          if (ENABLE_SMALL_SCROLL_AUTO_SELECT) {
+            window.addEventListener('scroll', requestScrollDrivenSelection, { passive: true });
+            window.addEventListener('resize', requestScrollDrivenSelection, { passive: true });
+            window.addEventListener('orientationchange', requestScrollDrivenSelection, { passive: true });
+            requestAnimationFrame(applyScrollDrivenSelection);
+          }
         } catch (_) { /* ignore scroll-selected tile errors */ }
 
         // Helper: trigger home overlay, then navigate to a URL
@@ -1743,40 +1749,52 @@
         }
 
         // Click/keyboard to navigate immediately to the relevant page (no select/expand state)
+        const isSmallHomeBreakpoint = () => {
+          try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
+        };
+
+        const navigateProject = (proj) => {
+          if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
+          if (proj === 'toyota') { navigateWithOverlay('./toyota.html'); return; }
+          if (proj === 'virelia') { navigateWithOverlay('./virelia.html'); return; }
+          if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+          if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
+          if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
+          if (proj === 'apendito') { try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+          if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+          if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+          if (proj === 'kakaoala') { try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+          if (proj === 'skilldex') { try { window.open('https://www.behance.net/gallery/120932085/Skilldex-UIUX-Branding', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+          window.location.href = './password.html';
+        };
+
+        const handleTileClickNavigation = (tile, proj) => {
+          const isExternalOpen = OPEN_IN_NEW_PROJECTS.has(proj);
+          if (!isSmallHomeBreakpoint() || isExternalOpen) {
+            navigateProject(proj);
+            return;
+          }
+
+          try { selectTile(tile); } catch (_) {}
+          setTimeout(() => {
+            try { tile.classList.add('tap-pressed'); } catch (_) {}
+          }, 120);
+          setTimeout(() => {
+            navigateProject(proj);
+          }, 240);
+        };
+
         tiles.forEach((tile, idx) => {
           tile.addEventListener('click', () => {
             const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
-            if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
-            if (proj === 'toyota') { navigateWithOverlay('./toyota.html'); return; }
-            if (proj === 'virelia') { navigateWithOverlay('./virelia.html'); return; }
-            if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-            if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
-            if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
-            if (proj === 'apendito') { try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-            if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-            if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-            if (proj === 'kakaoala') { try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-            if (proj === 'skilldex') { try { window.open('https://www.behance.net/gallery/120932085/Skilldex-UIUX-Branding', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-            // orion, placeholder -> gated
-            window.location.href = './password.html';
+            handleTileClickNavigation(tile, proj);
           });
 
           tile.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
-              if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
-              if (proj === 'toyota') { navigateWithOverlay('./toyota.html'); return; }
-              if (proj === 'virelia') { navigateWithOverlay('./virelia.html'); return; }
-              if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-              if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
-              if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
-              if (proj === 'apendito') { try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-              if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-              if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-              if (proj === 'kakaoala') { try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-              if (proj === 'skilldex') { try { window.open('https://www.behance.net/gallery/120932085/Skilldex-UIUX-Branding', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-              window.location.href = './password.html';
+              navigateProject(proj);
             }
           });
         });
