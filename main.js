@@ -1263,21 +1263,6 @@
               const overlay = document.createElement('div');
               overlay.className = 'tile-hover-overlay';
               overlay.setAttribute('aria-hidden', 'true');
-              try {
-                overlay.style.position = 'absolute';
-                overlay.style.inset = '0';
-                overlay.style.zIndex = '2';
-                overlay.style.display = 'flex';
-                overlay.style.flexDirection = 'column';
-                overlay.style.justifyContent = 'space-between';
-                overlay.style.padding = '40px';
-                overlay.style.color = '#fff';
-                overlay.style.background = '#000';
-                overlay.style.opacity = '0';
-                overlay.style.transition = 'opacity 160ms ease';
-                overlay.style.pointerEvents = 'none';
-                overlay.style.borderRadius = 'inherit';
-              } catch (_) {}
 
               const header = document.createElement('div');
               header.className = 'tile-hover-overlay__header';
@@ -1322,15 +1307,6 @@
               overlay.appendChild(header);
               overlay.appendChild(body);
               tile.appendChild(overlay);
-
-              try {
-                const show = () => { overlay.style.opacity = '1'; };
-                const hide = () => { overlay.style.opacity = '0'; };
-                tile.addEventListener('mouseenter', show);
-                tile.addEventListener('mouseleave', hide);
-                tile.addEventListener('focusin', show);
-                tile.addEventListener('focusout', hide);
-              } catch (_) {}
             } catch (_) { /* ignore overlay errors */ }
           });
         } catch (_) {}
