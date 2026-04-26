@@ -408,11 +408,13 @@
   const TRD_FILES = [
     "./assets/trd/1.jpg",
     "./assets/trd/2.svg",
-    "./assets/trd/3.jpg",
-    "./assets/trd/4.jpg",
-    "./assets/trd/5.png",
-    "./assets/trd/6.jpg",
-    "./assets/trd/7.jpg",
+    "./assets/trd/3.jpg?v=2",
+    "./assets/trd/5.png?v=2",
+    "./assets/trd/3.5.jpg",
+    "./assets/trd/4.jpg?v=4",
+    "./assets/trd/7.jpg?v=2",
+    "./assets/trd/8.png",
+    "./assets/trd/6.jpeg",
   ];
 
   const VIRELIA_FILES = [
@@ -2744,7 +2746,7 @@
       try { el.dataset.src = srcPath; } catch (_) {}
       // Mark media that should keep object-fit: contain on small screens
       if (/(^|\/)3\.png$/i.test(srcPath)
-        || /(\/)5\.png$/i.test(srcPath)
+        || /(\/)5\.png(?:\?|$)/i.test(srcPath)
         || /(\/)8\.png$/i.test(srcPath)
         || /(\/)11\.png$/i.test(srcPath)
         || /(^|\/)12\.5\.mp4$/i.test(srcPath)
