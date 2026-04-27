@@ -2795,8 +2795,8 @@ p { margin: 0; }
   line-height: 1;
 }
 /* Home thumbnails by project (attribute selectors so DOM order can change safely) */
-.page[data-name="home page"] .tile-grid .tile[data-project="virelia"]::before {
-  background-image: url('./assets/thumbnails/virelia.jpg');
+.page[data-name="home page"] .tile-grid .tile[data-project="relias"]::before {
+  background-image: url('./assets/thumbnails/relias.jpg');
   background-size: cover; background-position: center; background-repeat: no-repeat;
 }
 
@@ -2806,7 +2806,7 @@ p { margin: 0; }
 .page[data-name="home page"] .tile-grid .tile[data-project="apendito"] { --stackColor: #57A2EC; }
 .page[data-name="home page"] .tile-grid .tile[data-project="skilldex"] { --stackColor: #57A2EC; }
 .page[data-name="home page"] .tile-grid .tile[data-project="tom"] { --stackColor: #FFD65D; }
-.page[data-name="home page"] .tile-grid .tile[data-project="virelia"] { --stackColor: #FFD65D; }
+.page[data-name="home page"] .tile-grid .tile[data-project="relias"] { --stackColor: #FFD65D; }
 .page[data-name="home page"] .tile-grid .tile[data-project="dinobytes"] { --stackColor: #FFD65D; }
 .page[data-name="home page"] .tile-grid .tile[data-project="logofolio"] { --stackColor: #FFD65D; }
 .page[data-name="home page"] .tile-grid .tile[data-project="nestbank"] { --stackColor: #A072F5; }
