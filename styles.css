@@ -35,19 +35,8 @@ body.toyota-deep-dive .page[data-name="case study page"] .nav-split {
   position: fixed;
   left: 0;
   right: 0;
-  top: var(--space-s);
+  top: 0;
   z-index: 6;
-  pointer-events: none;
-  padding-left: var(--space-s);
-  padding-right: var(--space-s);
-}
-body.toyota-deep-dive .page[data-name="case study page"] .nav-split .nav-bar {
-  position: static !important;
-  top: auto !important;
-  pointer-events: auto;
-  margin-top: 0;
-  margin-left: 0;
-  margin-right: 0;
 }
 /* Hide overview cards when deep-dive article is active */
 body.toyota-deep-dive .page[data-name="case study page"] #overview {
@@ -1128,22 +1117,6 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__text {
   .bg-layer[data-src$="12.jpg"] {
     object-position: 45% center !important;
   }
-  /* Home page @600px: keep left/right cards static/visible, but allow the middle tabs
-     to use the standard intro animation. Limit overrides to nav-left and nav-right. */
-  .page[data-name="home page"] .nav-left,
-  .page[data-name="home page"] .nav-left.intro-top-hidden,
-  .page[data-name="home page"] .nav-left.intro-top-visible,
-  .page[data-name="home page"] .nav-left.exit-out,
-  .page[data-name="home page"] .ui-exited .nav-left,
-  .page[data-name="home page"] .nav-right,
-  .page[data-name="home page"] .nav-right.intro-top-hidden,
-  .page[data-name="home page"] .nav-right.intro-top-visible,
-  .page[data-name="home page"] .nav-right.exit-out,
-  .page[data-name="home page"] .ui-exited .nav-right {
-    transform: translate3d(0, 0, 0) !important;
-    pointer-events: auto !important;
-    opacity: 1 !important;
-  }
   .page[data-name="home page"] .paragraph,
   .page[data-name="home page"] .paragraph.intro-hidden,
   .page[data-name="home page"] .paragraph.intro-visible,
@@ -1161,20 +1134,28 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__text {
     pointer-events: auto !important;
   }
 
-  /* Home page (index): hide logo and LinkedIn cards */
-  .page[data-name="home page"] .nav-split .nav-left,
-  .page[data-name="home page"] .nav-split .nav-right { display: none; }
-  /* Position tabs to the top-left to leave room for the Menu button on the right */
-  .page[data-name="home page"] .nav-split { justify-content: flex-start; }
-
-  /* Keep the tabs card fixed at the top while scrolling */
-  .page[data-name="home page"] .nav-split .nav-middle {
-    position: fixed !important;
-    left: var(--space-s);
-    right: auto; /* free the right side for the Menu button */
-    top: max(env(safe-area-inset-top), var(--space-s));
-    z-index: 5; /* above tiles */
-    width: max-content; /* shrink to the tabs' width */
+  /* Home page (index): keep logo visible; hide right-side action cards */
+  .page[data-name="home page"] .nav-split .nav-right-wrap { display: none; }
+  .page[data-name="home page"] .nav-split {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--space-s);
+    z-index: 5;
+    pointer-events: none;
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
+  }
+  .page[data-name="home page"] .nav-split .nav-bar {
+    position: static !important;
+    top: auto !important;
+    pointer-events: auto;
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .page[data-name="home page"] .main {
+    padding-top: calc(var(--nav-card-height) + (2 * var(--space-s)));
   }
 
   /* Show the mobile-only Menu button at top-right on home page */
@@ -1477,6 +1458,11 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__text {
 
   .page[data-name="case study page"] .nav-split .nav-bar.nav-right[aria-label="Email"] {
     display: none !important;
+  }
+
+  .page[data-name="case study page"] .nav-split .nav-middle {
+    grid-column: 3;
+    justify-self: end;
   }
 
   /* Home page (index): stack rectangles vertically instead of horizontally */

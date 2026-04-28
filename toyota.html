@@ -296,7 +296,6 @@
       const viewTabs = Array.from(document.querySelectorAll('.nav-view-switch .nav-item[data-view]'));
       if (!viewTabs.length) return;
       const mainEl = document.querySelector('.page[data-name="case study page"] .main');
-      const navSplitEl = document.querySelector('.page[data-name="case study page"] .nav-split');
       const overviewSection = document.getElementById('overview');
       const deepDiveSection = document.getElementById('deep-dive');
       const deepDiveContent = deepDiveSection ? deepDiveSection.querySelector('.deep-dive-article__content') : null;
@@ -340,27 +339,6 @@
             mainEl.style.justifyContent = '';
             mainEl.style.paddingTop = '';
             mainEl.style.gap = '';
-          }
-        }
-        if (navSplitEl) {
-          if (deepDive) {
-            navSplitEl.style.position = 'fixed';
-            navSplitEl.style.left = '0';
-            navSplitEl.style.right = '0';
-            navSplitEl.style.top = 'var(--space-s)';
-            navSplitEl.style.zIndex = '6';
-            navSplitEl.style.pointerEvents = 'none';
-            navSplitEl.style.paddingLeft = 'var(--space-s)';
-            navSplitEl.style.paddingRight = 'var(--space-s)';
-          } else {
-            navSplitEl.style.position = '';
-            navSplitEl.style.left = '';
-            navSplitEl.style.right = '';
-            navSplitEl.style.top = '';
-            navSplitEl.style.zIndex = '';
-            navSplitEl.style.pointerEvents = '';
-            navSplitEl.style.paddingLeft = '';
-            navSplitEl.style.paddingRight = '';
           }
         }
         if (overviewSection) {
