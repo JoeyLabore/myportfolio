@@ -13,6 +13,319 @@
   transition: transform 400ms ease;
   will-change: transform;
 }
+
+/* Toyota: Deep Dive mode uses a centered article layout */
+body.toyota-deep-dive {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+body.toyota-deep-dive #bg-sequence {
+  display: none;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .main {
+  display: block !important;
+  align-items: initial !important;
+  justify-content: initial !important;
+  padding-left: var(--space-s) !important;
+  padding-right: var(--space-s) !important;
+  padding-top: calc(var(--nav-card-height) + (2 * var(--space-s)) + 64px) !important;
+  gap: 0 !important;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .nav-split {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: var(--space-s);
+  z-index: 6;
+  pointer-events: none;
+  padding-left: var(--space-s);
+  padding-right: var(--space-s);
+}
+body.toyota-deep-dive .page[data-name="case study page"] .nav-split .nav-bar {
+  position: static !important;
+  top: auto !important;
+  pointer-events: auto;
+  margin-top: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+/* Hide overview cards when deep-dive article is active */
+body.toyota-deep-dive .page[data-name="case study page"] #overview {
+  display: none !important;
+}
+
+.deep-dive-article {
+  display: none;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 0 clamp(40px, 6vw, 80px) !important;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article__content {
+  width: min(760px, 100%);
+  margin: 0 auto !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  text-align: left;
+  color: #ffffff;
+  position: relative;
+  z-index: 1;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-section {
+  width: 100%;
+  margin: 0;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-section + .deep-dive-section {
+  margin-top: 28px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-section--intro + .deep-dive-section--hero-image {
+  margin-top: 32px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-section--project-meta + .deep-dive-section--content {
+  margin-top: 96px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-section--intro {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-section--content {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block--insights {
+  gap: 48px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item .deep-dive-content-block__label,
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item .deep-dive-article__paragraph {
+  margin: 0;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item .deep-dive-content-block__label {
+  color: #ffffff;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-divider {
+  margin: 0;
+  border: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.14);
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__label {
+  margin: 0;
+  font-family: var(--font-family-manrope);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image {
+  width: 100%;
+  height: 60%;
+  max-height: 330px;
+  margin-top: 0;
+  margin-bottom: 32px;
+  object-fit: cover;
+  object-position: top center;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image--contain {
+  height: auto;
+  max-height: none;
+  margin-bottom: 4px;
+  object-fit: contain;
+  object-position: center;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__media {
+  position: relative;
+  margin-top: 32px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image-caption {
+  margin: 0;
+  position: absolute;
+  right: 12px;
+  bottom: 44px;
+  z-index: 1;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(4px);
+  font-family: var(--font-family-manrope);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.9);
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image-caption--wow {
+  bottom: 12px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 32px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image--section4-top {
+  margin-top: 32px;
+  margin-bottom: 0;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--section4 {
+  margin-top: 8px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__card {
+  flex: 0 1 calc((100% - 48px) / 3);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--two .deep-dive-image-row__card {
+  flex: 0 1 calc((100% - 24px) / 2);
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__item {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__item.deep-dive-content-block__image--contain {
+  aspect-ratio: 4 / 3;
+  height: auto;
+  object-fit: cover;
+  object-position: center;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__text {
+  margin: 0;
+  padding: 0 12px;
+  font-family: var(--font-family-manrope);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: #ffffff;
+}
+@media (max-width: 820px) {
+  body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__card {
+    flex: 0 1 calc((100% - 24px) / 2);
+  }
+}
+@media (max-width: 600px) {
+  body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__card {
+    flex: 1 1 100%;
+  }
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__title {
+  margin: 0;
+  font-family: "Fraunces", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "SOFT" 0, "WONK" 0;
+  font-size: 2rem;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.2;
+  color: #ffffff;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article__eyebrow {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  font-family: var(--font-family-manrope);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article__title {
+  margin: 0;
+  font-family: "Fraunces", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "SOFT" 0, "WONK" 0;
+  font-size: 3.25rem;
+  font-weight: var(--font-weight-regular);
+  line-height: 120%;
+  color: #ffffff;
+  text-shadow: none;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article__paragraph {
+  margin: 0;
+  font-family: var(--font-family-manrope);
+  font-size: 16px;
+  line-height: 160%;
+  opacity: 0.92;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: none;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article__image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  padding: 8px 0;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__label {
+  margin: 0;
+  font-family: var(--font-family-manrope);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.62);
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__text {
+  margin: 0;
+  font-family: var(--font-family-manrope);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 160%;
+  color: rgba(255, 255, 255, 0.9);
+}
+@media (max-width: 900px) {
+  body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__text {
+    font-size: 16px;
+  }
+}
 .route-handoff-pending .intro-overlay {
   transform: translateX(0);
 }
@@ -1162,6 +1475,10 @@
     opacity: 1 !important;
   }
 
+  .page[data-name="case study page"] .nav-split .nav-bar.nav-right[aria-label="Email"] {
+    display: none !important;
+  }
+
   /* Home page (index): stack rectangles vertically instead of horizontally */
   .page[data-name="home page"] {
     min-height: 100vh;          /* ensure full viewport height */
@@ -1588,9 +1905,14 @@ p { margin: 0; }
   padding: 12px; /* top/right/bottom/left */
   align-items: stretch; /* allow inner tabs to stretch to full card height */
 }
+.page[data-name="case study page"] .nav-split .nav-middle {
+  padding: 12px;
+  align-items: stretch;
+}
 /* Ensure the tabs row itself fills the parent card's height so child pills can size to 100% */
 /* Allow tabs to size naturally so parent height is not affected */
 .page[data-name="home page"] .nav-split .nav-middle .tabs { height: 100%; }
+.page[data-name="case study page"] .nav-split .nav-middle .tabs { height: 100%; }
 /* Home: center the single LinkedIn nav card */
 /* With grid layout, the middle column is centered inherently; no need to center the whole group */
 /* No explicit centering needed for the whole group when using grid */
@@ -1922,6 +2244,70 @@ p { margin: 0; }
   background: #ffffff;
 }
 
+/* Case study view switch should match the original home tab design exactly */
+.page[data-name="case study page"] .nav-view-switch .tabs .nav-item {
+  display: inline-flex;
+  align-items: center;
+  height: auto;
+  padding: var(--space-s);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.38);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  text-decoration: none;
+  transform: translateY(0);
+  transition: background-color 160ms ease, transform 160ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease;
+}
+.page[data-name="case study page"] .nav-view-switch .tabs .nav-item:hover,
+.page[data-name="case study page"] .nav-view-switch .tabs .nav-item:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+.page[data-name="case study page"] .nav-view-switch .tabs .nav-item.active,
+.page[data-name="case study page"] .nav-view-switch .tabs .nav-item[aria-selected="true"] {
+  background: #ffffff;
+  color: var(--color-typography-heading);
+  font-weight: 500;
+  box-shadow: none;
+  text-shadow: none;
+}
+.page[data-name="case study page"] .nav-view-switch .tabs .nav-item--with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding-right: var(--space-s);
+}
+.page[data-name="case study page"] .nav-view-switch .tabs .nav-item__icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.page[data-name="case study page"] .nav-view-switch .tabs .nav-item__label-compact {
+  display: none;
+}
+
+@media (max-width: 400px) {
+  .page[data-name="case study page"] .nav-view-switch .tabs .nav-item__icon {
+    display: none;
+  }
+
+  .page[data-name="case study page"] .nav-view-switch .tabs .nav-item--with-icon {
+    gap: 0;
+    padding-right: var(--space-s);
+  }
+}
+
+@media (max-width: 355px) {
+  .page[data-name="case study page"] .nav-view-switch .tabs .nav-item__label-full {
+    display: none;
+  }
+
+  .page[data-name="case study page"] .nav-view-switch .tabs .nav-item__label-compact {
+    display: inline;
+  }
+}
+
 /* Make the LinkedIn/Right-side nav match tab styling on hover/focus and support multiple buttons */
 .nav-split .nav-right {
   padding: 12px;
@@ -1929,7 +2315,7 @@ p { margin: 0; }
   gap: var(--space-xs);
   justify-content: flex-end; /* keep multiple buttons grouped to the right */
 }
-.nav-split .nav-right .nav-item {
+.nav-split .nav-right:not(.nav-view-switch) .nav-item {
   /* Pill-style buttons that sit side-by-side */
   display: flex;
   align-items: center;
@@ -1971,8 +2357,38 @@ p { margin: 0; }
 .nav-right.nav-about .nav-item:hover .avatar,
 .nav-right.nav-about .nav-item:focus-visible .avatar { filter: brightness(0.92); }
 .nav-right.nav-about .nav-item:active .avatar { filter: brightness(0.85); }
+
+/* Home page: keep profile avatar perfectly circular and prevent wrap/squish */
+.page[data-name="home page"] .nav-right-wrap {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+.page[data-name="home page"] .nav-right-wrap .nav-bar.nav-right.nav-about {
+  width: var(--nav-card-height) !important;
+  height: var(--nav-card-height) !important;
+  min-width: var(--nav-card-height);
+  min-height: var(--nav-card-height);
+  flex: 0 0 var(--nav-card-height);
+}
+.page[data-name="home page"] .nav-right-wrap .nav-right.nav-about .nav-item {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0 !important;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.page[data-name="home page"] .nav-right-wrap .nav-right.nav-about .nav-item .avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 8px !important;
+  box-sizing: border-box;
+  border-radius: 50%;
+  object-fit: cover;
+}
 /* Inline arrow icon (Material CallMade) default state: hidden/subtle */
-.nav-split .nav-right .nav-item .icon-arrow {
+.nav-split .nav-right:not(.nav-view-switch) .nav-item .icon-arrow {
   display: inline-block;
   margin-left: 0;            /* no reserved gap by default */
   width: 0;                  /* take no horizontal space */
@@ -1981,20 +2397,20 @@ p { margin: 0; }
   transition: opacity 160ms ease, transform 160ms ease, width 160ms ease, margin-left 160ms ease;
 }
 /* Reveal arrow on hover or keyboard focus of the specific link */
-.nav-split .nav-right .nav-item:hover .icon-arrow,
-.nav-split .nav-right .nav-item:focus-visible .icon-arrow {
+.nav-split .nav-right:not(.nav-view-switch) .nav-item:hover .icon-arrow,
+.nav-split .nav-right:not(.nav-view-switch) .nav-item:focus-visible .icon-arrow {
   width: 16px;        /* expand to natural width */
   margin-left: 8px;   /* add gap next to text */
   opacity: 1;         /* show icon */
   transform: translateX(2px); /* subtle slide-in */
 }
 /* Hover/focus background for the individual link */
-.nav-split .nav-right .nav-item:hover,
-.nav-split .nav-right .nav-item:focus-visible {
+.nav-split .nav-right:not(.nav-view-switch) .nav-item:hover,
+.nav-split .nav-right:not(.nav-view-switch) .nav-item:focus-visible {
   background-color: rgba(0, 0, 0, 0.24) !important; /* ensure hover takes precedence over base */
 }
 /* Pressed state: slightly darker than hover */
-.nav-split .nav-right .nav-item:active {
+.nav-split .nav-right:not(.nav-view-switch) .nav-item:active {
   background: rgba(0, 0, 0, 0.32) !important;
 }
 
@@ -2668,7 +3084,7 @@ p { margin: 0; }
   bottom: 16px;
   right: 16px;
   left: 16px; /* allow wrap within tile with side padding */
-  display: none;
+  display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: flex-end; /* align pills to the right */
@@ -2678,6 +3094,23 @@ p { margin: 0; }
   transform: translate3d(0, 0, 0);
   transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+}
+
+@media (min-width: 1051px) {
+  .tile-grid .tile .tile-tags {
+    justify-content: flex-start;
+    align-content: flex-start;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile .tile-tags {
+    display: none;
+  }
+}
+
+@media (max-width: 1050px) {
+  .page[data-name="home page"] .tile-grid .tile .tile-tags {
+    display: flex;
+  }
 }
 
 .tile-grid .tile:hover .tile-tags,
@@ -2736,12 +3169,6 @@ p { margin: 0; }
   display: block;
 }
 
-@media (max-width: 1050px) {
-  .tile-grid .tile .tile-tags {
-    display: flex;
-  }
-}
-
 /* Top-left project flag (e.g., 'Current Project' for Toyota) */
 .tile-grid .tile .tile-flag {
   position: absolute;
@@ -2796,7 +3223,7 @@ p { margin: 0; }
 }
 /* Home thumbnails by project (attribute selectors so DOM order can change safely) */
 .page[data-name="home page"] .tile-grid .tile[data-project="relias"]::before {
-  background-image: url('./assets/thumbnails/relias.jpg');
+  background-image: url('./assets/thumbnails/virelia.jpg');
   background-size: cover; background-position: center; background-repeat: no-repeat;
 }
 

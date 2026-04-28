@@ -18,8 +18,8 @@
     <!-- Manrope font to match Figma token font/family/manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=3" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=113" />
     <link rel="stylesheet" href="./impact-styles.css" />
     <style>
       .protected-image {
@@ -62,6 +62,15 @@
             </a>
           </div>
         </header>
+        <header class="nav-bar nav-middle nav-view-switch" aria-label="Case study view switch">
+          <nav class="tabs" role="tablist" aria-label="Toyota case study views">
+            <a href="#overview" class="nav-item active" role="tab" aria-selected="true" tabindex="0" data-view="overview">Overview</a>
+            <a href="#deep-dive" class="nav-item nav-item--with-icon" role="tab" aria-selected="false" tabindex="-1" data-view="deep-dive">
+              <span class="nav-item__label-full">Deep Dive</span>
+              <span class="nav-item__label-compact">Process</span>
+            </a>
+          </nav>
+        </header>
         <header class="nav-bar nav-right" data-name="nav-right" aria-label="Email">
           <a class="nav-item" href="mailto:joey.greenwood1997@gmail.com">
             Lets Connect
@@ -74,7 +83,7 @@
 
       <!-- Main content -->
       <main class="main" data-name="main" data-node-id="816:15570">
-        <section class="paragraph-containers" data-name="paragraph-containers" data-node-id="816:15617">
+        <section id="overview" class="paragraph-containers" data-name="paragraph-containers" data-node-id="816:15617">
           <div class="paragraph-col">
             <div class="paragraph" data-name="text-container" data-node-id="816:15618">
               <p class="text-label" data-node-id="816:15619">Project Background</p>
@@ -84,7 +93,7 @@
                 <br />
                 <ul class="project-overview">
                   <li><strong>Client:</strong> Toyota Racing Development</li>
-                  <li><strong>Industry:</strong> Motorsports</li>
+                  <li><strong>Type of work:</strong> Enterprise UX</li>
                   <li><strong>Duration:</strong> 2025 - Present</li>
                   <li><strong>Role:</strong> Product Design Lead. I led the redesign of core workflows and platform experiences.</li>
                 </ul>
@@ -144,10 +153,312 @@
             </div>
           </div>
         </section>
+        <section id="deep-dive" class="deep-dive-article" aria-label="Toyota deep dive article">
+          <article class="deep-dive-article__content">
+            <section class="deep-dive-section deep-dive-section--intro" aria-label="Article title and tags">
+              <p class="deep-dive-article__eyebrow"><span>TRD</span><span>Enterprise UX</span><span>2025 - Present</span></p>
+              <h1 class="deep-dive-article__title">Building the Operational Backbone of Toyota Racing</h1>
+            </section>
+
+            <section class="deep-dive-section deep-dive-section--hero-image" aria-label="Lead image">
+              <img class="deep-dive-article__image" src="./assets/trd/1.jpg" alt="Toyota Racing Development project visual" />
+            </section>
+
+            <section class="deep-dive-section deep-dive-section--project-meta" aria-label="Project metadata">
+              <div class="deep-dive-meta">
+                <div class="deep-dive-meta__item">
+                  <h2 class="deep-dive-meta__label">Role</h2>
+                  <p class="deep-dive-meta__text">Product Design Lead</p>
+                </div>
+                <div class="deep-dive-meta__item">
+                  <h2 class="deep-dive-meta__label">Team</h2>
+                  <p class="deep-dive-meta__text">Product Designers (3)<br />Product Strategist (1)<br />Business Analyst (1)<br />Architects (2)<br />Dev Ops Engineer (1)<br />Data Engineer (1)<br />QA Engineers (2)<br />Full Stack Dev (1)<br />Front-End Devs (2)<br />Backend Dev (1)</p>
+                </div>
+                <div class="deep-dive-meta__item">
+                  <h2 class="deep-dive-meta__label">Skills</h2>
+                  <p class="deep-dive-meta__text">Product Design<br />Product Strategy<br />UX Research<br />Usability Testing<br />Design Systems<br />AI Prototype Building<br />Stakeholder Management</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="deep-dive-section deep-dive-section--content" aria-label="Article content sections">
+              <article class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">Problem</p>
+                <h2 class="deep-dive-content-block__title">From spreadsheets to systems</h2>
+                <p class="deep-dive-article__paragraph">TRD operates in a complex, performance-critical environment supported by thier Internal System, its core operational platform. Over time, however, the system became fragmented.</p>
+                <p class="deep-dive-article__paragraph">Much of the work shifted outside it, into Excel, shared folders, and manual processes, creating a disconnected, error-prone workflow with no clear source of truth.</p>
+              </article>
+              <article class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">Soluton</p>
+                <h2 class="deep-dive-content-block__title">Structuring complex workflows</h2>
+                <p class="deep-dive-article__paragraph">The solution wasn’t just to improve usability, it was to re-establish thier Internal System as the operational backbone of TRD by simplifying workflows, reconnecting work happening outside the system, reducing manual overhead, and building a scalable UI and design system for long-term growth.</p>
+              </article>
+              <hr class="deep-dive-content-divider" aria-hidden="true" />
+              <article class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">01 Define the Ways of Working</p>
+                <h2 class="deep-dive-content-block__title">Before the Solution, the Shift</h2>
+                <p class="deep-dive-article__paragraph">To support the redesign, we defined a structured way of working that aligned product, design, and engineering across the full lifecycle, from discovery through delivery and post-release iteration.</p>
+                <div class="deep-dive-content-block__media">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain" src="./assets/trd/section-03.jpg" alt="Section 3 placeholder visual" />
+                  <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Way of Working Framework</p>
+                </div>
+                <p class="deep-dive-article__paragraph">A key challenge was aligning expectations around how the solution would be built. TRD was used to a model where internal teams implemented requests quickly and moved on, contributing to fragmented workflows through patchwork fixes.</p>
+                <p class="deep-dive-article__paragraph">Rather than simply building what was requested, we intentionally reduced scope and focused on high-impact problems first. The solution was developed iteratively, expanding over time as new needs emerged.</p>
+                <p class="deep-dive-article__paragraph">This approach introduced a more structured, problem-led way of working, balancing speed with long-term scalability.</p>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">02 Understanding Current State</p>
+                <h2 class="deep-dive-content-block__title">Understanding the System</h2>
+                <p class="deep-dive-article__paragraph">It was critical to understand how work actually happened across TRD, not just within thier Internal System, but across the broader ecosystem of tools, teams, and processes.</p>
+                <p class="deep-dive-article__paragraph">The system extended beyond a single platform, with key workflows distributed across in-person conversations, separate Excel files, and documentation. To understand these processes, we conducted stakeholder and user interviews, capturing insights through journey maps, user flows, object models, and system diagrams.</p>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article class="deep-dive-content-block deep-dive-content-block--insights">
+                <h2 class="deep-dive-content-block__title">Key Insights</h2>
+                <div class="deep-dive-insights-list">
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">01. The system wasn’t the source of truth</p>
+                    <p class="deep-dive-article__paragraph">Critical workflows existed outside of thier Internal System, in Excels, shared folders, and informal coordination, creating inconsistencies and making the system difficult to trust.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">02. Workflows were fragmented across teams and tools</p>
+                    <p class="deep-dive-article__paragraph">Processes spanned multiple systems with unclear ownership, leading to communication breakdowns and a heavy reliance on manual handoffs.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">03. Users relied on tribal knowledge to complete tasks</p>
+                    <p class="deep-dive-article__paragraph">The system exposed complexity without guidance, requiring users to depend on experience rather than structured workflows. Built over 20 years with the same leadership, the system was deeply embedded in institutional knowledge, making it difficult for new users to onboard.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">04. Errors were caught too late in the process</p>
+                    <p class="deep-dive-article__paragraph">Validation occurred primarily during review and approval stages, relying heavily on manual checks. As a result, errors introduced through human oversight often propagated across the system before being identified.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">05. Delivery was driven by requests, not problems</p>
+                    <p class="deep-dive-article__paragraph">Request-driven implementation led to patchwork solutions, addressing immediate needs while increasing long-term system complexity.</p>
+                  </div>
+                </div>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">04 Explore future state</p>
+                <h2 class="deep-dive-content-block__title">Dummy</h2>
+                <p class="deep-dive-article__paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer facilisis, mauris eu bibendum suscipit, arcu neque pretium nibh, et ultricies sem justo a massa.</p>
+                <div class="deep-dive-image-row deep-dive-image-row--two" aria-label="Future-state exploration visuals">
+                  <div class="deep-dive-image-row__card">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item" src="./assets/trd/section-04-img-01.jpg" alt="Future-state exploration visual one" />
+                  </div>
+                  <div class="deep-dive-image-row__card">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item" src="./assets/trd/section-04-img-02.jpg" alt="Future-state exploration visual two" />
+                  </div>
+                </div>
+              </article>
+            </section>
+          </article>
+        </section>
       </main>
     </div>
   </body>
-  <script src="./main.js?v=26"></script>
+  <script src="./main.js?v=35"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const PAGE_PASSWORD = 'peekaboo';
+      const PAGE_UNLOCK_KEY = 'toyota_page_unlocked';
+
+      const hasPageAccess = () => {
+        try {
+          return sessionStorage.getItem(PAGE_UNLOCK_KEY) === '1';
+        } catch (_) {
+          return false;
+        }
+      };
+
+      const requestPageAccess = () => {
+        if (hasPageAccess()) return true;
+        const entered = window.prompt('Enter password to access this page:');
+        if (entered === null) return false;
+        const ok = entered.trim() === PAGE_PASSWORD;
+        if (!ok) {
+          window.alert('Incorrect password.');
+          return false;
+        }
+        try {
+          sessionStorage.setItem(PAGE_UNLOCK_KEY, '1');
+        } catch (_) {}
+        return true;
+      };
+
+      if (!requestPageAccess()) {
+        try { window.location.replace('./index.html'); } catch (_) { window.location.href = './index.html'; }
+        return;
+      }
+
+      const viewTabs = Array.from(document.querySelectorAll('.nav-view-switch .nav-item[data-view]'));
+      if (!viewTabs.length) return;
+      const mainEl = document.querySelector('.page[data-name="case study page"] .main');
+      const navSplitEl = document.querySelector('.page[data-name="case study page"] .nav-split');
+      const overviewSection = document.getElementById('overview');
+      const deepDiveSection = document.getElementById('deep-dive');
+      const deepDiveContent = deepDiveSection ? deepDiveSection.querySelector('.deep-dive-article__content') : null;
+
+      try {
+        if (mainEl && deepDiveSection && !mainEl.contains(deepDiveSection)) {
+          mainEl.appendChild(deepDiveSection);
+        }
+      } catch (_) {}
+
+      const isDeepDiveActive = () => document.body.classList.contains('toyota-deep-dive');
+
+      const syncActiveTab = (mode) => {
+        viewTabs.forEach((tab, idx) => {
+          const active = tab.dataset.view === mode;
+          tab.classList.toggle('active', active);
+          tab.setAttribute('aria-selected', active ? 'true' : 'false');
+          tab.tabIndex = active ? 0 : -1;
+          if (active && idx >= 0) {
+            tab.setAttribute('aria-current', 'page');
+          } else {
+            tab.removeAttribute('aria-current');
+          }
+        });
+      };
+
+      const setViewMode = (mode) => {
+        const deepDive = mode === 'deep-dive';
+        document.body.classList.toggle('toyota-deep-dive', deepDive);
+        document.documentElement.classList.remove('ui-exited');
+        if (mainEl) {
+          if (deepDive) {
+            mainEl.style.display = 'block';
+            mainEl.style.alignItems = 'initial';
+            mainEl.style.justifyContent = 'flex-start';
+            mainEl.style.paddingTop = 'calc(var(--nav-card-height) + (2 * var(--space-s)) + 64px)';
+            mainEl.style.gap = '0';
+          } else {
+            mainEl.style.display = '';
+            mainEl.style.alignItems = '';
+            mainEl.style.justifyContent = '';
+            mainEl.style.paddingTop = '';
+            mainEl.style.gap = '';
+          }
+        }
+        if (navSplitEl) {
+          if (deepDive) {
+            navSplitEl.style.position = 'fixed';
+            navSplitEl.style.left = '0';
+            navSplitEl.style.right = '0';
+            navSplitEl.style.top = 'var(--space-s)';
+            navSplitEl.style.zIndex = '6';
+            navSplitEl.style.pointerEvents = 'none';
+            navSplitEl.style.paddingLeft = 'var(--space-s)';
+            navSplitEl.style.paddingRight = 'var(--space-s)';
+          } else {
+            navSplitEl.style.position = '';
+            navSplitEl.style.left = '';
+            navSplitEl.style.right = '';
+            navSplitEl.style.top = '';
+            navSplitEl.style.zIndex = '';
+            navSplitEl.style.pointerEvents = '';
+            navSplitEl.style.paddingLeft = '';
+            navSplitEl.style.paddingRight = '';
+          }
+        }
+        if (overviewSection) {
+          overviewSection.hidden = deepDive;
+          overviewSection.style.display = deepDive ? 'none' : '';
+          overviewSection.style.height = deepDive ? '0' : '';
+          overviewSection.style.minHeight = deepDive ? '0' : '';
+          overviewSection.style.margin = deepDive ? '0' : '';
+          overviewSection.style.padding = deepDive ? '0' : '';
+          overviewSection.style.overflow = deepDive ? 'hidden' : '';
+          overviewSection.setAttribute('aria-hidden', deepDive ? 'true' : 'false');
+        }
+        if (deepDiveSection) {
+          deepDiveSection.hidden = !deepDive;
+          deepDiveSection.style.display = deepDive ? 'block' : 'none';
+          deepDiveSection.style.width = deepDive ? '100%' : '';
+          deepDiveSection.style.margin = deepDive ? '0' : '';
+          deepDiveSection.style.padding = deepDive ? '0 0 80px' : '';
+          deepDiveSection.style.position = deepDive ? 'relative' : '';
+          deepDiveSection.style.top = deepDive ? '0' : '';
+          deepDiveSection.style.left = deepDive ? '0' : '';
+          deepDiveSection.setAttribute('aria-hidden', deepDive ? 'false' : 'true');
+        }
+        if (deepDiveContent) {
+          deepDiveContent.style.width = deepDive ? 'min(760px, 100%)' : '';
+          deepDiveContent.style.margin = deepDive ? '0 auto' : '';
+          deepDiveContent.style.textAlign = deepDive ? 'left' : '';
+        }
+        try {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        } catch (_) {
+          window.scrollTo(0, 0);
+        }
+        syncActiveTab(deepDive ? 'deep-dive' : 'overview');
+        try {
+          const hash = deepDive ? '#deep-dive' : '#overview';
+          if (window.location.hash !== hash) window.history.replaceState(null, '', hash);
+        } catch (_) {}
+      };
+
+      const initialHash = String(window.location.hash || '').toLowerCase();
+      setViewMode(initialHash === '#deep-dive' ? 'deep-dive' : 'overview');
+
+      viewTabs.forEach((tab) => {
+        tab.addEventListener('click', (e) => {
+          e.preventDefault();
+          const mode = (tab.dataset && tab.dataset.view) ? tab.dataset.view : 'overview';
+          setViewMode(mode);
+          tab.focus();
+        });
+      });
+
+      const tabList = document.querySelector('.nav-view-switch [role="tablist"]');
+      if (tabList) {
+        tabList.addEventListener('keydown', (e) => {
+          const key = e.key;
+          if (key !== 'ArrowRight' && key !== 'ArrowLeft' && key !== 'Home' && key !== 'End') return;
+          e.preventDefault();
+          const currentIdx = viewTabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
+          const last = viewTabs.length - 1;
+          let next = currentIdx < 0 ? 0 : currentIdx;
+          if (key === 'ArrowRight') next = currentIdx >= last ? 0 : currentIdx + 1;
+          if (key === 'ArrowLeft') next = currentIdx <= 0 ? last : currentIdx - 1;
+          if (key === 'Home') next = 0;
+          if (key === 'End') next = last;
+          const nextTab = viewTabs[next] || viewTabs[0];
+          const mode = (nextTab && nextTab.dataset && nextTab.dataset.view) ? nextTab.dataset.view : 'overview';
+          setViewMode(mode);
+          try { nextTab.focus(); } catch (_) {}
+        });
+      }
+
+      const bypassTimelineWhenDeepDive = (event) => {
+        if (!isDeepDiveActive()) return;
+        event.stopImmediatePropagation();
+      };
+
+      window.addEventListener('wheel', bypassTimelineWhenDeepDive, { capture: true, passive: false });
+      window.addEventListener('touchstart', bypassTimelineWhenDeepDive, { capture: true, passive: true });
+      window.addEventListener('touchmove', bypassTimelineWhenDeepDive, { capture: true, passive: false });
+      window.addEventListener('touchend', bypassTimelineWhenDeepDive, { capture: true, passive: true });
+      window.addEventListener('keydown', (event) => {
+        if (!isDeepDiveActive()) return;
+        const key = event.key;
+        if (key === 'ArrowDown' || key === 'ArrowUp' || key === 'PageDown' || key === 'PageUp' || key === ' ') {
+          event.stopImmediatePropagation();
+        }
+      }, { capture: true });
+
+      document.addEventListener('click', (event) => {
+        if (!isDeepDiveActive()) return;
+        if (!event.target || !event.target.closest) return;
+        if (!event.target.closest('.paragraph')) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }, true);
+    });
+  </script>
   <script>
     // Disable right-click on protected images
     document.addEventListener('DOMContentLoaded', function() {
