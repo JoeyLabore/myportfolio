@@ -1219,27 +1219,56 @@
               if (tags) tags.remove();
               const flag = tile.querySelector('.tile-flag');
               if (flag) flag.remove();
+              const lockBadge = tile.querySelector('.tile-lock-badge');
+              if (lockBadge) lockBadge.remove();
+              const proj = (tile.dataset && tile.dataset.project) ? String(tile.dataset.project || '').trim().toLowerCase() : '';
               const role = (tile.dataset && tile.dataset.role) ? String(tile.dataset.role || '').trim() : '';
               const industry = (tile.dataset && tile.dataset.industry) ? String(tile.dataset.industry || '').trim() : '';
-              if (!role && !industry) return;
+              if (role || industry) {
+                const tagsWrap = document.createElement('div');
+                tagsWrap.className = 'tile-tags';
 
-              const tagsWrap = document.createElement('div');
-              tagsWrap.className = 'tile-tags';
+                if (role) {
+                  const roleTag = document.createElement('div');
+                  roleTag.className = 'tile-tag tile-tag--role';
+                  roleTag.textContent = role;
+                  tagsWrap.appendChild(roleTag);
+                }
 
-              if (role) {
-                const roleTag = document.createElement('div');
-                roleTag.className = 'tile-tag tile-tag--role';
-                roleTag.textContent = role;
-                tagsWrap.appendChild(roleTag);
+                if (industry) {
+                  const industryTag = document.createElement('div');
+                  industryTag.className = 'tile-tag tile-tag--industry';
+                  industryTag.textContent = industry;
+                  tagsWrap.appendChild(industryTag);
+                }
+
+                tile.appendChild(tagsWrap);
               }
 
-              if (industry) {
-                const industryTag = document.createElement('div');
-                industryTag.className = 'tile-tag tile-tag--industry';
-                industryTag.textContent = industry;
-                tagsWrap.appendChild(industryTag);
+              if (proj === 'toyota') {
+                const lockBadgeWrap = document.createElement('div');
+                lockBadgeWrap.className = 'tile-lock-badge';
+
+                const lockTag = document.createElement('div');
+                lockTag.className = 'tile-tag tile-tag--locked';
+                lockTag.setAttribute('aria-label', 'Password protected project');
+
+                const lockIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                lockIcon.setAttribute('class', 'tile-tag__locked');
+                lockIcon.setAttribute('aria-hidden', 'true');
+                lockIcon.setAttribute('viewBox', '0 0 24 24');
+                lockIcon.setAttribute('width', '14');
+                lockIcon.setAttribute('height', '14');
+                lockIcon.setAttribute('fill', 'currentColor');
+                lockIcon.setAttribute('focusable', 'false');
+                const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                iconPath.setAttribute('d', 'M17 9h-1V7c0-2.76-2.24-5-5-5S6 4.24 6 7v2H5c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-9c0-1.1-.9-2-2-2m-6 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-8H7.9V7c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1z');
+                lockIcon.appendChild(iconPath);
+
+                lockTag.appendChild(lockIcon);
+                lockBadgeWrap.appendChild(lockTag);
+                tile.appendChild(lockBadgeWrap);
               }
-              tile.appendChild(tagsWrap);
             } catch (_) { /* ignore flag errors */ }
           });
         } catch (_) { /* ignore tag injection errors */ }
@@ -1272,7 +1301,24 @@
 
               const h = document.createElement('div');
               h.className = 'tile-hover-overlay__title';
-              h.textContent = title || proj;
+              if (proj === 'toyota') {
+                const titleLock = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                titleLock.setAttribute('class', 'tile-hover-overlay__title-lock');
+                titleLock.setAttribute('aria-hidden', 'true');
+                titleLock.setAttribute('viewBox', '0 0 24 24');
+                titleLock.setAttribute('width', '14');
+                titleLock.setAttribute('height', '14');
+                titleLock.setAttribute('fill', 'currentColor');
+                titleLock.setAttribute('focusable', 'false');
+                const titleLockPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                titleLockPath.setAttribute('d', 'M17 9h-1V7c0-2.76-2.24-5-5-5S6 4.24 6 7v2H5c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-9c0-1.1-.9-2-2-2m-6 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-8H7.9V7c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1z');
+                titleLock.appendChild(titleLockPath);
+                h.appendChild(titleLock);
+              }
+
+              const hText = document.createElement('span');
+              hText.textContent = title || proj;
+              h.appendChild(hText);
               header.appendChild(h);
 
               const arrow = document.createElement('div');
