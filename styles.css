@@ -111,6 +111,8 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item .deep-dive-content-block__label {
   color: #ffffff;
+  font-size: 14px;
+  line-height: 140%;
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-divider {
   margin: 0;
