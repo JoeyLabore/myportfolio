@@ -1310,7 +1310,7 @@
 
                 const progressTag = document.createElement('div');
                 progressTag.className = 'tile-tag tile-tag--progress';
-                progressTag.setAttribute('aria-label', 'Project currently in progress');
+                progressTag.setAttribute('aria-label', 'Project currently building');
 
                 const rocket = document.createElement('img');
                 rocket.className = 'tile-tag__rocket';
@@ -1319,7 +1319,7 @@
                 rocket.setAttribute('aria-hidden', 'true');
 
                 const label = document.createElement('span');
-                label.textContent = 'In Progress';
+                label.textContent = 'Building';
 
                 progressTag.appendChild(rocket);
                 progressTag.appendChild(label);
@@ -2923,7 +2923,7 @@
         || /(^|\/)2\.svg$/i.test(srcPath)
         // Removed 3.jpg to match behavior of images 1, 4, and 5
         || /(^|\/)6\.svg$/i.test(srcPath)
-        || /(^|\/)8\.jpg$/i.test(srcPath)
+        || (/(^|\/)8\.jpg$/i.test(srcPath) && !/(^|\/)virelia\/8\.jpg$/i.test(srcPath))
         // Virelia: keep 3,5.png and 10.svg original aspect ratio
         || /(^|\/)3,5\.png$/i.test(srcPath)
         || /(^|\/)7\.png$/i.test(srcPath)
