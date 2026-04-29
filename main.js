@@ -417,18 +417,18 @@
     "./assets/trd/6.jpeg",
   ];
 
-  const VIRELIA_FILES = [
-    "./assets/virelia/1.jpg",
-    "./assets/virelia/2.svg",
-    "./assets/virelia/3.jpg",
-    "./assets/virelia/3,5.png",
-    "./assets/virelia/4.jpg",
-    "./assets/virelia/5.png",
-    "./assets/virelia/6.jpg",
-    "./assets/virelia/7.png",
-    "./assets/virelia/8.jpg",
-    "./assets/virelia/9.jpg",
-    "./assets/virelia/10.svg",
+  const RELIAS_FILES = [
+    "./assets/relias/1.jpg",
+    "./assets/relias/2.svg",
+    "./assets/relias/3.jpg",
+    "./assets/relias/3,5.png",
+    "./assets/relias/4.jpg",
+    "./assets/relias/5.png",
+    "./assets/relias/6.jpg",
+    "./assets/relias/7.png",
+    "./assets/relias/8.jpg",
+    "./assets/relias/9.jpg",
+    "./assets/relias/10.svg",
   ];
 
   function getCaseStudyFiles() {
@@ -438,7 +438,7 @@
       if (p.includes('tom.html') || t.includes('tom')) return TOM_FILES;
       if (p.includes('toyota.html') || t.includes('toyota')) return TRD_FILES;
       if (p.includes('nestbank.html') || t.includes('nestbank')) return NESTBANK_FILES;
-      if (p.includes('virelia.html') || t.includes('virelia')) return VIRELIA_FILES;
+      if (p.includes('relias.html') || p.includes('virelia.html') || t.includes('relias') || t.includes('virelia')) return RELIAS_FILES;
     } catch (_) {}
     return NESTBANK_FILES;
   }
@@ -1266,7 +1266,7 @@
                 tile.appendChild(tagsWrap);
               }
 
-              if (proj === 'toyota') {
+              if (proj === 'toyota' || proj === 'relias') {
                 const lockBadgeWrap = document.createElement('div');
                 lockBadgeWrap.className = 'tile-lock-badge';
 
@@ -1421,7 +1421,7 @@
                 titleExternal.appendChild(titleExternalPathB);
                 h.appendChild(titleExternal);
               }
-              if (proj === 'toyota') {
+              if (projKey === 'toyota' || projKey === 'relias') {
                 const titleLock = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 titleLock.setAttribute('class', 'tile-hover-overlay__title-lock');
                 titleLock.setAttribute('aria-hidden', 'true');
@@ -1501,14 +1501,14 @@
           const projectToUrl = {
             nestbank: './nestbank.html',
             toyota: './toyota.html',
-            relias: './virelia.html',
+            relias: './relias.html',
             tom: './tom.html',
             logofolio: './logofolio.html',
           };
           const projectToFiles = {
             nestbank: (typeof NESTBANK_FILES !== 'undefined' ? NESTBANK_FILES : null),
             toyota: (typeof TRD_FILES !== 'undefined' ? TRD_FILES : null),
-            relias: (typeof VIRELIA_FILES !== 'undefined' ? VIRELIA_FILES : null),
+            relias: (typeof RELIAS_FILES !== 'undefined' ? RELIAS_FILES : null),
             tom: (typeof TOM_FILES !== 'undefined' ? TOM_FILES : null),
           };
 
@@ -1760,13 +1760,13 @@
           try { v.play().catch(() => {}); } catch (_) {}
         }
         
-        // Lazy-init the Virelia image and attach to the Virelia tile (by data-project)
-        function ensureVireliaVideo() {
+        // Lazy-init the Relias image and attach to the Relias tile (by data-project)
+        function ensureReliasVideo() {
           if (reliasVideo) return;
           const t = getTileByProject('relias');
           if (!t) return;
 
-          // Virelia is rendered via CSS thumbnail plate; keep a truthy ref to prevent re-init
+          // Relias is rendered via CSS thumbnail plate; keep a truthy ref to prevent re-init
           reliasVideo = true;
         }
 
@@ -1795,7 +1795,7 @@
             try { if (orionVideo && orionVideo.paused) orionVideo.play().catch(() => {}); } catch (_) {}
             try { if (!kintiVideo) ensureKintiVideo(); } catch (_) {}
             try { if (kintiVideo && kintiVideo.paused) kintiVideo.play().catch(() => {}); } catch (_) {}
-            try { if (!reliasVideo) ensureVireliaVideo(); } catch (_) {}
+            try { if (!reliasVideo) ensureReliasVideo(); } catch (_) {}
           } catch (_) { /* ignore */ }
         };
         const clearSelectedTiles = () => {
@@ -1925,7 +1925,7 @@
         const navigateProject = (proj) => {
           if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
           if (proj === 'toyota') { navigateWithOverlay('./toyota.html'); return; }
-          if (proj === 'relias') { navigateWithOverlay('./virelia.html'); return; }
+          if (proj === 'relias') { navigateWithOverlay('./relias.html'); return; }
           if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
           if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
           if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
@@ -1993,7 +1993,7 @@
         try { ensureOrionVideo(); } catch (_) {}
         try { ensureKintiVideo(); } catch (_) {}
         try { ensureSkilldexVideo(); } catch (_) {}
-        try { ensureVireliaVideo(); } catch (_) {}
+        try { ensureReliasVideo(); } catch (_) {}
 
         // Hover-proxy: when cursor is in the gaps between tiles, slightly expand the nearest tile
         try {
@@ -2954,8 +2954,8 @@
         || /(^|\/)2\.svg$/i.test(srcPath)
         // Removed 3.jpg to match behavior of images 1, 4, and 5
         || /(^|\/)6\.svg$/i.test(srcPath)
-        || (/(^|\/)8\.jpg$/i.test(srcPath) && !/(^|\/)virelia\/8\.jpg$/i.test(srcPath))
-        // Virelia: keep 3,5.png and 10.svg original aspect ratio
+        || (/(^|\/)8\.jpg$/i.test(srcPath) && !/(^|\/)relias\/8\.jpg$/i.test(srcPath))
+        // Relias: keep 3,5.png and 10.svg original aspect ratio
         || /(^|\/)3,5\.png$/i.test(srcPath)
         || /(^|\/)7\.png$/i.test(srcPath)
         || /(^|\/)10\.svg$/i.test(srcPath)) {
@@ -3024,8 +3024,8 @@
       if (p.includes('toyota.html') || t.includes('toyota')) {
         return { index: 0, progress: 0.25 }; // Start with 1.jpg and show 2.svg at 25% scroll
       }
-      if (p.includes('virelia.html') || t.includes('virelia')) {
-        const isSmallVireliaScreen = (() => {
+      if (p.includes('relias.html') || p.includes('virelia.html') || t.includes('relias') || t.includes('virelia')) {
+        const isSmallReliasScreen = (() => {
           try {
             const w1 = Number(window && window.innerWidth) || Infinity;
             const w2 = Number(document && document.documentElement && document.documentElement.clientWidth) || Infinity;
@@ -3034,7 +3034,7 @@
             return narrowByWidth || narrowByMedia;
           } catch (_) { return false; }
         })();
-        return { index: 0, progress: isSmallVireliaScreen ? 0.6 : 0.19 }; // Use deeper start on <=600px
+        return { index: 0, progress: isSmallReliasScreen ? 0.6 : 0.19 }; // Use deeper start on <=600px
       }
     } catch (_) {}
     // Default: show 2nd image with 60% into next (3rd)
@@ -3696,10 +3696,10 @@
       if (isImpact) {
         // Check which page we're on
         const isToyotaPage = window.location.pathname.includes('toyota.html') || document.title.toLowerCase().includes('toyota');
-        const isVireliaPage = window.location.pathname.includes('virelia.html') || document.title.toLowerCase().includes('virelia');
+        const isReliasPage = window.location.pathname.includes('relias.html') || window.location.pathname.includes('virelia.html') || document.title.toLowerCase().includes('relias') || document.title.toLowerCase().includes('virelia');
         
         // Use different titles based on the page
-        const titles = isVireliaPage ? [
+        const titles = isReliasPage ? [
           'Reduced transcript creation time by shifting from manual drafting to AI-first generation',
           'Accelerated time to market for new educational content',
           'Decreased rework and errors across writing, QA, and compliance',

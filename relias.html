@@ -18,7 +18,8 @@
     <!-- Manrope font to match Figma token font/family/manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css?v=3" />
   </head>
   <body>
@@ -38,6 +39,15 @@
             </a>
           </div>
         </header>
+        <header class="nav-bar nav-middle nav-view-switch" aria-label="Case study view switch">
+          <nav class="tabs" role="tablist" aria-label="Relias case study views">
+            <a href="#overview" class="nav-item active" role="tab" aria-selected="true" tabindex="0" data-view="overview">Overview</a>
+            <a href="#deep-dive" class="nav-item nav-item--with-icon" role="tab" aria-selected="false" tabindex="-1" data-view="deep-dive">
+              <span class="nav-item__label-full">Deep Dive</span>
+              <span class="nav-item__label-compact">Process</span>
+            </a>
+          </nav>
+        </header>
         <header class="nav-bar nav-right" data-name="nav-right" aria-label="Email">
           <a class="nav-item" href="mailto:joey.greenwood1997@gmail.com">
             Lets Connect
@@ -50,7 +60,7 @@
 
       <!-- Main content -->
       <main class="main" data-name="main" data-node-id="816:15570">
-        <section class="paragraph-containers" data-name="paragraph-containers" data-node-id="816:15617">
+        <section id="overview" class="paragraph-containers" data-name="paragraph-containers" data-node-id="816:15617">
           <div class="paragraph-col">
             <div class="paragraph" data-name="text-container" data-node-id="816:15618">
               <p class="text-label" data-node-id="816:15619">Project Background</p>
@@ -60,8 +70,8 @@
                 <br />
                 <ul class="project-overview">
                   <li><strong>Client:</strong> Relias</li>
-                  <li><strong>Industry:</strong> Healthcare Education</li>
-                  <li><strong>Duration:</strong> 2024–2025</li>
+                  <li><strong>Type of work:</strong> Enterprise UX</li>
+                  <li><strong>Duration:</strong> 2024-2026</li>
                   <li><strong>My Role:</strong> Product Design Lead. I led the design of AI-driven content workflows and platform experiences.</li>
                 </ul>
               </div>
@@ -115,8 +125,534 @@
             </div>
           </div>
         </section>
+        <section id="deep-dive" class="deep-dive-article" aria-label="Toyota deep dive article">
+          <nav class="deep-dive-toc" aria-label="Table of contents">
+            <p class="deep-dive-toc__title">Contents</p>
+            <a class="deep-dive-toc__link" href="#section-overview">Overview</a>
+            <a class="deep-dive-toc__link" href="#section-02">Current State</a>
+            <a class="deep-dive-toc__link" href="#section-03">Key Insights</a>
+            <a class="deep-dive-toc__link" href="#section-04">Future State</a>
+            <a class="deep-dive-toc__link" href="#section-05">Initial Designs</a>
+            <a class="deep-dive-toc__link" href="#section-06">Validate &amp; Refine</a>
+            <a class="deep-dive-toc__link" href="#section-07">Final Design</a>
+            <a class="deep-dive-toc__link" href="#section-08">Dev Handoff</a>
+          </nav>
+          <article class="deep-dive-article__content">
+            <section class="deep-dive-section deep-dive-section--intro" aria-label="Article title and tags">
+              <p class="deep-dive-article__eyebrow"><span>Relias</span><span>Enterprise UX</span><span>2024 - 2026</span></p>
+              <h1 class="deep-dive-article__title">Designing an AI-First Content Creation Platform for Healthcare Education</h1>
+            </section>
+
+            <section class="deep-dive-section deep-dive-section--hero-image" aria-label="Lead image">
+              <img class="deep-dive-article__image" src="./assets/relias/1.jpg" alt="Toyota Racing Development project visual" />
+            </section>
+
+            <section class="deep-dive-section deep-dive-section--project-meta" aria-label="Project metadata">
+              <div class="deep-dive-meta">
+                <div class="deep-dive-meta__item">
+                  <h2 class="deep-dive-meta__label">Role</h2>
+                  <p class="deep-dive-meta__text">Product Design Lead</p>
+                </div>
+                <div class="deep-dive-meta__item">
+                  <h2 class="deep-dive-meta__label">Team</h2>
+                  <p class="deep-dive-meta__text">Product Designers (1)<br />Product Strategist (1)<br />Project Manager (1)<br />Delivery Manager (1)<br />Business Analyst (1)<br />Architects (1)<br />AI Engineers (2)<br />Dev Lead (1)<br />Dev Ops Engineer (1)<br />QA Engineers (2)<br />Front-End Devs (3)<br />Backend Devs (2)</p>
+                </div>
+                <div class="deep-dive-meta__item">
+                  <h2 class="deep-dive-meta__label">Responsibilities</h2>
+                  <p class="deep-dive-meta__text">Product Design<br />Visual &amp; UI Design<br />Product Strategy<br />UX Research<br />Usability Testing<br />Design System Creation<br />AI Prototype Building<br />Stakeholder Management<br />Leadership &amp; Direction</p>
+                </div>
+              </div>
+              <div class="deep-dive-meta__disclaimer">
+                <h3 class="deep-dive-meta__disclaimer-title">Note on confidentiality</h3>
+                <p class="deep-dive-meta__disclaimer-text">This case study reflects work conducted across a complex internal ecosystem. To respect confidentiality, certain visuals and details have been simplified, anonymised, or omitted. The content presented here focuses on communicating my process, thinking, and key outcomes.</p>
+              </div>
+            </section>
+
+            <section class="deep-dive-section deep-dive-section--content" aria-label="Article content sections">
+              <div id="section-overview">
+                <article class="deep-dive-content-block">
+                  <p class="deep-dive-content-block__label">Problem</p>
+                  <h2 class="deep-dive-content-block__title">Adapting to a Rapidly Changing Landscape</h2>
+                  <p class="deep-dive-article__paragraph">As generative AI was impacting the world, Relias felt they faced a critical risk: evolve or be outpaced by faster, AI-driven competitors.</p>
+                  <p class="deep-dive-article__paragraph">While writers were already using tools like ChatGPT, usage was fragmented. This gap between AI capability and existing processes led Relias to pursue a more integrated approach, aiming to reduce transcript production time by 35% while maintaining accuracy, compliance, and quality.</p>
+                </article>
+                <article class="deep-dive-content-block">
+                  <p class="deep-dive-content-block__label">Solution</p>
+                  <h2 class="deep-dive-content-block__title">A Unified Content System</h2>
+                  <p class="deep-dive-article__paragraph">To help Relias move from fragmented ChatGPT usage to a unified, AI-integrated workflow, we designed a centralised Content Studio platform.</p>
+                  <p class="deep-dive-article__paragraph">AI was embedded across writing, review, and build processes, focusing on transcript generation and supporting the business goal of a 35% reduction in production time.</p>
+                  <p class="deep-dive-article__paragraph">At the same time, the solution extended beyond AI. Addressing underlying inefficiencies by unifying fragmented workflows into a single system, reducing duplication, improving visibility, and streamlining collaboration across teams.</p>
+                </article>
+              </div>
+              <hr class="deep-dive-content-divider" aria-hidden="true" />
+              <article id="section-02" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">01 Understanding Current State</p>
+                <h2 class="deep-dive-content-block__title">Uncovering a System in Transition</h2>
+                <p class="deep-dive-article__paragraph">We conducted a four-week discovery phase, beginning with on-site workshops and stakeholder interviews. Through these sessions with writers, reviewers, and leadership, we mapped the end-to-end content creation process.</p>
+                <p class="deep-dive-article__paragraph">Initially, before our investigation, there was no clear “broken” workflow. Existing processes were functional. Our focus was to understand how users currently create and review content, identify where AI was already being used informally, uncover inefficiencies, risks, and opportunities for integration.</p>
+                <p class="deep-dive-article__paragraph">We weren’t solving a visible problem, we were uncovering how to evolve a working system.</p>
+                <div class="deep-dive-content-block__media">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain" src="./assets/relias/jounrey-map.png" alt="Understanding the system visual" />
+                  <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Current State Journey Map</p>
+                </div>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article id="section-03" class="deep-dive-content-block deep-dive-content-block--insights">
+                <h2 class="deep-dive-content-block__title">Key Insights</h2>
+                <div class="deep-dive-insights-list">
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">01. HIGHLY MANUAL AND REPETITIVE WORK</p>
+                    <p class="deep-dive-article__paragraph">Teams spend a large amount of time copying, pasting, reformatting, and re-entering information across tools instead of creating content. This slows production and introduces avoidable errors.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">02. DISCONNECTED TOOLS AND FRAGMENTED WORKFLOW</p>
+                    <p class="deep-dive-article__paragraph">The process is split across multiple systems that don’t integrate well, causing poor handoffs, lost context, and inefficiencies throughout the lifecycle.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">03. INEFFICIENT REVIEW, QA, AND VERSIONING</p>
+                    <p class="deep-dive-article__paragraph">Feedback is scattered, changes are hard to track, and multiple review layers create bottlenecks. QA repeatedly catches preventable issues, and version control is messy.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">04. INCONSISTENT CONTENT QUALITY, ALIGNMENT, AND BRAND VOICE</p>
+                    <p class="deep-dive-article__paragraph">There’s no system enforcing alignment between learning objectives, content, and assessments. Quality, tone, and brand voice vary across courses, and standards are checked manually instead of systematically.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">05. LIMITED TRACEABILITY AND TRUST IN CONTENT (ESPECIALLY AI)</p>
+                    <p class="deep-dive-article__paragraph">It’s difficult to see what was generated vs. edited, why changes were made, and whether sources are valid. This creates risk for compliance and reduces confidence in outputs.</p>
+                  </div>
+                </div>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article id="section-04" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">03 Explore future state</p>
+                <h2 class="deep-dive-content-block__title">Shifting Mindsets</h2>
+                <p class="deep-dive-article__paragraph">It was critical to involve users directly in shaping the future of the system. Through collaborative workshops with writers, reviewers, and stakeholders, we explored how content workflows could evolve beyond their current state. Conversations naturally defaulted to improving existing processes rather than rethinking them. To move forward, we reframed discussions around the future: how roles would change, how work would be supported, and what an ideal workflow could look like in a more integrated system.</p>
+                <p class="deep-dive-article__paragraph">This shift surfaced several key ideas and requests. One consistent need was better support for maintaining visual and content standards. Writers relied on Word-based templated to format titles, copy, and structure, yet these were manually applied and often inconsistent. This presented an opportunity to embed these standards directly into the system, removing the need for manual formatting and ensuring consistency by design.</p>
+                <div class="deep-dive-image-row deep-dive-image-row--stacked" aria-label="Future-state exploration visuals">
+                  <div class="deep-dive-image-row__card deep-dive-image-row__card--captioned">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="./assets/relias/workshop.jpg" alt="Future-state exploration visual one" />
+                    <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow deep-dive-content-block__image-caption--left">Collaborative Workshop Session Board</p>
+                  </div>
+                  <p class="deep-dive-article__paragraph">Before moving into interface design, it was essential to align on how the system should function at a structural level. Using insights gathered from workshops and discovery, we developed and iterated on multiple future-state artifacts, including journey maps, user flows, and product diagrams. These helped us visualize how content would move through the system, how responsibilities would shift, and where automation could support each stage.</p>
+                  <p class="deep-dive-article__paragraph">In parallel, we explored how user roles themselves would evolve, moving from content creators to editors, validators, and decision-makers within a more system-driven workflow.</p>
+                  <div class="deep-dive-image-row__card deep-dive-image-row__card--captioned">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="./assets/relias/future-state-flow.png" alt="Future-state exploration visual two" />
+                    <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Future State Product Diagram</p>
+                  </div>
+                </div>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article id="section-05" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">04 Initial Prototypes &amp; Screens</p>
+                <h2 class="deep-dive-content-block__title">Showing Less, Enabling More</h2>
+                <p class="deep-dive-article__paragraph">We explored a wide range of interface concepts and layouts, testing different ways to support writing, research, and review workflows.</p>
+                <p class="deep-dive-article__paragraph">A key breakthrough came when we realised that many of these functions, searching, generating suggestions, and manually adding some content, could be consolidated into a single interaction model. With AI acting as a central assistant, these actions no longer required separate UI components, allowing users to request what they need in context.</p>
+                <p class="deep-dive-article__paragraph">This shift simplified the interface, reduced the number of steps required to complete tasks. It also reduced frontend complexity, making the system easier to build and scale.</p>
+                <div class="deep-dive-content-block__media">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain" src="./assets/relias/concepts.jpg" alt="Initial prototypes and screens concept" />
+                  <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Before → After: Simplifying the Interface</p>
+                </div>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article id="section-06" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">05 Validate &amp; Refine the Solution</p>
+                <h2 class="deep-dive-content-block__title">Testing Beyond the Interface with AI Prototypes</h2>
+                <p class="deep-dive-article__paragraph">Traditional Figma prototypes were not sufficient for testing interactions with a language model. Static screens could not capture how users would actually engage with a system driven by conversation and dynamic responses.</p>
+                <p class="deep-dive-article__paragraph">To address this, I built a production-like prototype by using Figma’s MCP to build the interface with lightweight AI agents integrated into the UI via OpenAI’s API. This allowed us to simulate real interactions between users and the system.</p>
+                <p class="deep-dive-article__paragraph">These prototypes enabled us to go beyond usability testing and observe behavior in context, how users think, how they phrase requests, what they expect from responses, and how they navigate tasks through conversation.</p>
+                <p class="deep-dive-article__paragraph">This approach also provided valuable insights for the development team, helping inform how AI agents should be structured, orchestrated, and integrated into the product.</p>
+                <div class="deep-dive-content-block__media" aria-label="Section 06 visual">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain" src="./assets/relias/user-testing.png" alt="Section 06 visual" />
+                  <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Production Prototype Testing Session</p>
+                </div>
+                <p class="deep-dive-article__paragraph">One of the most interesting insights emerged during testing: users naturally defaulted to conversation over traditional interface patterns.</p>
+                <p class="deep-dive-article__paragraph">In several cases, users attempted to continue workflows by asking the system directly, rather than using buttons or predefined UI actions. This highlighted a shift in mental models, where users expected the system to respond dynamically to intent, not just structured inputs.</p>
+                <div class="deep-dive-content-block__media" aria-label="Section 06 demo video">
+                  <video class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain deep-dive-content-block__video" src="./assets/relias/demo-example.mp4" autoplay muted loop playsinline preload="metadata"></video>
+                  <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Production Prototype Demo. Rebranded for Confidentiality.</p>
+                </div>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article id="section-07" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">06 Final Design &amp; Refinement</p>
+                <h2 class="deep-dive-content-block__title">Aligning design with real system behavior</h2>
+                <p class="deep-dive-article__paragraph">Building on validated insights, we translated learnings from co-creation and testing into the final design. A key focus was aligning design with how the system actually works. The solution relied on specialised agents coordinated by an orchestration layer, shaping how features, interactions, and responsibilities were structured.</p>
+                <p class="deep-dive-article__paragraph">This extended into conversational design, defining how the system responds, guides users, and supports decision-making. By grounding decisions in both user behavior and system capabilities, we created a solution that is intuitive, feasible, and scalable.</p>
+                <div class="deep-dive-content-block__media">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain" src="./assets/relias/6.jpg" alt="Final design and refinement visual" />
+                </div>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article id="section-08" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">07 Design to Delivery</p>
+                <h2 class="deep-dive-content-block__title">Designing for Scale</h2>
+                <p class="deep-dive-article__paragraph">We developed an initial UI kit to support the first phase of the product build, enabling rapid development across a four-month delivery timeline.</p>
+                <p class="deep-dive-article__paragraph">As the product evolved, this foundation was expanded into a scalable design system. Using atomic design principles, we created a structured set of components that ensured consistency, improved development efficiency, and supported future growth. This approach allowed the team to move quickly in the early stages while establishing a system that could scale alongside the product.</p>
+                <div class="deep-dive-image-row deep-dive-image-row--two" aria-label="Handoff visuals">
+                  <div class="deep-dive-image-row__card">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="./assets/relias/design-system-1.png" alt="Handoff visual one" />
+                  </div>
+                  <div class="deep-dive-image-row__card">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="./assets/relias/design-system-2.png" alt="Handoff visual two" />
+                  </div>
+                </div>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+              <article class="deep-dive-content-block deep-dive-content-block--closing">
+                <img class="deep-dive-closing__rocket" src="./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png" alt="Animated rocket icon" />
+                <h2 class="deep-dive-content-block__title">You're all caught up</h2>
+                <p class="deep-dive-closing__text">This is an active, evolving project.</p>
+                <p class="deep-dive-closing__text">The product has just recently launched so, we continue to develop this case study as we monitor performance, gathering feedback, and iterating on what’s been implemented.</p>
+              </article>
+            </section>
+          </article>
+        </section>
       </main>
     </div>
   </body>
+  <script>
+    (function ensureReliasPageAccess() {
+      const PAGE_PASSWORD = 'peekaboo';
+      const PAGE_UNLOCK_KEY = 'relias_page_unlocked';
+
+      const hasPageAccess = () => {
+        try {
+          return sessionStorage.getItem(PAGE_UNLOCK_KEY) === '1';
+        } catch (_) {
+          return false;
+        }
+      };
+
+      if (hasPageAccess()) {
+        window.__reliasPageUnlocked = true;
+        return;
+      }
+
+      const entered = window.prompt('Enter password to access this page:');
+      if (entered === null) {
+        try { window.location.replace('./index.html'); } catch (_) { window.location.href = './index.html'; }
+        return;
+      }
+
+      const ok = entered.trim() === PAGE_PASSWORD;
+      if (!ok) {
+        window.alert('Incorrect password.');
+        try { window.location.replace('./index.html'); } catch (_) { window.location.href = './index.html'; }
+        return;
+      }
+
+      try {
+        sessionStorage.setItem(PAGE_UNLOCK_KEY, '1');
+      } catch (_) {}
+      window.__reliasPageUnlocked = true;
+    })();
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.__reliasPageUnlocked !== true) return;
+      const viewTabs = Array.from(document.querySelectorAll('.nav-view-switch .nav-item[data-view]'));
+      const tocLinks = Array.from(document.querySelectorAll('.deep-dive-toc__link[href^="#"]'));
+      if (!viewTabs.length) return;
+      const mainEl = document.querySelector('.page[data-name="case study page"] .main');
+      const tocEl = document.querySelector('.deep-dive-toc');
+      const navViewSwitch = document.querySelector('.nav-view-switch');
+      const overviewSection = document.getElementById('overview');
+      const deepDiveSection = document.getElementById('deep-dive');
+      const deepDiveContent = deepDiveSection ? deepDiveSection.querySelector('.deep-dive-article__content') : null;
+      const revealItems = deepDiveContent ? Array.from(deepDiveContent.querySelectorAll([
+        '.deep-dive-meta__label',
+        '.deep-dive-meta__text',
+        '.deep-dive-meta__disclaimer-title',
+        '.deep-dive-meta__disclaimer-text',
+        '.deep-dive-content-block__label',
+        '.deep-dive-content-block__title',
+        '.deep-dive-article__paragraph',
+        '.deep-dive-content-block__media',
+        '.deep-dive-image-row',
+        '.deep-dive-image-row__card',
+        '.deep-dive-content-divider',
+        '.deep-dive-closing__rocket',
+        '.deep-dive-closing__text',
+      ].join(','))) : [];
+      const closingRocket = document.querySelector('.deep-dive-closing__rocket');
+
+      if (closingRocket) {
+        const rocketFrames = [
+          './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png',
+          './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png',
+          './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-03.png',
+        ];
+        let frameIndex = 0;
+        window.setInterval(() => {
+          frameIndex = (frameIndex + 1) % rocketFrames.length;
+          closingRocket.src = rocketFrames[frameIndex];
+        }, 140);
+      }
+
+      try {
+        if (mainEl && deepDiveSection && !mainEl.contains(deepDiveSection)) {
+          mainEl.appendChild(deepDiveSection);
+        }
+      } catch (_) {}
+
+      const syncActiveTab = (mode) => {
+        viewTabs.forEach((tab, idx) => {
+          const active = tab.dataset.view === mode;
+          tab.classList.toggle('active', active);
+          tab.setAttribute('aria-selected', active ? 'true' : 'false');
+          tab.tabIndex = active ? 0 : -1;
+          if (active && idx >= 0) {
+            tab.setAttribute('aria-current', 'page');
+          } else {
+            tab.removeAttribute('aria-current');
+          }
+        });
+      };
+
+      const isDeepDiveActive = () => document.body.classList.contains('toyota-deep-dive');
+      let revealObserver = null;
+
+      const syncTocPosition = () => {
+        if (!tocEl || !deepDiveSection || !isDeepDiveActive()) return;
+        const sectionTop = deepDiveSection.getBoundingClientRect().top - 8;
+        const navBottom = navViewSwitch ? navViewSwitch.getBoundingClientRect().bottom : 0;
+        const stickyTop = navBottom + 16;
+        const nextTop = Math.max(stickyTop, sectionTop);
+        tocEl.style.top = `${Math.round(nextTop)}px`;
+      };
+
+      const setupContentReveal = () => {
+        if (!revealItems.length || !deepDiveContent) return;
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (revealObserver) {
+          revealObserver.disconnect();
+          revealObserver = null;
+        }
+        if (!isDeepDiveActive() || reducedMotion || !('IntersectionObserver' in window)) {
+          document.body.classList.remove('deep-dive-reveal-ready');
+          revealItems.forEach((item) => {
+            item.classList.add('deep-dive-reveal-item', 'is-revealed');
+          });
+          return;
+        }
+        document.body.classList.add('deep-dive-reveal-ready');
+        revealItems.forEach((item) => {
+          item.classList.add('deep-dive-reveal-item');
+          item.classList.remove('is-revealed');
+        });
+        revealObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('is-revealed');
+            revealObserver.unobserve(entry.target);
+          });
+        }, {
+          root: null,
+          rootMargin: '0px 0px -10% 0px',
+          threshold: 0.12,
+        });
+        revealItems.forEach((item) => revealObserver.observe(item));
+      };
+
+      const setViewMode = (mode) => {
+        const deepDive = mode === 'deep-dive';
+        document.body.classList.toggle('toyota-deep-dive', deepDive);
+        if (!deepDive) {
+          document.body.classList.remove('deep-dive-intro-visible');
+        }
+        document.documentElement.classList.remove('ui-exited');
+        if (mainEl) {
+          if (deepDive) {
+            mainEl.style.display = 'block';
+            mainEl.style.alignItems = 'initial';
+            mainEl.style.justifyContent = 'flex-start';
+            mainEl.style.paddingTop = 'calc(var(--nav-card-height) + (2 * var(--space-s)) + 64px)';
+            mainEl.style.gap = '0';
+          } else {
+            mainEl.style.display = '';
+            mainEl.style.alignItems = '';
+            mainEl.style.justifyContent = '';
+            mainEl.style.paddingTop = '';
+            mainEl.style.gap = '';
+          }
+        }
+
+        if (overviewSection) {
+          overviewSection.hidden = deepDive;
+          overviewSection.style.display = deepDive ? 'none' : '';
+          overviewSection.style.height = deepDive ? '0' : '';
+          overviewSection.style.minHeight = deepDive ? '0' : '';
+          overviewSection.style.margin = deepDive ? '0' : '';
+          overviewSection.style.padding = deepDive ? '0' : '';
+          overviewSection.style.overflow = deepDive ? 'hidden' : '';
+          overviewSection.setAttribute('aria-hidden', deepDive ? 'true' : 'false');
+        }
+
+        if (deepDiveSection) {
+          deepDiveSection.hidden = !deepDive;
+          deepDiveSection.style.display = deepDive ? 'block' : 'none';
+          deepDiveSection.style.width = deepDive ? '100%' : '';
+          deepDiveSection.style.margin = deepDive ? '0' : '';
+          deepDiveSection.style.padding = deepDive ? '0 0 80px' : '';
+          deepDiveSection.style.position = deepDive ? 'relative' : '';
+          deepDiveSection.style.top = deepDive ? '0' : '';
+          deepDiveSection.style.left = deepDive ? '0' : '';
+          deepDiveSection.setAttribute('aria-hidden', deepDive ? 'false' : 'true');
+        }
+
+        if (deepDiveContent) {
+          deepDiveContent.style.width = deepDive ? 'min(760px, 100%)' : '';
+          deepDiveContent.style.margin = deepDive ? '0 auto' : '';
+          deepDiveContent.style.textAlign = deepDive ? 'left' : '';
+        }
+
+        syncActiveTab(deepDive ? 'deep-dive' : 'overview');
+        try {
+          const hash = deepDive ? '#deep-dive' : '#overview';
+          if (window.location.hash !== hash) window.history.replaceState(null, '', hash);
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        } catch (_) {}
+
+        if (deepDive) {
+          document.body.classList.remove('deep-dive-intro-visible');
+          window.requestAnimationFrame(() => {
+            document.body.classList.add('deep-dive-intro-visible');
+          });
+          window.requestAnimationFrame(syncTocPosition);
+          window.requestAnimationFrame(setupContentReveal);
+        } else {
+          setupContentReveal();
+        }
+      };
+
+      const initialHash = String(window.location.hash || '').toLowerCase();
+      setViewMode(initialHash === '#deep-dive' ? 'deep-dive' : 'overview');
+      window.addEventListener('scroll', syncTocPosition, { passive: true });
+      window.addEventListener('resize', syncTocPosition);
+
+      viewTabs.forEach((tab) => {
+        tab.addEventListener('click', (e) => {
+          e.preventDefault();
+          const mode = (tab.dataset && tab.dataset.view) ? tab.dataset.view : 'overview';
+          setViewMode(mode);
+          tab.focus();
+        });
+      });
+
+      tocLinks.forEach((link) => {
+        link.addEventListener('click', (e) => {
+          const targetId = (link.getAttribute('href') || '').trim();
+          if (!targetId || !targetId.startsWith('#')) return;
+          const targetEl = document.querySelector(targetId);
+          if (!targetEl) return;
+          e.preventDefault();
+          try {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } catch (_) {
+            targetEl.scrollIntoView();
+          }
+          try {
+            if (window.location.hash !== targetId) window.history.replaceState(null, '', targetId);
+          } catch (_) {}
+        });
+      });
+
+      const tocTargets = tocLinks
+        .map((link) => {
+          const targetId = (link.getAttribute('href') || '').trim();
+          if (!targetId || !targetId.startsWith('#')) return null;
+          const targetEl = document.querySelector(targetId);
+          if (!targetEl) return null;
+          return { link, targetEl, targetId };
+        })
+        .filter(Boolean);
+
+      const setActiveTocLink = (activeId) => {
+        tocTargets.forEach(({ link, targetId }) => {
+          const isActive = targetId === activeId;
+          link.classList.toggle('is-active', isActive);
+          if (isActive) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+      };
+
+      if (tocTargets.length) {
+        setActiveTocLink(tocTargets[0].targetId);
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver((entries) => {
+            const visible = entries
+              .filter((entry) => entry.isIntersecting)
+              .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+            if (!visible.length) return;
+            const nextId = `#${visible[0].target.id}`;
+            setActiveTocLink(nextId);
+          }, {
+            root: null,
+            rootMargin: '-26% 0px -58% 0px',
+            threshold: 0,
+          });
+          tocTargets.forEach(({ targetEl }) => observer.observe(targetEl));
+        }
+      }
+
+      const tabList = document.querySelector('.nav-view-switch [role="tablist"]');
+      if (tabList) {
+        tabList.addEventListener('keydown', (e) => {
+          const key = e.key;
+          if (key !== 'ArrowRight' && key !== 'ArrowLeft' && key !== 'Home' && key !== 'End') return;
+          e.preventDefault();
+          const currentIdx = viewTabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
+          const last = viewTabs.length - 1;
+          let next = currentIdx < 0 ? 0 : currentIdx;
+          if (key === 'ArrowRight') next = currentIdx >= last ? 0 : currentIdx + 1;
+          if (key === 'ArrowLeft') next = currentIdx <= 0 ? last : currentIdx - 1;
+          if (key === 'Home') next = 0;
+          if (key === 'End') next = last;
+          const nextTab = viewTabs[next] || viewTabs[0];
+          const mode = (nextTab && nextTab.dataset && nextTab.dataset.view) ? nextTab.dataset.view : 'overview';
+          setViewMode(mode);
+          try { nextTab.focus(); } catch (_) {}
+        });
+      }
+
+      const bypassTimelineWhenDeepDive = (event) => {
+        if (!isDeepDiveActive()) return;
+        event.stopImmediatePropagation();
+      };
+
+      window.addEventListener('wheel', bypassTimelineWhenDeepDive, { capture: true, passive: false });
+      window.addEventListener('touchstart', bypassTimelineWhenDeepDive, { capture: true, passive: true });
+      window.addEventListener('touchmove', bypassTimelineWhenDeepDive, { capture: true, passive: false });
+      window.addEventListener('touchend', bypassTimelineWhenDeepDive, { capture: true, passive: true });
+      window.addEventListener('keydown', (event) => {
+        if (!isDeepDiveActive()) return;
+        const key = event.key;
+        if (key === 'ArrowDown' || key === 'ArrowUp' || key === 'PageDown' || key === 'PageUp' || key === ' ') {
+          event.stopImmediatePropagation();
+        }
+      }, { capture: true });
+
+      document.addEventListener('click', (event) => {
+        if (!isDeepDiveActive()) return;
+        if (!event.target || !event.target.closest) return;
+        if (!event.target.closest('.paragraph')) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }, true);
+
+      document.addEventListener('contextmenu', (event) => {
+        if (!event.target || !event.target.closest) return;
+        if (!event.target.closest('#deep-dive img, #deep-dive video')) return;
+        event.preventDefault();
+      });
+
+      document.addEventListener('dragstart', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLImageElement || target instanceof HTMLVideoElement)) return;
+        if (!target.closest('#deep-dive')) return;
+        event.preventDefault();
+      });
+    });
+  </script>
   <script src="./main.js?v=39"></script>
 </html>
