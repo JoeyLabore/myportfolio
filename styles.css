@@ -2449,6 +2449,20 @@ p { margin: 0; }
   display: none;
 }
 
+.page[data-name="home page"] .nav-bar[data-name="nav-tabs"] .tabs .nav-item__label-compact {
+  display: none;
+}
+
+@media (max-width: 630px) {
+  .page[data-name="home page"] .nav-bar[data-name="nav-tabs"] .tabs .nav-item__label-full {
+    display: none;
+  }
+
+  .page[data-name="home page"] .nav-bar[data-name="nav-tabs"] .tabs .nav-item__label-compact {
+    display: inline;
+  }
+}
+
 @media (max-width: 400px) {
   .page[data-name="case study page"] .nav-view-switch .tabs .nav-item__icon {
     display: none;
@@ -2457,6 +2471,12 @@ p { margin: 0; }
   .page[data-name="case study page"] .nav-view-switch .tabs .nav-item--with-icon {
     gap: 0;
     padding-right: var(--space-s);
+  }
+}
+
+@media (max-width: 420px) {
+  .page[data-name="home page"] .nav-split .nav-middle {
+    display: none !important;
   }
 }
 
@@ -2833,6 +2853,7 @@ p { margin: 0; }
 /* Use direct grid spacing between the Awards heading and content */
 .page[data-name="about page"] .about-card.about-awards-card {
   row-gap: 16px;
+  padding-top: 24px;
 }
 
 .page[data-name="about page"] .about-awards__item {
@@ -2886,6 +2907,152 @@ p { margin: 0; }
   line-height: var(--line-height-base);
   color: #ffffff;
   opacity: 0.75;
+}
+
+.page[data-name="about page"] .about-card.about-reviews-card {
+  row-gap: 16px;
+  padding-top: 24px;
+}
+
+.page[data-name="about page"] .about-reviews__title {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-base);
+  font-weight: 500;
+  color: #ffffff;
+  opacity: 0.5;
+}
+
+.page[data-name="about page"] .about-reviews__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.page[data-name="about page"] .about-review-item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.page[data-name="about page"] .about-review-item__content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.page[data-name="about page"] .about-review-item__content[hidden] {
+  display: none !important;
+}
+
+.page[data-name="about page"] .about-review-item.is-collapsed .about-review-item__content {
+  max-height: none;
+}
+
+.page[data-name="about page"] .about-review-item__preview {
+  margin: 0;
+  font-size: 16px;
+  line-height: 160%;
+  color: #ffffff;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+.page[data-name="about page"] .about-review-item__toggle {
+  display: inline-block;
+  vertical-align: baseline;
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: #ffffff;
+  opacity: 0.72;
+  font-family: var(--font-family-manrope);
+  font-size: 16px;
+  line-height: 160%;
+  font-weight: 400;
+  cursor: pointer;
+  transition: opacity 140ms ease;
+}
+
+.page[data-name="about page"] .about-review-item__toggle:hover {
+  opacity: 1;
+}
+
+.page[data-name="about page"] .about-review-item__toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.2);
+  border-radius: 6px;
+}
+
+.page[data-name="about page"] .about-review-item + .about-review-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.page[data-name="about page"] .about-review-item__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page[data-name="about page"] .about-review-item__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.page[data-name="about page"] .about-review-item__person {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page[data-name="about page"] .about-review-item__name,
+.page[data-name="about page"] .about-review-item__role,
+.page[data-name="about page"] .about-review-item__text {
+  margin: 0;
+}
+
+.page[data-name="about page"] .about-review-item__name {
+  font-size: var(--font-size-base);
+  line-height: 1.25;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.page[data-name="about page"] .about-review-item__name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page[data-name="about page"] .about-review-item__name a:hover {
+  text-decoration: underline;
+}
+
+.page[data-name="about page"] .about-review-item__name a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.2);
+  border-radius: 6px;
+}
+
+.page[data-name="about page"] .about-review-item__role {
+  font-size: 13px;
+  line-height: 1.35;
+  color: #ffffff;
+  opacity: 0.68;
+}
+
+.page[data-name="about page"] .about-review-item__text {
+  font-size: 16px;
+  line-height: 160%;
+  color: #ffffff;
+  opacity: 0.9;
+  font-weight: 400;
 }
 
 .page[data-name="about page"] .about-cv {
@@ -3230,6 +3397,23 @@ p { margin: 0; }
   text-overflow: ellipsis;
 }
 
+.tile-grid .tile .tile-hover-overlay__title-rocket {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  flex: 0 0 auto;
+  transform: rotate(90deg);
+  transform-origin: 50% 50%;
+  animation: home-progress-rocket-float 1200ms ease-in-out infinite;
+}
+
+.tile-grid .tile .tile-hover-overlay__title-external {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
 .tile-grid .tile .tile-hover-overlay__title-lock {
   width: 16px;
   height: 16px;
@@ -3322,7 +3506,7 @@ p { margin: 0; }
   justify-content: center;
   min-height: 34px;
   padding: 9px 14px;
-  border-radius: 999px;
+  border-radius: 10px;
   font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   font-size: 12px;
   font-weight: 600;
@@ -3342,8 +3526,21 @@ p { margin: 0; }
     2px 2px 0 0 rgba(255, 255, 255, 0.92);
 }
 
+.tile-grid .tile .tile-external-badge .tile-tag--external {
+  background: #0f0f0f;
+  color: #ffffff;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 1px #ffffff,
+    2px 2px 0 0 rgba(255, 255, 255, 0.92);
+}
+
 .tile-grid .tile .tile-tag--external {
-  padding: 8px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
 }
 
 .tile-grid .tile .tile-tag--external .tile-tag__external {
@@ -3374,6 +3571,14 @@ p { margin: 0; }
   pointer-events: none;
 }
 
+.tile-grid .tile .tile-external-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+  pointer-events: none;
+}
+
 .tile-grid .tile .tile-lock-badge .tile-tag--locked {
   background: #0f0f0f;
   color: #ffffff;
@@ -3381,6 +3586,48 @@ p { margin: 0; }
   box-shadow:
     inset 0 0 0 1px #ffffff,
     2px 2px 0 0 rgba(255, 255, 255, 0.92);
+}
+
+.tile-grid .tile .tile-progress-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.tile-grid .tile .tile-tag--progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 16px 6px 12px;
+  border-radius: 10px;
+  background: #0f0f0f;
+  color: #ffffff;
+  box-shadow:
+    inset 0 0 0 1px #ffffff,
+    2px 2px 0 0 rgba(255, 255, 255, 0.92);
+}
+
+.tile-grid .tile .tile-tag--progress .tile-tag__rocket {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  display: block;
+  transform: rotate(90deg);
+  transform-origin: 50% 50%;
+  animation: home-progress-rocket-float 1200ms ease-in-out infinite;
+}
+
+@keyframes home-progress-rocket-float {
+  0%, 100% {
+    transform: rotate(90deg) translateY(0);
+  }
+  50% {
+    transform: rotate(90deg) translateY(-1px);
+  }
 }
 
 /* Top-left project flag (e.g., 'Current Project' for Toyota) */

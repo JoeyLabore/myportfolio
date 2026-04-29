@@ -1202,6 +1202,8 @@
           try { return tiles.find((t) => t && t.dataset && String(t.dataset.project || '').toLowerCase() === String(name || '').toLowerCase()); } catch (_) { return null; }
         };
         const OPEN_IN_NEW_PROJECTS = new Set(['medigo', 'apendito', 'kinti', 'dinobytes', 'kakaoala', 'skilldex']);
+        const IN_PROGRESS_PROJECTS = new Set(['orion', 'medigo']);
+        const NON_CLICKABLE_PROJECTS = new Set(['orion', 'medigo']);
         // Helper: sort tiles by computed CSS order (fallback to DOM index)
         const sortByCssOrder = (list) => {
           try {
@@ -1221,6 +1223,10 @@
               if (flag) flag.remove();
               const lockBadge = tile.querySelector('.tile-lock-badge');
               if (lockBadge) lockBadge.remove();
+              const externalBadge = tile.querySelector('.tile-external-badge');
+              if (externalBadge) externalBadge.remove();
+              const progressBadge = tile.querySelector('.tile-progress-badge');
+              if (progressBadge) progressBadge.remove();
               const proj = (tile.dataset && tile.dataset.project) ? String(tile.dataset.project || '').trim().toLowerCase() : '';
               const role = (tile.dataset && tile.dataset.role) ? String(tile.dataset.role || '').trim() : '';
               const industry = (tile.dataset && tile.dataset.industry) ? String(tile.dataset.industry || '').trim() : '';
@@ -1269,8 +1275,81 @@
                 lockBadgeWrap.appendChild(lockTag);
                 tile.appendChild(lockBadgeWrap);
               }
+
+              if (OPEN_IN_NEW_PROJECTS.has(proj) && !NON_CLICKABLE_PROJECTS.has(proj)) {
+                const externalBadgeWrap = document.createElement('div');
+                externalBadgeWrap.className = 'tile-external-badge';
+
+                const externalTag = document.createElement('div');
+                externalTag.className = 'tile-tag tile-tag--external';
+                externalTag.setAttribute('aria-label', 'Opens external project in new tab');
+
+                const externalIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                externalIcon.setAttribute('class', 'tile-tag__external');
+                externalIcon.setAttribute('aria-hidden', 'true');
+                externalIcon.setAttribute('viewBox', '0 0 24 24');
+                externalIcon.setAttribute('focusable', 'false');
+
+                const externalPathA = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                externalPathA.setAttribute('fill', 'currentColor');
+                externalPathA.setAttribute('d', 'M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z');
+                const externalPathB = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                externalPathB.setAttribute('fill', 'currentColor');
+                externalPathB.setAttribute('d', 'M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3z');
+                externalIcon.appendChild(externalPathA);
+                externalIcon.appendChild(externalPathB);
+
+                externalTag.appendChild(externalIcon);
+                externalBadgeWrap.appendChild(externalTag);
+                tile.appendChild(externalBadgeWrap);
+              }
+
+              if (IN_PROGRESS_PROJECTS.has(proj)) {
+                const progressBadgeWrap = document.createElement('div');
+                progressBadgeWrap.className = 'tile-progress-badge';
+
+                const progressTag = document.createElement('div');
+                progressTag.className = 'tile-tag tile-tag--progress';
+                progressTag.setAttribute('aria-label', 'Project currently in progress');
+
+                const rocket = document.createElement('img');
+                rocket.className = 'tile-tag__rocket';
+                rocket.src = './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png';
+                rocket.alt = '';
+                rocket.setAttribute('aria-hidden', 'true');
+
+                const label = document.createElement('span');
+                label.textContent = 'In Progress';
+
+                progressTag.appendChild(rocket);
+                progressTag.appendChild(label);
+                progressBadgeWrap.appendChild(progressTag);
+                tile.appendChild(progressBadgeWrap);
+              }
             } catch (_) { /* ignore flag errors */ }
           });
+
+          try {
+            const getProgressRockets = () => Array.from(document.querySelectorAll('.tile-progress-badge .tile-tag__rocket, .tile-hover-overlay__title-rocket'));
+            if (getProgressRockets().length) {
+              const rocketFrames = [
+                './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png',
+                './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png',
+                './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-03.png',
+              ];
+              if (window.__homeProgressRocketInterval) {
+                window.clearInterval(window.__homeProgressRocketInterval);
+              }
+              let frameIndex = 0;
+              window.__homeProgressRocketInterval = window.setInterval(() => {
+                frameIndex = (frameIndex + 1) % rocketFrames.length;
+                const progressRockets = getProgressRockets();
+                progressRockets.forEach((rocket) => {
+                  rocket.src = rocketFrames[frameIndex];
+                });
+              }, 140);
+            }
+          } catch (_) { /* ignore progress rocket animation errors */ }
         } catch (_) { /* ignore tag injection errors */ }
 
         try {
@@ -1287,6 +1366,7 @@
             try {
               if (!tile || tile.querySelector('.tile-hover-overlay')) return;
               const proj = (tile.dataset && tile.dataset.project) ? String(tile.dataset.project || '') : '';
+              const projKey = String(proj || '').toLowerCase();
               const title = (tile.dataset && tile.dataset.title) ? String(tile.dataset.title || '') : '';
               const industry = (tile.dataset && tile.dataset.industry) ? String(tile.dataset.industry || '') : '';
               const desc = (tile.dataset && tile.dataset.desc) ? String(tile.dataset.desc || '') : '';
@@ -1301,6 +1381,31 @@
 
               const h = document.createElement('div');
               h.className = 'tile-hover-overlay__title';
+              if (IN_PROGRESS_PROJECTS.has(projKey)) {
+                const titleRocket = document.createElement('img');
+                titleRocket.className = 'tile-hover-overlay__title-rocket';
+                titleRocket.src = './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png';
+                titleRocket.alt = '';
+                titleRocket.setAttribute('aria-hidden', 'true');
+                h.appendChild(titleRocket);
+              }
+              if (OPEN_IN_NEW_PROJECTS.has(projKey) && !NON_CLICKABLE_PROJECTS.has(projKey)) {
+                const titleExternal = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                titleExternal.setAttribute('class', 'tile-hover-overlay__title-external');
+                titleExternal.setAttribute('aria-hidden', 'true');
+                titleExternal.setAttribute('viewBox', '0 0 24 24');
+                titleExternal.setAttribute('focusable', 'false');
+
+                const titleExternalPathA = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                titleExternalPathA.setAttribute('fill', 'currentColor');
+                titleExternalPathA.setAttribute('d', 'M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z');
+                const titleExternalPathB = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                titleExternalPathB.setAttribute('fill', 'currentColor');
+                titleExternalPathB.setAttribute('d', 'M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3z');
+                titleExternal.appendChild(titleExternalPathA);
+                titleExternal.appendChild(titleExternalPathB);
+                h.appendChild(titleExternal);
+              }
               if (proj === 'toyota') {
                 const titleLock = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 titleLock.setAttribute('class', 'tile-hover-overlay__title-lock');
@@ -1321,10 +1426,12 @@
               h.appendChild(hText);
               header.appendChild(h);
 
-              const arrow = document.createElement('div');
-              arrow.className = 'tile-hover-overlay__arrow';
-              arrow.innerHTML = arrowSvg;
-              header.appendChild(arrow);
+              if (!NON_CLICKABLE_PROJECTS.has(projKey) && !OPEN_IN_NEW_PROJECTS.has(projKey)) {
+                const arrow = document.createElement('div');
+                arrow.className = 'tile-hover-overlay__arrow';
+                arrow.innerHTML = arrowSvg;
+                header.appendChild(arrow);
+              }
 
               const body = document.createElement('div');
               body.className = 'tile-hover-overlay__body';
@@ -1816,6 +1923,10 @@
         };
 
         const handleTileClickNavigation = (tile, proj) => {
+          if (NON_CLICKABLE_PROJECTS.has(proj)) {
+            return;
+          }
+
           const isExternalOpen = OPEN_IN_NEW_PROJECTS.has(proj);
           if (!isSmallHomeBreakpoint() || isExternalOpen) {
             navigateProject(proj);
@@ -1841,7 +1952,7 @@
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
-              navigateProject(proj);
+              handleTileClickNavigation(tile, proj);
             }
           });
         });
@@ -1989,12 +2100,12 @@
         const tabs = Array.from(tabList.querySelectorAll('.nav-item[role="tab"]'));
         if (!tabs.length) return;
 
-        // Responsive label: under 400px, show 'UX' instead of 'Product' for the ux tab
+        // Responsive label: at or below 475px, show 'UX' instead of 'Product' for the ux tab
         try {
           const uxTab = tabs.find((t) => t && t.dataset && t.dataset.tab === 'ux');
           const updateUxLabel = () => {
             if (!uxTab) return;
-            const isNarrow = (window.innerWidth || 0) < 400; // strictly below 400px
+            const isNarrow = (window.innerWidth || 0) <= 475;
             const target = isNarrow ? 'UX' : 'Product';
             // Only touch text when it actually changes to avoid unnecessary layout work
             if (uxTab.textContent !== target) {
@@ -2006,13 +2117,22 @@
           window.addEventListener('orientationchange', updateUxLabel);
         } catch (_) { /* ignore responsive label errors */ }
 
-        // Responsive label: at or below 360px, show 'Brand' instead of 'Branding' for the branding tab
+        // Responsive label: at or below 630px, show 'Brand' instead of 'Branding' for the branding tab
         try {
           const brandingTab = tabs.find((t) => t && t.dataset && t.dataset.tab === 'branding');
           const updateBrandingLabel = () => {
             if (!brandingTab) return;
-            const isVeryNarrow = (window.innerWidth || 0) <= 360; // at or below 360px
-            const target = isVeryNarrow ? 'Brand' : 'Branding';
+            const isNarrow = (window.innerWidth || 0) <= 630;
+            const fullLabel = brandingTab.querySelector('.nav-item__label-full');
+            const compactLabel = brandingTab.querySelector('.nav-item__label-compact');
+
+            if (fullLabel && compactLabel) {
+              if (fullLabel.textContent !== 'Branding') fullLabel.textContent = 'Branding';
+              if (compactLabel.textContent !== 'Brand') compactLabel.textContent = 'Brand';
+              return;
+            }
+
+            const target = isNarrow ? 'Brand' : 'Branding';
             if (brandingTab.textContent !== target) {
               brandingTab.textContent = target;
             }
