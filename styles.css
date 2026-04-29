@@ -244,6 +244,14 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-bloc
   object-fit: contain;
   object-position: center;
 }
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__video {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  object-position: center;
+}
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__media {
   position: relative;
   margin-top: 32px;
@@ -271,6 +279,10 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-bloc
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image-caption--wow {
   bottom: 12px;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image-caption--left {
+  left: 12px;
+  right: auto;
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row {
   display: flex;
