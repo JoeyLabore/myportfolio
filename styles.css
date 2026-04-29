@@ -193,7 +193,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item .deep-dive-content-block__label {
   color: #ffffff;
   font-size: 14px;
-  line-height: 140%;
+  line-height: 160%;
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-divider {
   margin: 0;
@@ -254,6 +254,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-bloc
   right: 12px;
   bottom: 44px;
   z-index: 1;
+  max-width: calc(100% - 24px);
   padding: 6px 10px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.42);
@@ -263,6 +264,9 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-bloc
   font-weight: 500;
   line-height: 1.3;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: rgba(255, 255, 255, 0.9);
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image-caption--wow {
@@ -3175,7 +3179,13 @@ p { margin: 0; }
   font-size: 18px;
   line-height: 1.6;
   font-weight: 400;
-  white-space: pre-line;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
   width: 100%;
 }
 
@@ -3207,10 +3217,11 @@ p { margin: 0; }
 }
 
 .tile-grid .tile .tile-hover-overlay__title span {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -3223,13 +3234,25 @@ p { margin: 0; }
 
 .tile-grid .tile .tile-hover-overlay__tags {
   display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
+  flex-wrap: nowrap;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
   font-family: var(--font-family-manrope);
   font-size: 14px;
   line-height: normal;
   font-weight: 400;
   color: #a8a8a8;
+}
+
+.tile-grid .tile .tile-hover-overlay__tag {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc((100% - 16px) / 2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tile-grid .tile .tile-hover-overlay__arrow {

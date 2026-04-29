@@ -350,12 +350,10 @@
       </main>
     </div>
   </body>
-  <script src="./main.js?v=35"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    (function ensureToyotaPageAccess() {
       const PAGE_PASSWORD = 'peekaboo';
       const PAGE_UNLOCK_KEY = 'toyota_page_unlocked';
-      let justUnlockedPage = false;
 
       const hasPageAccess = () => {
         try {
@@ -365,31 +363,34 @@
         }
       };
 
-      const requestPageAccess = () => {
-        if (hasPageAccess()) return true;
-        const entered = window.prompt('Enter password to access this page:');
-        if (entered === null) return false;
-        const ok = entered.trim() === PAGE_PASSWORD;
-        if (!ok) {
-          window.alert('Incorrect password.');
-          return false;
-        }
-        try {
-          sessionStorage.setItem(PAGE_UNLOCK_KEY, '1');
-        } catch (_) {}
-        justUnlockedPage = true;
-        return true;
-      };
+      if (hasPageAccess()) {
+        window.__toyotaPageUnlocked = true;
+        return;
+      }
 
-      if (!requestPageAccess()) {
+      const entered = window.prompt('Enter password to access this page:');
+      if (entered === null) {
         try { window.location.replace('./index.html'); } catch (_) { window.location.href = './index.html'; }
         return;
       }
 
-      if (justUnlockedPage) {
-        try { window.location.reload(); } catch (_) { window.location.href = window.location.href; }
+      const ok = entered.trim() === PAGE_PASSWORD;
+      if (!ok) {
+        window.alert('Incorrect password.');
+        try { window.location.replace('./index.html'); } catch (_) { window.location.href = './index.html'; }
         return;
       }
+
+      try {
+        sessionStorage.setItem(PAGE_UNLOCK_KEY, '1');
+      } catch (_) {}
+      window.__toyotaPageUnlocked = true;
+    })();
+  </script>
+  <script src="./main.js?v=35"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.__toyotaPageUnlocked !== true) return;
 
       const viewTabs = Array.from(document.querySelectorAll('.nav-view-switch .nav-item[data-view]'));
       const tocLinks = Array.from(document.querySelectorAll('.deep-dive-toc__link[href^="#"]'));
