@@ -2376,12 +2376,16 @@ p { margin: 0; }
 .tabs .nav-item:focus-visible {
   background: rgba(255, 255, 255, 0.12); /* lighter on hover */
 }
-.tabs .nav-item.active {
+.tabs .nav-item.active,
+.tabs .nav-item[aria-selected="true"] {
   background: #ffffff; /* white pill */
   color: var(--color-typography-heading); /* black text */
+  font-family: var(--font-family-manrope);
+  font-weight: 500; /* medium */
   box-shadow: none; /* remove inset ring for clean white look */
-  text-shadow: none; /* crisp text on white */
+  text-shadow: none;
 }
+/* crisp text on white */
 /* Disable underline behavior for tabs */
 .tabs .nav-item::after,
 .tabs .nav-item:hover::after,
