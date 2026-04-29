@@ -19,6 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css?v=113" />
     <link rel="stylesheet" href="./impact-styles.css" />
     <style>
@@ -689,11 +690,19 @@
       
       // Disable right-click
       document.addEventListener('contextmenu', function(e) {
-        if (e.target.classList.contains('protected-image')) {
+        const target = e.target;
+        if (!target || !target.closest) return;
+        if (target.classList && target.classList.contains('protected-image')) {
           e.preventDefault();
+          e.stopPropagation();
           return false;
         }
-      });
+        if (target.closest('#deep-dive img, #deep-dive video, #deep-dive .deep-dive-section--hero-image, #deep-dive .deep-dive-content-block__media, #deep-dive .deep-dive-image-row__card')) {
+          e.preventDefault();
+          e.stopPropagation();
+          return false;
+        }
+      }, true);
       
       // Disable drag and drop
       protectedImages.forEach(function(img) {
@@ -701,6 +710,13 @@
           e.preventDefault();
         });
       });
+
+      document.addEventListener('dragstart', function(e) {
+        const target = e.target;
+        if (!(target instanceof HTMLImageElement || target instanceof HTMLVideoElement)) return;
+        if (!target.closest || !target.closest('#deep-dive')) return;
+        e.preventDefault();
+      }, true);
       
       // Disable keyboard shortcuts for saving images
       document.addEventListener('keydown', function(e) {

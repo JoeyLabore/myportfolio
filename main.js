@@ -1201,6 +1201,19 @@
         const getTileByProject = (name) => {
           try { return tiles.find((t) => t && t.dataset && String(t.dataset.project || '').toLowerCase() === String(name || '').toLowerCase()); } catch (_) { return null; }
         };
+        const PROJECT_YEARS = {
+          toyota: '2026',
+          relias: '2025',
+          nestbank: '2023',
+          orion: '2024',
+          medigo: '2022',
+          tom: '2023',
+          apendito: '2025',
+          dinobytes: '2025',
+          kinti: '2020',
+          kakaoala: '2020',
+          skilldex: '2021',
+        };
         const OPEN_IN_NEW_PROJECTS = new Set(['medigo', 'apendito', 'kinti', 'dinobytes', 'kakaoala', 'skilldex']);
         const IN_PROGRESS_PROJECTS = new Set(['orion', 'medigo']);
         const NON_CLICKABLE_PROJECTS = new Set(['orion', 'medigo']);
@@ -1230,7 +1243,9 @@
               const proj = (tile.dataset && tile.dataset.project) ? String(tile.dataset.project || '').trim().toLowerCase() : '';
               const role = (tile.dataset && tile.dataset.role) ? String(tile.dataset.role || '').trim() : '';
               const industry = (tile.dataset && tile.dataset.industry) ? String(tile.dataset.industry || '').trim() : '';
-              if (role || industry) {
+              const year = PROJECT_YEARS[proj] || '';
+              const secondaryTag = proj === 'logofolio' ? industry : year;
+              if (role || secondaryTag) {
                 const tagsWrap = document.createElement('div');
                 tagsWrap.className = 'tile-tags';
 
@@ -1241,10 +1256,10 @@
                   tagsWrap.appendChild(roleTag);
                 }
 
-                if (industry) {
+                if (secondaryTag) {
                   const industryTag = document.createElement('div');
                   industryTag.className = 'tile-tag tile-tag--industry';
-                  industryTag.textContent = industry;
+                  industryTag.textContent = secondaryTag;
                   tagsWrap.appendChild(industryTag);
                 }
 
@@ -1422,7 +1437,7 @@
               }
 
               const hText = document.createElement('span');
-              hText.textContent = title || proj;
+              hText.textContent = IN_PROGRESS_PROJECTS.has(projKey) ? 'In Progress...' : (title || proj);
               h.appendChild(hText);
               header.appendChild(h);
 
@@ -1664,7 +1679,7 @@
           const t = getTileByProject('orion');
           if (!t) return;
           const v = document.createElement('video');
-          v.src = './assets/thumbnails/orion.mp4';
+          v.src = './assets/thumbnails/ql.mp4';
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
@@ -1922,8 +1937,24 @@
           window.location.href = './password.html';
         };
 
+        const triggerBlockedTileShake = (tile) => {
+          if (!tile) return;
+          try {
+            tile.classList.remove('is-blocked-feedback');
+            tile.classList.remove('is-blocked-shake');
+            void tile.offsetWidth;
+            tile.classList.add('is-blocked-feedback');
+            tile.classList.add('is-blocked-shake');
+            window.setTimeout(() => {
+              try { tile.classList.remove('is-blocked-shake'); } catch (_) {}
+              try { tile.classList.remove('is-blocked-feedback'); } catch (_) {}
+            }, 420);
+          } catch (_) {}
+        };
+
         const handleTileClickNavigation = (tile, proj) => {
           if (NON_CLICKABLE_PROJECTS.has(proj)) {
+            triggerBlockedTileShake(tile);
             return;
           }
 

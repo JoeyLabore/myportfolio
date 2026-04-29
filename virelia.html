@@ -19,6 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./styles.css?v=3" />
   </head>
   <body>
@@ -197,7 +198,6 @@
               </article>
               <div class="deep-dive-content-divider" aria-hidden="true"></div>
               <article id="section-03" class="deep-dive-content-block deep-dive-content-block--insights">
-                <p class="deep-dive-content-block__label">02 Key Insights</p>
                 <h2 class="deep-dive-content-block__title">Key Insights</h2>
                 <div class="deep-dive-insights-list">
                   <div class="deep-dive-insight-item">
@@ -601,6 +601,19 @@
         event.preventDefault();
         event.stopImmediatePropagation();
       }, true);
+
+      document.addEventListener('contextmenu', (event) => {
+        if (!event.target || !event.target.closest) return;
+        if (!event.target.closest('#deep-dive img, #deep-dive video')) return;
+        event.preventDefault();
+      });
+
+      document.addEventListener('dragstart', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLImageElement || target instanceof HTMLVideoElement)) return;
+        if (!target.closest('#deep-dive')) return;
+        event.preventDefault();
+      });
     });
   </script>
   <script src="./main.js?v=39"></script>
