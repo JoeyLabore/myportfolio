@@ -407,7 +407,7 @@
 
   const TRD_FILES = [
     "./assets/trd/1.jpg",
-    "./assets/trd/2.svg",
+    "./assets/trd/2.png",
     "./assets/trd/3.jpg?v=2",
     "./assets/trd/5.png?v=2",
     "./assets/trd/3.5.jpg",
@@ -419,7 +419,7 @@
 
   const RELIAS_FILES = [
     "./assets/relias/1.jpg",
-    "./assets/relias/2.svg",
+    "./assets/relias/2.png",
     "./assets/relias/3.jpg",
     "./assets/relias/3,5.png",
     "./assets/relias/4.jpg",
@@ -428,7 +428,7 @@
     "./assets/relias/7.png",
     "./assets/relias/8.jpg",
     "./assets/relias/9.jpg",
-    "./assets/relias/10.svg",
+    "./assets/relias/10.png",
   ];
 
   function getCaseStudyFiles() {
@@ -2955,10 +2955,10 @@
         // Removed 3.jpg to match behavior of images 1, 4, and 5
         || /(^|\/)6\.svg$/i.test(srcPath)
         || (/(^|\/)8\.jpg$/i.test(srcPath) && !/(^|\/)relias\/8\.jpg$/i.test(srcPath))
-        // Relias: keep 3,5.png and 10.svg original aspect ratio
+        // Relias: keep 3,5.png and 10.png original aspect ratio
         || /(^|\/)3,5\.png$/i.test(srcPath)
         || /(^|\/)7\.png$/i.test(srcPath)
-        || /(^|\/)10\.svg$/i.test(srcPath)) {
+        || /(^|\/)10\.png$/i.test(srcPath)) {
         el.classList.add('keep-contain');
       }
       el.style.opacity = "1";
@@ -3022,7 +3022,7 @@
         return { index: 0, progress: 0.35 };
       }
       if (p.includes('toyota.html') || t.includes('toyota')) {
-        return { index: 0, progress: 0.25 }; // Start with 1.jpg and show 2.svg at 25% scroll
+        return { index: 0, progress: 0.25 }; // Start with 1.jpg and show 2.png at 25% scroll
       }
       if (p.includes('relias.html') || p.includes('virelia.html') || t.includes('relias') || t.includes('virelia')) {
         const isSmallReliasScreen = (() => {
