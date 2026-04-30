@@ -2954,6 +2954,8 @@
         || /(^|\/)2\.svg$/i.test(srcPath)
         // Removed 3.jpg to match behavior of images 1, 4, and 5
         || /(^|\/)6\.svg$/i.test(srcPath)
+        || /(^|\/)trd\/2\.png$/i.test(srcPath)
+        || /(^|\/)relias\/2\.png$/i.test(srcPath)
         || (/(^|\/)8\.jpg$/i.test(srcPath) && !/(^|\/)relias\/8\.jpg$/i.test(srcPath))
         // Relias: keep 3,5.png and 10.png original aspect ratio
         || /(^|\/)3,5\.png$/i.test(srcPath)
