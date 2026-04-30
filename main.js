@@ -3006,7 +3006,9 @@
     setTimeout(() => {
       if (document.documentElement.classList.contains('preloading')) {
         document.documentElement.classList.remove('preloading');
-        try { start(); } catch (_) {}
+        if (layers.length) {
+          try { start(); } catch (_) {}
+        }
       }
     }, FORCE_START_MS);
   } catch (_) {}
@@ -3160,6 +3162,7 @@
     timeline += (targetTimeline - timeline) * SMOOTHING;
 
     const L = layers.length;
+    if (!L) return;
     const loopPos = ((timeline % L) + L) % L; // [0, L)
     const idx = Math.floor(loopPos);
     const progress = loopPos - idx; // [0,1)
@@ -3329,6 +3332,7 @@
   let __started = false;
   function start() {
     if (__started) { return; }
+    if (!layers.length) { return; }
     __started = true;
     // Initialize timeline so default view shows 2nd image with 60% into next (3rd)
     timeline = INITIAL_INDEX + INITIAL_PROGRESS;

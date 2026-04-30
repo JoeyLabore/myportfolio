@@ -425,11 +425,54 @@
           './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png',
           './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-03.png',
         ];
-        let frameIndex = 0;
-        window.setInterval(() => {
-          frameIndex = (frameIndex + 1) % rocketFrames.length;
-          closingRocket.src = rocketFrames[frameIndex];
-        }, 140);
+        const preloadRocketFrames = async (frames) => {
+          const loaded = await Promise.all(frames.map((src) => new Promise((resolve) => {
+            const img = new Image();
+            img.decoding = 'async';
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(null);
+            img.src = src;
+          })));
+          return loaded.filter(Boolean);
+        };
+
+        void preloadRocketFrames(rocketFrames).then((loadedFrames) => {
+          if (!loadedFrames.length) return;
+          const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          const firstFrame = loadedFrames[0];
+          const naturalW = Math.max(1, Number(firstFrame && firstFrame.naturalWidth) || 1);
+          const naturalH = Math.max(1, Number(firstFrame && firstFrame.naturalHeight) || 1);
+          const aspect = naturalW / naturalH;
+          const rect = closingRocket.getBoundingClientRect();
+          const cssWidth = Math.max(1, Math.round(rect.width || 40));
+          const cssHeight = Math.max(1, Math.round(cssWidth / aspect));
+          const dpr = Math.max(1, window.devicePixelRatio || 1);
+          const canvas = document.createElement('canvas');
+          canvas.className = closingRocket.className;
+          canvas.width = Math.round(cssWidth * dpr);
+          canvas.height = Math.round(cssHeight * dpr);
+          canvas.style.width = `${cssWidth}px`;
+          canvas.style.height = `${cssHeight}px`;
+          canvas.setAttribute('role', 'img');
+          canvas.setAttribute('aria-label', closingRocket.getAttribute('alt') || 'Animated rocket icon');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          const drawFrame = (img) => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          };
+          drawFrame(loadedFrames[0]);
+          closingRocket.replaceWith(canvas);
+          if (prefersReducedMotion || loadedFrames.length < 2) return;
+          let frameIndex = 0;
+          if (window.__toyotaClosingRocketInterval) {
+            window.clearInterval(window.__toyotaClosingRocketInterval);
+          }
+          window.__toyotaClosingRocketInterval = window.setInterval(() => {
+            frameIndex = (frameIndex + 1) % loadedFrames.length;
+            drawFrame(loadedFrames[frameIndex]);
+          }, 180);
+        });
       }
 
       try {
