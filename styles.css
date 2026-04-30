@@ -163,9 +163,11 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-bloc
   padding: 0 0 6px;
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-closing__rocket {
-  width: 40px;
+  width: 32px;
   height: auto;
   image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
   animation: toyota-closing-rocket-bob 1700ms ease-in-out infinite;
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-closing__text {

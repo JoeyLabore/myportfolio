@@ -386,7 +386,20 @@
           const loaded = await Promise.all(frames.map((src) => new Promise((resolve) => {
             const img = new Image();
             img.decoding = 'async';
-            img.onload = () => resolve(img);
+            img.onload = () => {
+              try {
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, img.naturalWidth || img.width || 1);
+                canvas.height = Math.max(1, img.naturalHeight || img.height || 1);
+                const ctx = canvas.getContext('2d');
+                if (!ctx) { resolve(src); return; }
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL('image/png'));
+              } catch (_) {
+                resolve(src);
+              }
+            };
             img.onerror = () => resolve(null);
             img.src = src;
           })));
@@ -396,30 +409,7 @@
         void preloadRocketFrames(rocketFrames).then((loadedFrames) => {
           if (!loadedFrames.length) return;
           const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-          const firstFrame = loadedFrames[0];
-          const naturalW = Math.max(1, Number(firstFrame && firstFrame.naturalWidth) || 1);
-          const naturalH = Math.max(1, Number(firstFrame && firstFrame.naturalHeight) || 1);
-          const aspect = naturalW / naturalH;
-          const rect = closingRocket.getBoundingClientRect();
-          const cssWidth = Math.max(1, Math.round(rect.width || 40));
-          const cssHeight = Math.max(1, Math.round(cssWidth / aspect));
-          const dpr = Math.max(1, window.devicePixelRatio || 1);
-          const canvas = document.createElement('canvas');
-          canvas.className = closingRocket.className;
-          canvas.width = Math.round(cssWidth * dpr);
-          canvas.height = Math.round(cssHeight * dpr);
-          canvas.style.width = `${cssWidth}px`;
-          canvas.style.height = `${cssHeight}px`;
-          canvas.setAttribute('role', 'img');
-          canvas.setAttribute('aria-label', closingRocket.getAttribute('alt') || 'Animated rocket icon');
-          const ctx = canvas.getContext('2d');
-          if (!ctx) return;
-          const drawFrame = (img) => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          };
-          drawFrame(loadedFrames[0]);
-          closingRocket.replaceWith(canvas);
+          closingRocket.src = loadedFrames[0];
           if (prefersReducedMotion || loadedFrames.length < 2) return;
           let frameIndex = 0;
           if (window.__reliasClosingRocketInterval) {
@@ -427,7 +417,7 @@
           }
           window.__reliasClosingRocketInterval = window.setInterval(() => {
             frameIndex = (frameIndex + 1) % loadedFrames.length;
-            drawFrame(loadedFrames[frameIndex]);
+            closingRocket.src = loadedFrames[frameIndex];
           }, 180);
         });
       }
