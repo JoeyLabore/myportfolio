@@ -428,7 +428,19 @@
     "./assets/relias/7.png",
     "./assets/relias/8.jpg",
     "./assets/relias/9.jpg",
-    "./assets/relias/10.png",
+    "./assets/relias/10.png?v=2",
+  ];
+
+  const QL_FILES = [
+    "./assets/ql/1.jpg",
+    "./assets/ql/2.png",
+    "./assets/ql/3.jpg?v=2",
+    "./assets/ql/4.png",
+    "./assets/ql/5.jpg",
+    "./assets/ql/6.png",
+    "./assets/ql/7.jpg",
+    "./assets/ql/8.jpg",
+    "./assets/ql/9.png",
   ];
 
   function getCaseStudyFiles() {
@@ -438,6 +450,7 @@
       if (p.includes('tom.html') || t.includes('tom')) return TOM_FILES;
       if (p.includes('toyota.html') || t.includes('toyota')) return TRD_FILES;
       if (p.includes('nestbank.html') || t.includes('nestbank')) return NESTBANK_FILES;
+      if (p.includes('ql.html') || t.includes('quicken') || t.includes('rocket')) return QL_FILES;
       if (p.includes('relias.html') || p.includes('virelia.html') || t.includes('relias') || t.includes('virelia')) return RELIAS_FILES;
     } catch (_) {}
     return NESTBANK_FILES;
@@ -1215,8 +1228,8 @@
           skilldex: '2021',
         };
         const OPEN_IN_NEW_PROJECTS = new Set(['medigo', 'apendito', 'kinti', 'dinobytes', 'kakaoala', 'skilldex']);
-        const IN_PROGRESS_PROJECTS = new Set(['orion', 'medigo']);
-        const NON_CLICKABLE_PROJECTS = new Set(['orion', 'medigo']);
+        const IN_PROGRESS_PROJECTS = new Set(['medigo']);
+        const NON_CLICKABLE_PROJECTS = new Set(['medigo']);
         // Helper: sort tiles by computed CSS order (fallback to DOM index)
         const sortByCssOrder = (list) => {
           try {
@@ -1502,6 +1515,7 @@
             nestbank: './nestbank.html',
             toyota: './toyota.html',
             relias: './relias.html',
+            orion: './ql.html',
             tom: './tom.html',
             logofolio: './logofolio.html',
           };
@@ -1509,6 +1523,7 @@
             nestbank: (typeof NESTBANK_FILES !== 'undefined' ? NESTBANK_FILES : null),
             toyota: (typeof TRD_FILES !== 'undefined' ? TRD_FILES : null),
             relias: (typeof RELIAS_FILES !== 'undefined' ? RELIAS_FILES : null),
+            orion: (typeof QL_FILES !== 'undefined' ? QL_FILES : null),
             tom: (typeof TOM_FILES !== 'undefined' ? TOM_FILES : null),
           };
 
@@ -1675,31 +1690,7 @@
 
         // Lazy-init the Orion video and attach to the Orion tile (by data-project)
         function ensureOrionVideo() {
-          if (orionVideo) return;
-          const t = getTileByProject('orion');
-          if (!t) return;
-          const v = document.createElement('video');
-          v.src = './assets/thumbnails/ql.mp4';
-          v.muted = true;
-          v.loop = true;
-          v.playsInline = true;
-          try { v.preload = 'auto'; } catch (_) {}
-          v.autoplay = true;
-          v.setAttribute('aria-hidden', 'true');
-          const onMeta = () => {
-            try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
-            try { v.play().catch(() => {}); } catch (_) {}
-          };
-          v.addEventListener('loadedmetadata', onMeta, { once: true });
-          // Do NOT clear innerHTML; preserve tags/overlays
-          try {
-            t.insertBefore(v, t.firstChild || null);
-          } catch (_) {
-            try { t.appendChild(v); } catch (_) {}
-          }
-          orionVideo = v;
-          // Attempt immediate play in case metadata already available
-          try { v.play().catch(() => {}); } catch (_) {}
+          return;
         }
 
         // Lazy-init the Kinti video and attach to the Kinti tile (by data-project)
@@ -1926,6 +1917,7 @@
           if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
           if (proj === 'toyota') { navigateWithOverlay('./toyota.html'); return; }
           if (proj === 'relias') { navigateWithOverlay('./relias.html'); return; }
+          if (proj === 'orion') { navigateWithOverlay('./ql.html'); return; }
           if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
           if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
           if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
@@ -2956,11 +2948,15 @@
         || /(^|\/)6\.svg$/i.test(srcPath)
         || /(^|\/)trd\/2\.png$/i.test(srcPath)
         || /(^|\/)relias\/2\.png$/i.test(srcPath)
+        || /(^|\/)ql\/2\.png$/i.test(srcPath)
+        || /(^|\/)ql\/4\.png$/i.test(srcPath)
+        || /(^|\/)ql\/6\.png$/i.test(srcPath)
+        || /(^|\/)ql\/9\.png$/i.test(srcPath)
         || (/(^|\/)8\.jpg$/i.test(srcPath) && !/(^|\/)relias\/8\.jpg$/i.test(srcPath))
         // Relias: keep 3,5.png and 10.png original aspect ratio
         || /(^|\/)3,5\.png$/i.test(srcPath)
         || /(^|\/)7\.png$/i.test(srcPath)
-        || /(^|\/)10\.png$/i.test(srcPath)) {
+        || /(^|\/)10\.png(?:\?|$)/i.test(srcPath)) {
         el.classList.add('keep-contain');
       }
       el.style.opacity = "1";
@@ -3027,6 +3023,9 @@
       }
       if (p.includes('toyota.html') || t.includes('toyota')) {
         return { index: 0, progress: 0.25 }; // Start with 1.jpg and show 2.png at 25% scroll
+      }
+      if (p.includes('ql.html') || t.includes('quicken') || t.includes('rocket')) {
+        return { index: 0, progress: 0.3 }; // Start with 1.jpg and show 2.png at 30% scroll
       }
       if (p.includes('relias.html') || p.includes('virelia.html') || t.includes('relias') || t.includes('virelia')) {
         const isSmallReliasScreen = (() => {
@@ -3700,48 +3699,75 @@
       // For Impact, create separate detail panels; for Problem & Solution, create two; for Deliverables, create panels; otherwise single
       let detailsToOpen = [];
       if (isImpact) {
-        // Check which page we're on
-        const isToyotaPage = window.location.pathname.includes('toyota.html') || document.title.toLowerCase().includes('toyota');
-        const isReliasPage = window.location.pathname.includes('relias.html') || window.location.pathname.includes('virelia.html') || document.title.toLowerCase().includes('relias') || document.title.toLowerCase().includes('virelia');
-        
-        // Use different titles based on the page
-        const titles = isReliasPage ? [
-          'Reduced transcript creation time by shifting from manual drafting to AI-first generation',
-          'Accelerated time to market for new educational content',
-          'Decreased rework and errors across writing, QA, and compliance',
-          'Enabled faster feature development through a scalable visual direction and design system'
-        ] : isToyotaPage ? [
-          'Reduce change cycle time by identifying impacts earlier',
-          'Lower risk by minimizing late-stage rework and disruption',
-          'Improve efficiency by reducing manual coordination and approval bottlenecks',
-          'Support scalable growth with a modern, extensible platform foundation'
-        ] : [
-          '1,164,000+ loans disbursed digitally',
-          '111,000+ active users',
-          '97% of invited members registered',
-          '4.9★ average app store rating',
-          '65% of loans created and approved directly within the app',
-        ];
-        // If we already created them once, reuse
-        const existing = openDetails.get(card);
-        // Check if we're on Toyota page to determine expected array length
-        const expectedLength = isToyotaPage ? 4 : 5;
-        if (existing && Array.isArray(existing) && existing.length === expectedLength) {
-          detailsToOpen = existing;
-          // Clear inline closed styles before reopening and enforce title-only
-          detailsToOpen.forEach((d, i) => {
-            d.classList.remove('open');
-            d.style.marginTop = '';
-            d.style.opacity = '';
-            d.style.pointerEvents = '';
-            const inner = d.querySelector('.paragraph-detail__inner') || d;
-            inner.innerHTML = `<p class="text-label">${titles[i] || ''}</p>`;
-          });
+        const body = card.querySelector('.text-body');
+        const list = body ? (body.querySelector('ul') || body.querySelector('ol')) : null;
+        const listItems = list ? Array.from(list.querySelectorAll(':scope > li')) : [];
+
+        if (listItems.length) {
+          const titles = listItems
+            .map((li) => (li && li.textContent ? li.textContent.trim() : ''))
+            .filter(Boolean);
+          const existing = openDetails.get(card);
+          if (existing && Array.isArray(existing) && existing.length === titles.length) {
+            detailsToOpen = existing;
+            detailsToOpen.forEach((d, i) => {
+              d.classList.remove('open');
+              d.style.marginTop = '';
+              d.style.opacity = '';
+              d.style.pointerEvents = '';
+              const inner = d.querySelector('.paragraph-detail__inner') || d;
+              inner.innerHTML = `<p class="text-label">${titles[i] || ''}</p>`;
+            });
+          } else {
+            detailsToOpen = titles.map((title) => makeDetail(
+              `<p class="text-label">${title}</p>`,
+              title
+            ));
+          }
         } else {
-          detailsToOpen = titles.map(title => makeDetail(
-            `<p class="text-label">${title}</p>`,
-            title
-          ));
+          // Check which page we're on
+          const isToyotaPage = window.location.pathname.includes('toyota.html') || document.title.toLowerCase().includes('toyota');
+          const isReliasPage = window.location.pathname.includes('relias.html') || window.location.pathname.includes('virelia.html') || document.title.toLowerCase().includes('relias') || document.title.toLowerCase().includes('virelia');
+
+          // Use different titles based on the page
+          const titles = isReliasPage ? [
+            'Reduced transcript creation time by shifting from manual drafting to AI-first generation',
+            'Accelerated time to market for new educational content',
+            'Decreased rework and errors across writing, QA, and compliance',
+            'Enabled faster feature development through a scalable visual direction and design system'
+          ] : isToyotaPage ? [
+            'Reduce change cycle time by identifying impacts earlier',
+            'Lower risk by minimizing late-stage rework and disruption',
+            'Improve efficiency by reducing manual coordination and approval bottlenecks',
+            'Support scalable growth with a modern, extensible platform foundation'
+          ] : [
+            '1,164,000+ loans disbursed digitally',
+            '111,000+ active users',
+            '97% of invited members registered',
+            '4.9★ average app store rating',
+            '65% of loans created and approved directly within the app',
+          ];
+          // If we already created them once, reuse
+          const existing = openDetails.get(card);
+          // Check if we're on Toyota page to determine expected array length
+          const expectedLength = isToyotaPage ? 4 : 5;
+          if (existing && Array.isArray(existing) && existing.length === expectedLength) {
+            detailsToOpen = existing;
+            // Clear inline closed styles before reopening and enforce title-only
+            detailsToOpen.forEach((d, i) => {
+              d.classList.remove('open');
+              d.style.marginTop = '';
+              d.style.opacity = '';
+              d.style.pointerEvents = '';
+              const inner = d.querySelector('.paragraph-detail__inner') || d;
+              inner.innerHTML = `<p class="text-label">${titles[i] || ''}</p>`;
+            });
+          } else {
+            detailsToOpen = titles.map(title => makeDetail(
+              `<p class="text-label">${title}</p>`,
+              title
+            ));
+          }
         }
         // Insert sequentially after the card
         let afterNode = card;

@@ -282,6 +282,10 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-bloc
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image-caption--wow {
   bottom: 12px;
 }
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image-caption--top-right {
+  top: 12px;
+  bottom: auto;
+}
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image-caption--left {
   left: 12px;
   right: auto;
@@ -1325,6 +1329,9 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   /* Reframe 12.jpg: nudge slightly left for better centering */
   .bg-layer[data-src$="12.jpg"] {
     object-position: 45% center !important;
+  }
+  .bg-layer[data-src$="ql/5.jpg"] {
+    object-position: 22% center !important;
   }
   .page[data-name="home page"] .paragraph,
   .page[data-name="home page"] .paragraph.intro-hidden,
@@ -3757,7 +3764,10 @@ p { margin: 0; }
 .page[data-name="home page"] .tile-grid .tile[data-project="kakaoala"] { --stackColor: #66C961; }
 .page[data-name="home page"] .tile-grid .tile[data-project="kinti"] { --stackColor: #66C961; }
 .page[data-name="home page"] .tile-grid .tile[data-project="orion"]::before {
-  display: none;
+  background-image: url('./assets/thumbnails/ql.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .page[data-name="home page"] .tile-grid .tile[data-project="nestbank"]::before {
   background-image: url('./assets/thumbnails/nestbank.jpg');

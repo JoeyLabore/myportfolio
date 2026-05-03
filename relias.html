@@ -20,6 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
     <link rel="stylesheet" href="./styles.css?v=3" />
   </head>
   <body>
@@ -71,7 +72,7 @@
                 <ul class="project-overview">
                   <li><strong>Client:</strong> Relias</li>
                   <li><strong>Type of work:</strong> Enterprise UX</li>
-                  <li><strong>Duration:</strong> 2024-2026</li>
+                  <li><strong>Duration:</strong> 2025 - 2026</li>
                   <li><strong>My Role:</strong> Product Design Lead. I led the design of AI-driven content workflows and platform experiences.</li>
                 </ul>
               </div>
@@ -139,7 +140,7 @@
           </nav>
           <article class="deep-dive-article__content">
             <section class="deep-dive-section deep-dive-section--intro" aria-label="Article title and tags">
-              <p class="deep-dive-article__eyebrow"><span>Relias</span><span>Enterprise UX</span><span>2024 - 2026</span></p>
+              <p class="deep-dive-article__eyebrow"><span>Relias</span><span>Enterprise UX</span><span>2025 - 2026</span></p>
               <h1 class="deep-dive-article__title">Designing an AI-First Content Creation Platform for Healthcare Education</h1>
             </section>
 
@@ -159,7 +160,7 @@
                 </div>
                 <div class="deep-dive-meta__item">
                   <h2 class="deep-dive-meta__label">Responsibilities</h2>
-                  <p class="deep-dive-meta__text">Product Design<br />Visual &amp; UI Design<br />Product Strategy<br />UX Research<br />Usability Testing<br />Design System Creation<br />AI Prototype Building<br />Stakeholder Management<br />Leadership &amp; Direction</p>
+                  <p class="deep-dive-meta__text">Product Design<br />Visual &amp; UI Design<br />Product Strategy<br />UX Research<br />Usability Testing<br />Design System<br />AI Prototype Building<br />Stakeholder Management<br />Leadership &amp; Direction<br />Cross-functional Collaboration</p>
                 </div>
               </div>
               <div class="deep-dive-meta__disclaimer">
@@ -300,14 +301,27 @@
               <div class="deep-dive-content-divider" aria-hidden="true"></div>
               <article class="deep-dive-content-block deep-dive-content-block--closing">
                 <img class="deep-dive-closing__rocket" src="./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png" alt="Animated rocket icon" />
-                <h2 class="deep-dive-content-block__title">You're all caught up</h2>
-                <p class="deep-dive-closing__text">This is an active, evolving project.</p>
-                <p class="deep-dive-closing__text">The product has just recently launched so, we continue to develop this case study as we monitor performance, gathering feedback, and iterating on what’s been implemented.</p>
+                <h2 class="deep-dive-content-block__title">This is an active, evolving project.</h2>
+                <p class="deep-dive-closing__text">The product has just recently launched so, we will continue to develop this case study as we monitor performance, gather feedback, and iterate on what’s been implemented.</p>
               </article>
             </section>
           </article>
         </section>
       </main>
+      <footer class="site-footer" aria-label="Footer">
+        <p class="site-footer__text"><span>Joseph Greenwood</span><span>©2019 / 2026</span></p>
+        <div class="site-footer__icons" aria-label="Links">
+          <a class="site-footer__icon" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn (opens in new tab)">
+            <i class="ph ph-linkedin-logo" aria-hidden="true"></i>
+          </a>
+          <a class="site-footer__icon" href="https://medium.com/@joseph.s.greenwood" target="_blank" rel="noopener noreferrer" aria-label="Medium (opens in new tab)">
+            <i class="ph ph-medium-logo" aria-hidden="true"></i>
+          </a>
+          <a class="site-footer__icon" href="mailto:joey.greenwood1997@gmail.com" aria-label="Email">
+            <i class="ph ph-envelope" aria-hidden="true"></i>
+          </a>
+        </div>
+      </footer>
     </div>
   </body>
   <script>
@@ -354,6 +368,7 @@
       const tocLinks = Array.from(document.querySelectorAll('.deep-dive-toc__link[href^="#"]'));
       if (!viewTabs.length) return;
       const mainEl = document.querySelector('.page[data-name="case study page"] .main');
+      const footerEl = document.querySelector('.page[data-name="case study page"] .site-footer');
       const tocEl = document.querySelector('.deep-dive-toc');
       const navViewSwitch = document.querySelector('.nav-view-switch');
       const overviewSection = document.getElementById('overview');
@@ -526,7 +541,7 @@
           deepDiveSection.style.display = deepDive ? 'block' : 'none';
           deepDiveSection.style.width = deepDive ? '100%' : '';
           deepDiveSection.style.margin = deepDive ? '0' : '';
-          deepDiveSection.style.padding = deepDive ? '0 0 80px' : '';
+          deepDiveSection.style.padding = deepDive ? '0 0 32px' : '';
           deepDiveSection.style.position = deepDive ? 'relative' : '';
           deepDiveSection.style.top = deepDive ? '0' : '';
           deepDiveSection.style.left = deepDive ? '0' : '';
@@ -537,6 +552,11 @@
           deepDiveContent.style.width = deepDive ? 'min(760px, 100%)' : '';
           deepDiveContent.style.margin = deepDive ? '0 auto' : '';
           deepDiveContent.style.textAlign = deepDive ? 'left' : '';
+        }
+
+        if (footerEl) {
+          footerEl.style.display = deepDive ? '' : 'none';
+          footerEl.setAttribute('aria-hidden', deepDive ? 'false' : 'true');
         }
 
         syncActiveTab(deepDive ? 'deep-dive' : 'overview');
