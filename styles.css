@@ -355,6 +355,18 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__t
   body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__card {
     flex: 0 1 calc((100% - 24px) / 2);
   }
+
+  body.toyota-deep-dive .page[data-name="case study page"] #section-07 .deep-dive-image-row--two .deep-dive-image-row__card {
+    flex: 1 1 100%;
+  }
+
+  body.toyota-deep-dive .page[data-name="case study page"] #section-04 .deep-dive-image-row--two .deep-dive-image-row__card {
+    flex: 1 1 100%;
+  }
+
+  body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row[aria-label="Handoff visuals"] .deep-dive-image-row__card {
+    flex: 1 1 100%;
+  }
 }
 @media (max-width: 600px) {
   body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article__title {

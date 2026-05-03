@@ -3022,10 +3022,28 @@
         return { index: 0, progress: 0.35 };
       }
       if (p.includes('toyota.html') || t.includes('toyota')) {
-        return { index: 0, progress: 0.25 }; // Start with 1.jpg and show 2.png at 25% scroll
+        const isSmallToyotaScreen = (() => {
+          try {
+            const w1 = Number(window && window.innerWidth) || Infinity;
+            const w2 = Number(document && document.documentElement && document.documentElement.clientWidth) || Infinity;
+            const narrowByWidth = Math.min(w1, w2) <= 600;
+            const narrowByMedia = !!(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
+            return narrowByWidth || narrowByMedia;
+          } catch (_) { return false; }
+        })();
+        return { index: 0, progress: isSmallToyotaScreen ? 0.5 : 0.25 }; // Start higher on small screens so logo appears larger
       }
       if (p.includes('ql.html') || t.includes('quicken') || t.includes('rocket')) {
-        return { index: 0, progress: 0.3 }; // Start with 1.jpg and show 2.png at 30% scroll
+        const isSmallQlScreen = (() => {
+          try {
+            const w1 = Number(window && window.innerWidth) || Infinity;
+            const w2 = Number(document && document.documentElement && document.documentElement.clientWidth) || Infinity;
+            const narrowByWidth = Math.min(w1, w2) <= 600;
+            const narrowByMedia = !!(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
+            return narrowByWidth || narrowByMedia;
+          } catch (_) { return false; }
+        })();
+        return { index: 0, progress: isSmallQlScreen ? 0.5 : 0.3 }; // Start higher on small screens so logo appears larger
       }
       if (p.includes('relias.html') || p.includes('virelia.html') || t.includes('relias') || t.includes('virelia')) {
         const isSmallReliasScreen = (() => {
