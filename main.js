@@ -3778,10 +3778,11 @@
             'Decreased rework and errors across writing, QA, and compliance',
             'Enabled faster feature development through a scalable visual direction and design system'
           ] : isToyotaPage ? [
-            'Reduce change cycle time by identifying impacts earlier',
-            'Lower risk by minimizing late-stage rework and disruption',
-            'Improve efficiency by reducing manual coordination and approval bottlenecks',
-            'Support scalable growth with a modern, extensible platform foundation'
+            'Unified fragmented workflows into one system',
+            'Reduced reliance on tribal knowledge',
+            'Shifted validation earlier to prevent errors',
+            'Built a scalable design foundation',
+            'Improved visibility for faster decision-making'
           ] : [
             '1,164,000+ loans disbursed digitally',
             '111,000+ active users',
