@@ -3743,6 +3743,30 @@
             ));
           }
         } else {
+          const metricItems = body ? Array.from(body.querySelectorAll('.impact-metric')) : [];
+          const metricTitles = metricItems
+            .map((item) => (item && item.textContent ? item.textContent.trim() : ''))
+            .filter(Boolean);
+
+          if (metricTitles.length) {
+            const existing = openDetails.get(card);
+            if (existing && Array.isArray(existing) && existing.length === metricTitles.length) {
+              detailsToOpen = existing;
+              detailsToOpen.forEach((d, i) => {
+                d.classList.remove('open');
+                d.style.marginTop = '';
+                d.style.opacity = '';
+                d.style.pointerEvents = '';
+                const inner = d.querySelector('.paragraph-detail__inner') || d;
+                inner.innerHTML = `<p class="text-label">${metricTitles[i] || ''}</p>`;
+              });
+            } else {
+              detailsToOpen = metricTitles.map((title) => makeDetail(
+                `<p class="text-label">${title}</p>`,
+                title
+              ));
+            }
+          } else {
           // Check which page we're on
           const isToyotaPage = window.location.pathname.includes('toyota.html') || document.title.toLowerCase().includes('toyota');
           const isReliasPage = window.location.pathname.includes('relias.html') || window.location.pathname.includes('virelia.html') || document.title.toLowerCase().includes('relias') || document.title.toLowerCase().includes('virelia');
@@ -3767,8 +3791,7 @@
           ];
           // If we already created them once, reuse
           const existing = openDetails.get(card);
-          // Check if we're on Toyota page to determine expected array length
-          const expectedLength = isToyotaPage ? 4 : 5;
+          const expectedLength = titles.length;
           if (existing && Array.isArray(existing) && existing.length === expectedLength) {
             detailsToOpen = existing;
             // Clear inline closed styles before reopening and enforce title-only
@@ -3785,6 +3808,7 @@
               `<p class="text-label">${title}</p>`,
               title
             ));
+          }
           }
         }
         // Insert sequentially after the card

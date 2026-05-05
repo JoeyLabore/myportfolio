@@ -217,7 +217,8 @@ body.toyota-deep-dive .page[data-name="case study page"] #section-04,
 body.toyota-deep-dive .page[data-name="case study page"] #section-05,
 body.toyota-deep-dive .page[data-name="case study page"] #section-06,
 body.toyota-deep-dive .page[data-name="case study page"] #section-07,
-body.toyota-deep-dive .page[data-name="case study page"] #section-08 {
+body.toyota-deep-dive .page[data-name="case study page"] #section-08,
+body.toyota-deep-dive .page[data-name="case study page"] #section-09 {
   scroll-margin-top: calc(var(--nav-card-height) + (2 * var(--space-s)) + 48px);
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__label {

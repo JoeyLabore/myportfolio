@@ -130,6 +130,7 @@
           <nav class="deep-dive-toc" aria-label="Table of contents">
             <p class="deep-dive-toc__title">Contents</p>
             <a class="deep-dive-toc__link" href="#section-overview">Overview</a>
+            <a class="deep-dive-toc__link" href="#section-09">Impact</a>
             <a class="deep-dive-toc__link" href="#section-02">Current State</a>
             <a class="deep-dive-toc__link" href="#section-03">Key Insights</a>
             <a class="deep-dive-toc__link" href="#section-04">Future State</a>
@@ -186,6 +187,36 @@
                 </article>
               </div>
               <hr class="deep-dive-content-divider" aria-hidden="true" />
+              <article id="section-09" class="deep-dive-content-block deep-dive-content-block--insights">
+                <h2 class="deep-dive-content-block__title">Impact</h2>
+                <div class="deep-dive-insights-list">
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">01. Reduced production time through AI-first workflows</p>
+                    <p class="deep-dive-article__paragraph">By shifting from manual drafting to AI-assisted generation, the platform significantly reduced the time required to create transcripts, supporting faster content production without sacrificing quality.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">02. Accelerated time to market for educational content</p>
+                    <p class="deep-dive-article__paragraph">Streamlining creation and review workflows enabled teams to produce and publish content more quickly, improving responsiveness to business needs.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">03. Streamlined end-to-end content workflows</p>
+                    <p class="deep-dive-article__paragraph">Unifying previously disconnected tools into a single system eliminated redundant steps, reduced context switching, and improved visibility across writing, review, and QA processes.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">04. Improved content quality and consistency</p>
+                    <p class="deep-dive-article__paragraph">Embedding structure, standards, and guidance directly into the system reduced reliance on manual formatting and review cycles, leading to more consistent outputs and fewer preventable errors.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">05. Increased confidence and traceability in AI-generated content</p>
+                    <p class="deep-dive-article__paragraph">Making generation, edits, and sources transparent improved trust in outputs, addressing key concerns around compliance, validation, and accountability.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">06. Enabled faster product and feature development</p>
+                    <p class="deep-dive-article__paragraph">A scalable design system and unified platform foundation allowed teams to build and iterate more efficiently, supporting ongoing product growth.</p>
+                  </div>
+                </div>
+              </article>
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
               <article id="section-02" class="deep-dive-content-block">
                 <p class="deep-dive-content-block__label">01 Understanding Current State</p>
                 <h2 class="deep-dive-content-block__title">Uncovering a System in Transition</h2>
@@ -457,6 +488,19 @@
         });
       };
 
+      const resetTocActiveToFirst = () => {
+        if (!tocLinks.length) return;
+        const firstTargetId = (tocLinks[0].getAttribute('href') || '').trim();
+        if (!firstTargetId || !firstTargetId.startsWith('#')) return;
+        tocLinks.forEach((link) => {
+          const targetId = (link.getAttribute('href') || '').trim();
+          const isActive = targetId === firstTargetId;
+          link.classList.toggle('is-active', isActive);
+          if (isActive) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+      };
+
       const isDeepDiveActive = () => document.body.classList.contains('toyota-deep-dive');
       let revealObserver = null;
 
@@ -567,6 +611,7 @@
         } catch (_) {}
 
         if (deepDive) {
+          resetTocActiveToFirst();
           document.body.classList.remove('deep-dive-intro-visible');
           window.requestAnimationFrame(() => {
             document.body.classList.add('deep-dive-intro-visible');

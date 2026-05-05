@@ -134,20 +134,19 @@
               <div class="text-body" data-node-id="816:15629">
                 <div class="impact-metrics">
                   <div class="impact-card">
-                    <p class="impact-metric">Lowered risk</p>
-                    <p>through clearer workflows and automated validation</p>
+                    <p class="impact-metric">Connect fragmented workflows into a single source of truth</p>
                   </div>
                   <div class="impact-card">
-                    <p class="impact-metric">Improved efficiency</p>
-                    <p>by reducing manual coordination and approval delays</p>
+                    <p class="impact-metric">Replace tribal knowledge with guided, repeatable processes</p>
                   </div>
                   <div class="impact-card">
-                    <p class="impact-metric">Increased visibility</p>
-                    <p>of parts and engine status across teams</p>
+                    <p class="impact-metric">Catch errors earlier with built-in validation</p>
                   </div>
                   <div class="impact-card">
-                    <p class="impact-metric">Built a scalable platform</p>
-                    <p>to support future TRD systems</p>
+                    <p class="impact-metric">Create a scalable foundation for consistent product development</p>
+                  </div>
+                  <div class="impact-card">
+                    <p class="impact-metric">Enable faster decisions through clear system visibility</p>
                   </div>
                 </div>
               </div>
@@ -159,6 +158,7 @@
           <nav class="deep-dive-toc" aria-label="Table of contents">
             <p class="deep-dive-toc__title">Contents</p>
             <a class="deep-dive-toc__link" href="#section-overview">Overview</a>
+            <a class="deep-dive-toc__link" href="#section-09">Impact</a>
             <a class="deep-dive-toc__link" href="#section-01">Ways of Working</a>
             <a class="deep-dive-toc__link" href="#section-02">Current State</a>
             <a class="deep-dive-toc__link" href="#section-03">Key Insights</a>
@@ -214,6 +214,35 @@
                 </article>
               </div>
               <hr class="deep-dive-content-divider" aria-hidden="true" />
+
+              <article id="section-09" class="deep-dive-content-block deep-dive-content-block--insights">
+                <h2 class="deep-dive-content-block__title">Impact</h2>
+                <div class="deep-dive-insights-list">
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">01. From Fragmented Workflows to a Connected System</p>
+                    <p class="deep-dive-article__paragraph">Replaced Excel, shared folders, and informal coordination with a single, structured platform, creating a clear source of truth.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">02. From Tribal Knowledge to Repeatable Processes</p>
+                    <p class="deep-dive-article__paragraph">Introduced guided workflows and system logic, reducing reliance on experience and making the system usable for new team members.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">03. From Late Error Detection to Built-In Validation</p>
+                    <p class="deep-dive-article__paragraph">Moved validation earlier into the process, catching issues before approval and preventing errors from propagating downstream.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">04. From Patchwork UI to Scalable Product Foundation</p>
+                    <p class="deep-dive-article__paragraph">Established a design system and scalable architecture, enabling consistent experiences and faster future development.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">05. From Limited Visibility to Informed Decision-Making</p>
+                    <p class="deep-dive-article__paragraph">Surfaced critical information and system relationships upfront, enabling faster, more accurate decisions without relying on experience or guesswork.</p>
+                  </div>
+                </div>
+              </article>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
               <article id="section-01" class="deep-dive-content-block">
                 <p class="deep-dive-content-block__label">01 Define the Ways of Working</p>
                 <h2 class="deep-dive-content-block__title">Before the Solution, the Shift</h2>
@@ -340,6 +369,7 @@
                 </div>
               </article>
               <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
               <article class="deep-dive-content-block deep-dive-content-block--closing">
                 <img class="deep-dive-closing__rocket" src="./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png" alt="Animated rocket icon" />
                 <h2 class="deep-dive-content-block__title">This is an active, evolving project.</h2>
@@ -545,6 +575,19 @@
         });
       };
 
+      const resetTocActiveToFirst = () => {
+        if (!tocLinks.length) return;
+        const firstTargetId = (tocLinks[0].getAttribute('href') || '').trim();
+        if (!firstTargetId || !firstTargetId.startsWith('#')) return;
+        tocLinks.forEach((link) => {
+          const targetId = (link.getAttribute('href') || '').trim();
+          const isActive = targetId === firstTargetId;
+          link.classList.toggle('is-active', isActive);
+          if (isActive) link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+      };
+
       const setViewMode = (mode) => {
         const deepDive = mode === 'deep-dive';
         document.body.classList.toggle('toyota-deep-dive', deepDive);
@@ -610,6 +653,7 @@
           if (window.location.hash !== hash) window.history.replaceState(null, '', hash);
         } catch (_) {}
         if (deepDive) {
+          resetTocActiveToFirst();
           document.body.classList.remove('deep-dive-intro-visible');
           window.requestAnimationFrame(() => {
             document.body.classList.add('deep-dive-intro-visible');
