@@ -8,13 +8,14 @@
     <!-- Manrope font to match Figma token font/family/manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,100..900&display=swap" rel="stylesheet" />
     <!-- Material Symbols for MUI icons (lock) -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=95" />
+    <link rel="stylesheet" href="./styles.css?v=110" />
     <style>
       /* Disable hover/pressed/selected widen and tilt on home page tiles */
       @media (min-width: 601px) {
@@ -103,43 +104,63 @@
         </div>
         <!-- Page transition overlay (used when navigating to case studies) -->
         <div class="nav-transition" aria-hidden="true"></div>
-        <section class="home-game-stage" aria-label="Rocket game area">
-          <div class="home-game-stage__inner" tabindex="0" role="button" aria-pressed="false" aria-label="Rocket game area, click to pause or resume">
-            <div class="home-game-score" aria-live="polite" aria-atomic="true">Score: 0</div>
-            <div class="home-game-hint" aria-hidden="true">
-              <span class="home-game-hint__title">Shoot for the moon.<br />Build something real.</span>
-              <span class="home-game-hint__body">Product Designer &amp; Strategist helping startups and teams turn ambitious ideas into well-crafted, scalable products.</span>
+        <section class="home-hero" aria-label="Intro">
+          <div class="home-hero__headline-wrap">
+            <h1 class="home-hero__headline">Designer, Strategist &amp; Builder</h1>
+          </div>
+          <div class="home-hero__column home-hero__column--about">
+            <p class="home-hero__label">About</p>
+            <p class="home-hero__body">
+              Product designer and strategist from the UK with 7 years of experience creating products and brands across healthcare, fintech, edtech, motorsports and more.
+            </p>
+            <p class="home-hero__body">
+              I live to create and build, combining strategy, research, systems thinking and execution to design products that are useful, impactful and even just a little fun.
+            </p>
+            <p class="home-hero__body">If you have an ambitious idea, let&apos;s build it together.</p>
+          </div>
+          <div class="home-hero__column home-hero__column--more">
+            <p class="home-hero__label">More Info</p>
+            <a class="home-hero__link" href="./about.html">Skills</a>
+            <a class="home-hero__link" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a class="home-hero__link" href="mailto:joey.greenwood1997@gmail.com">Email</a>
+            <a class="home-hero__link" href="#" data-home-game-start="true">Play</a>
+          </div>
+        </section>
+
+        <section class="home-game-stage" aria-label="Rocket game">
+          <div class="home-game-stage__inner" role="button" tabindex="0" aria-pressed="false" aria-label="Rocket game stage">
+            <div class="home-game-score" aria-live="polite">Score: 0</div>
+
+            <div class="home-game-hint">
+              <span class="home-game-hint__title">Rocket Run</span>
+              <span class="home-game-hint__body">Dodge asteroids and survive as long as you can.</span>
               <span class="home-game-hint__play-wrap">
-                <button class="home-game-hint__play" type="button">Launch</button>
+                <a class="home-game-hint__play" href="#">Play</a>
               </span>
             </div>
-            <div class="home-game-pause">Paused</div>
-            <div class="home-game-over" aria-live="polite" aria-atomic="true">
+
+            <div class="home-game-over" aria-live="polite">
               <div class="home-game-over__card">
                 <span class="home-game-over__eyebrow">Score: 0</span>
-                <span class="home-game-over__title">Even the best ideas hit obstacles. What matters is what comes next.</span>
+                <span class="home-game-over__title">Mission Failed</span>
                 <div class="home-game-over__actions">
                   <span class="home-game-over__cta-wrap">
-                    <a class="home-game-over__cta home-game-over__cta--secondary" href="mailto:joey.greenwood1997@gmail.com">Let&apos;s Talk</a>
+                    <a class="home-game-over__cta home-game-over__cta--primary home-game-over__replay" href="#">Play Again</a>
                   </span>
                   <span class="home-game-over__cta-wrap">
-                    <button class="home-game-over__cta home-game-over__cta--primary home-game-over__replay" type="button">Play Again</button>
+                    <a class="home-game-over__cta home-game-over__cta--secondary" href="mailto:joey.greenwood1997@gmail.com">Let&apos;s Talk</a>
                   </span>
                 </div>
               </div>
             </div>
+
             <div class="home-game-asteroid-layer" aria-hidden="true"></div>
-            <div class="home-game-rocket-wrap">
-              <img
-                class="home-game-rocket"
-                src="./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png"
-                alt="Animated rocket"
-                width="128"
-                height="128"
-              />
+            <div class="home-game-rocket-wrap" aria-hidden="true">
+              <img class="home-game-rocket" src="./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png" alt="" draggable="false" />
             </div>
           </div>
         </section>
+
         <div class="tile-grid filter-all">
           <div class="tile" data-category="ux" data-project="toyota" data-title="Toyota Racing Development" data-desc="Designing the operational backbone behind Toyota Racing Development. From complex legacy systems to a unified operational platform." data-industry="Enterprise UX" data-role="Product Design Lead"></div>
           <div class="tile" data-category="ux" data-project="relias" data-title="Relias AI Content Studio" data-desc="Building the content creation platform behind enterprise learning. Transforming Relias workflows into an AI-powered production system." data-industry="Enterprise UX" data-role="Product Design Lead"></div>
@@ -170,6 +191,6 @@
         </div>
       </footer>
     </div>
-    <script src="./main.js?v=61"></script>
+    <script src="./main.js?v=80"></script>
   </body>
 </html>

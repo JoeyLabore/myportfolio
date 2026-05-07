@@ -144,11 +144,25 @@
       const targetGroups = [
         {
           selectors: [
+            '.home-hero__headline',
+            '.page[data-name="about page"] .about-heading',
             '.home-game-hint__play',
             '.tile-grid .tile',
           ],
           baseDelay: 0,
           step: 35,
+        },
+        {
+          selectors: [
+            '.page[data-name="home page"] .home-hero__column--about .home-hero__label',
+            '.page[data-name="home page"] .home-hero__column--about .home-hero__body',
+            '.page[data-name="home page"] .home-hero__column--more .home-hero__label',
+            '.page[data-name="home page"] .home-hero__column--more .home-hero__link',
+            '.page[data-name="case study page"] #overview [data-node-id="816:15627"] .impact-card',
+            '.page[data-name="case study page"] #overview [data-node-id="816:15627"] li',
+          ],
+          baseDelay: 320,
+          step: 45,
         },
         {
           selectors: [
@@ -159,6 +173,16 @@
           ],
           baseDelay: 760,
           step: 45,
+        },
+        {
+          selectors: [
+            '.home-hero__link',
+            '.page[data-name="about page"] .about-awards__headline',
+            '.page[data-name="about page"] .about-review-item__name a',
+          ],
+          baseDelay: 760,
+          step: 45,
+          runOnLoad: false,
         },
       ];
 
@@ -188,6 +212,7 @@
                 textNode,
                 delay: group.baseDelay + (localIndex * group.step),
                 duration: randomDuration(),
+                runOnLoad: group.runOnLoad !== false,
               });
               localIndex += 1;
             });
@@ -210,14 +235,20 @@
       const animateSpan = (span, finalText, delay, duration) => {
         if (!span || !String(finalText || '').trim()) return;
 
+        const shouldLockWidth = !(
+          span.dataset && span.dataset.noWidthLock === 'true'
+        );
+
         try {
           if (span.__scrambleRaf) cancelAnimationFrame(span.__scrambleRaf);
         } catch (_) { /* ignore */ }
 
-        try {
-          const measuredWidth = Math.ceil(span.getBoundingClientRect().width);
-          if (measuredWidth > 0) span.style.width = `${measuredWidth}px`;
-        } catch (_) { /* ignore width lock failures */ }
+        if (shouldLockWidth) {
+          try {
+            const measuredWidth = Math.ceil(span.getBoundingClientRect().width);
+            if (measuredWidth > 0) span.style.width = `${measuredWidth}px`;
+          } catch (_) { /* ignore width lock failures */ }
+        }
 
         const startAt = performance.now() + Math.max(0, Number(delay) || 0);
         const len = finalText.length;
@@ -279,32 +310,73 @@
       const run = () => {
         rebuildTargets();
         if (!queue.length) return false;
+        const isHomePage = !!document.querySelector('.page[data-name="home page"]');
+        const processedWrappingHeadingRoots = new WeakSet();
 
-        queue.forEach(({ textNode, delay, duration }) => {
-          const finalText = getFinalTextForNode(textNode);
-          if (!finalText.trim()) return;
+        queue.forEach(({ textNode, delay, duration, runOnLoad }) => {
           const tabClipRoot = getTabClipRoot(textNode);
+          const parentEl = textNode ? textNode.parentElement : null;
+          const isHomeHeroHeadlineText = !!(
+            parentEl && parentEl.matches('.home-hero__headline')
+          );
+          const isAboutHeadingText = !!(
+            parentEl && parentEl.matches('.page[data-name="about page"] .about-heading')
+          );
+          const isHomeHeroSideText = !!(
+            parentEl && parentEl.matches('.page[data-name="home page"] .home-hero__column .home-hero__label, .page[data-name="home page"] .home-hero__column .home-hero__body, .page[data-name="home page"] .home-hero__column .home-hero__link')
+          );
+          const isWrappingHeadingText = isHomeHeroHeadlineText || isAboutHeadingText;
+          const isFlowingText = isWrappingHeadingText || isHomeHeroSideText;
+          const wrappingHeadingRoot = isWrappingHeadingText ? textNode.parentElement : null;
+
+          if (wrappingHeadingRoot && processedWrappingHeadingRoots.has(wrappingHeadingRoot)) return;
+
+          const finalText = wrappingHeadingRoot
+            ? String((wrappingHeadingRoot.textContent || '')).replace(/\s+/g, ' ').trim()
+            : getFinalTextForNode(textNode);
+          if (!finalText.trim()) return;
+
+          if (wrappingHeadingRoot) processedWrappingHeadingRoots.add(wrappingHeadingRoot);
           if (tabClipRoot) tabClipRoot.style.overflow = 'hidden';
 
           const span = document.createElement('span');
           span.className = 'text-reveal-scramble';
           span.textContent = finalText;
           span.dataset.finalText = finalText;
-          span.style.display = 'inline-block';
-          span.style.whiteSpace = 'pre';
+          span.style.display = isFlowingText ? 'inline' : 'inline-block';
+          span.style.whiteSpace = isFlowingText ? 'normal' : 'pre';
+          if (isFlowingText) span.dataset.noWidthLock = 'true';
           span.style.verticalAlign = 'baseline';
 
           try {
-            textNode.parentNode.replaceChild(span, textNode);
+            if (wrappingHeadingRoot) {
+              wrappingHeadingRoot.textContent = '';
+              wrappingHeadingRoot.appendChild(span);
+            } else {
+              textNode.parentNode.replaceChild(span, textNode);
+            }
           } catch (_) {
             return;
           }
 
-          animateSpan(span, finalText, delay, duration);
+          const shouldRunOnLoad = runOnLoad && (!isHomePage || isHomeHeroHeadlineText);
+          if (shouldRunOnLoad) animateSpan(span, finalText, delay, duration);
         });
 
         interactiveRoots.forEach((root) => {
           if (!root || root.__scrambleReplayBound) return;
+          const isCaseStudyRoot = !!(root.closest && root.closest('.page[data-name="case study page"]'));
+          const isTabNavItem = !!(root.matches && root.matches('.tabs .nav-item'));
+          const isLetsConnectNavItem = !!(
+            root.matches && root.matches('.nav-right.nav-connect .nav-item')
+          );
+          const isHomeHeroHeadline = !!(root.matches && root.matches('.home-hero__headline'));
+          const isHomeHeroStaticSideRoot = !!(
+            root.matches && root.matches('.page[data-name="home page"] .home-hero__column .home-hero__label, .page[data-name="home page"] .home-hero__column .home-hero__body')
+          );
+          const isThumbnailTileRoot = !!(root.matches && root.matches('.tile-grid .tile'));
+          const isAboutHeading = !!(root.matches && root.matches('.page[data-name="about page"] .about-heading'));
+          if (isCaseStudyRoot || isTabNavItem || isLetsConnectNavItem || isHomeHeroHeadline || isHomeHeroStaticSideRoot || isThumbnailTileRoot || isAboutHeading) return;
           root.__scrambleReplayBound = true;
           let lastReplayAt = 0;
           const triggerReplay = (event) => {
@@ -786,15 +858,33 @@
     // No background sequence on this page (e.g., home). Still run the nav intro animation.
     try {
       const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const navs = Array.from(document.querySelectorAll('.nav-bar'));
+      const homeHeaderSections = Array.from(document.querySelectorAll(
+        '.page[data-name="home page"] .nav-split > .nav-left, .page[data-name="home page"] .nav-split > .nav-middle, .page[data-name="home page"] .nav-split > .nav-right-wrap, .page[data-name="home page"] .nav-split > .nav-menu'
+      ));
+      const navs = homeHeaderSections.length ? homeHeaderSections : Array.from(document.querySelectorAll('.nav-bar'));
       navs.forEach((n) => n.classList.remove('exit-out'));
       navs.forEach((nav) => {
         nav.classList.add('intro-top-hidden');
       });
       
       if (!prefersReduced) {
-        const BASE_DELAY = 600;
-        const STEP = 180; // stagger between nav cards
+        const homeHeroSections = Array.from(document.querySelectorAll('.page[data-name="home page"] .home-hero > *'));
+        homeHeroSections.forEach((section) => {
+          section.classList.add('home-intro-section-hidden');
+          section.classList.remove('home-intro-section-visible');
+        });
+        const HERO_BASE_DELAY = 260;
+        const HERO_STEP = 140;
+        homeHeroSections.forEach((section, i) => {
+          setTimeout(() => {
+            section.classList.remove('home-intro-section-hidden');
+            section.classList.add('home-intro-section-visible');
+          }, HERO_BASE_DELAY + (i * HERO_STEP));
+        });
+
+        const heroTailDelay = HERO_BASE_DELAY + (Math.max(0, homeHeroSections.length - 1) * HERO_STEP);
+        const BASE_DELAY = heroTailDelay + 140;
+        const STEP = 150; // stagger between nav cards
         navs.forEach((nav, i) => {
           setTimeout(() => {
             nav.classList.remove('intro-top-hidden');
@@ -806,6 +896,12 @@
           nav.classList.remove('intro-top-hidden');
           nav.classList.add('intro-top-visible');
         });
+
+        const homeHeroSections = Array.from(document.querySelectorAll('.page[data-name="home page"] .home-hero > *'));
+        homeHeroSections.forEach((section) => {
+          section.classList.remove('home-intro-section-hidden');
+          section.classList.add('home-intro-section-visible');
+        });
       }
 
       (function setupHomeGameStage() {
@@ -815,6 +911,8 @@
           const hintEl = document.querySelector('.home-game-hint');
           const playHintWrap = document.querySelector('.home-game-hint__play-wrap');
           const playHintBtn = document.querySelector('.home-game-hint__play');
+          const moreInfoPlayLink = document.querySelector('.page[data-name="home page"] .home-hero__link[data-home-game-start="true"]');
+          const homePageRoot = document.querySelector('.page[data-name="home page"]');
           const gameOverEl = document.querySelector('.home-game-over');
           const gameOverScoreEl = document.querySelector('.home-game-over__eyebrow');
           const playAgainBtn = document.querySelector('.home-game-over__replay');
@@ -970,6 +1068,15 @@
           const markGameStarted = () => {
             if (hasStartedGame) return;
             resetGameButtonStates();
+            try { if (homePageRoot) homePageRoot.classList.add('home-game-active'); } catch (_) {}
+            try {
+              rocketWrap.classList.remove('is-relaunching');
+              void rocketWrap.offsetWidth;
+              rocketWrap.classList.add('is-relaunching');
+              window.setTimeout(() => {
+                if (!isRelaunching) rocketWrap.classList.remove('is-relaunching');
+              }, 840);
+            } catch (_) {}
             hasStartedGame = true;
             gameStartedAt = performance.now();
             lastAsteroidTick = gameStartedAt;
@@ -1493,6 +1600,16 @@
               markGameStarted();
             });
           });
+          if (moreInfoPlayLink) {
+            moreInfoPlayLink.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              runButtonAction(() => {
+                try { if (homePageRoot) homePageRoot.classList.add('home-game-active'); } catch (_) {}
+                markGameStarted();
+              });
+            });
+          }
           playAgainBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
