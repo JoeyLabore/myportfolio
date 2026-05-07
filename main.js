@@ -166,10 +166,7 @@
         },
         {
           selectors: [
-            '.nav-split .nav-item',
             '.home-game-over__cta',
-            '.mobile-menu-panel .nav-item',
-            '.deep-dive-toc__link',
           ],
           baseDelay: 760,
           step: 45,
@@ -325,8 +322,11 @@
           const isHomeHeroSideText = !!(
             parentEl && parentEl.matches('.page[data-name="home page"] .home-hero__column .home-hero__label, .page[data-name="home page"] .home-hero__column .home-hero__body, .page[data-name="home page"] .home-hero__column .home-hero__link')
           );
+          const isAboutAwardsHeadlineText = !!(
+            parentEl && parentEl.matches('.page[data-name="about page"] .about-awards__headline, .page[data-name="about page"] .about-awards__headline *')
+          );
           const isWrappingHeadingText = isHomeHeroHeadlineText || isAboutHeadingText;
-          const isFlowingText = isWrappingHeadingText || isHomeHeroSideText;
+          const isFlowingText = isWrappingHeadingText || isHomeHeroSideText || isAboutAwardsHeadlineText;
           const wrappingHeadingRoot = isWrappingHeadingText ? textNode.parentElement : null;
 
           if (wrappingHeadingRoot && processedWrappingHeadingRoots.has(wrappingHeadingRoot)) return;
@@ -912,6 +912,7 @@
           const playHintWrap = document.querySelector('.home-game-hint__play-wrap');
           const playHintBtn = document.querySelector('.home-game-hint__play');
           const moreInfoPlayLink = document.querySelector('.page[data-name="home page"] .home-hero__link[data-home-game-start="true"]');
+          const moreInfoReviewsLink = document.querySelector('.page[data-name="home page"] .home-hero__link[href="./about.html?scroll=reviews"]');
           const homePageRoot = document.querySelector('.page[data-name="home page"]');
           const gameOverEl = document.querySelector('.home-game-over');
           const gameOverScoreEl = document.querySelector('.home-game-over__eyebrow');
@@ -920,6 +921,14 @@
           const asteroidLayer = document.querySelector('.home-game-asteroid-layer');
           const rocketWrap = document.querySelector('.home-game-rocket-wrap');
           const rocket = document.querySelector('.home-game-rocket');
+          if (moreInfoReviewsLink && !moreInfoReviewsLink.__reviewsNavBound) {
+            moreInfoReviewsLink.__reviewsNavBound = true;
+            moreInfoReviewsLink.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              try { window.location.href = './about.html?scroll=reviews'; } catch (_) {}
+            });
+          }
           if (!stage || !scoreEl || !hintEl || !playHintWrap || !playHintBtn || !gameOverEl || !gameOverScoreEl || !playAgainBtn || !gameOverTalkLink || !asteroidLayer || !rocketWrap || !rocket) return;
           try { rocket.setAttribute('draggable', 'false'); } catch (_) {}
           try { rocket.addEventListener('dragstart', (e) => e.preventDefault()); } catch (_) {}

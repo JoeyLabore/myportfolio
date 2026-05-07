@@ -1590,8 +1590,15 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
     display: block !important;
     width: 100% !important;
     max-width: none !important;
-    min-height: 600px;
+    margin-top: 0;
+    min-height: 280px;
     aspect-ratio: 4 / 5;
+  }
+
+  .page[data-name="about page"] .main .about-photo img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
   }
 }
 
@@ -2872,6 +2879,9 @@ p { margin: 0; }
 .page[data-name="about page"] {
   --about-radius: 24px; /* single source of truth for rounding on card & photo */
 }
+.page[data-name="about page"] #reviews {
+  scroll-margin-top: calc(var(--nav-card-height) + (2 * var(--space-s)) + 16px);
+}
 .page[data-name="about page"] .main {
   align-items: center;
   padding: var(--space-m);
@@ -2933,6 +2943,10 @@ p { margin: 0; }
     flex-direction: column;
     align-items: stretch;
   }
+  .page[data-name="about page"] .about-left {
+    width: 100%;
+    max-width: none;
+  }
   .page[data-name="about page"] .about-left > .about-card {
     max-width: none;
     width: 100%;
@@ -2942,7 +2956,11 @@ p { margin: 0; }
     width: 100% !important;
   }
   .page[data-name="about page"] .main .about-photo {
-    display: none;
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-height: 340px;
+    aspect-ratio: 4 / 5;
   }
   .page[data-name="about page"] .main .about-photo img {
     width: 100% !important;
@@ -3139,7 +3157,9 @@ p { margin: 0; }
   line-height: var(--line-height-base);
   color: #ffffff;
   text-decoration: none;
-  width: fit-content;
+  display: inline;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 0 2px;
   transition: background-color 160ms ease, color 160ms ease;
 }

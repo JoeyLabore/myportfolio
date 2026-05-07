@@ -14,7 +14,7 @@
     <!-- Material Symbols for MUI Done icon -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=13" />
+    <link rel="stylesheet" href="./styles.css?v=19" />
   </head>
   <body class="about-page" style="background-color:#0A0A0A;">
     <div class="page" data-name="about page">
@@ -77,7 +77,7 @@
               </div>
             </section>
 
-            <section class="about-card about-reviews-card scroll-reveal" aria-label="Reviews">
+            <section id="reviews" class="about-card about-reviews-card scroll-reveal" aria-label="Reviews">
               <h2 class="about-reviews__title">Reviews</h2>
               <div class="about-reviews__list">
                 <article class="about-review-item">
@@ -150,6 +150,38 @@
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
+        const shouldScrollToReviews = () => {
+          try {
+            const hash = String(window.location.hash || '').toLowerCase();
+            if (hash === '#reviews') return true;
+            const params = new URLSearchParams(window.location.search || '');
+            return String(params.get('scroll') || '').toLowerCase() === 'reviews';
+          } catch (_) {
+            return false;
+          }
+        };
+
+        const scrollToReviews = () => {
+          if (!shouldScrollToReviews()) return;
+          const reviewsSection = document.getElementById('reviews');
+          if (!reviewsSection) return;
+          const navSplit = document.querySelector('.page[data-name="about page"] .nav-split');
+          const navHeight = navSplit ? Math.ceil(navSplit.getBoundingClientRect().height) : 0;
+          const topOffset = navHeight + 16;
+          const targetTop = Math.max(0, window.scrollY + reviewsSection.getBoundingClientRect().top - topOffset);
+          const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          window.scrollTo({ top: targetTop, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+        };
+
+        const runInitialReviewsScroll = () => {
+          window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(scrollToReviews);
+          });
+        };
+        if (document.readyState === 'complete') runInitialReviewsScroll();
+        else window.addEventListener('load', runInitialReviewsScroll, { once: true });
+        window.addEventListener('hashchange', scrollToReviews);
+
         const reviewItems = Array.from(document.querySelectorAll('.about-review-item'));
         if (!reviewItems.length) return;
 
@@ -270,6 +302,6 @@
         } catch (_) {}
       });
     </script>
-    <script src="./main.js?v=7"></script>
+    <script src="./main.js?v=9"></script>
   </body>
 </html>

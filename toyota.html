@@ -432,7 +432,7 @@
       window.__toyotaPageUnlocked = true;
     })();
   </script>
-  <script src="./main.js?v=41"></script>
+  <script src="./main.js?v=42"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       if (window.__toyotaPageUnlocked !== true) return;
@@ -465,6 +465,8 @@
       const closingRocket = document.querySelector('.deep-dive-closing__rocket');
 
       if (closingRocket) {
+        closingRocket.style.animation = 'none';
+        closingRocket.style.transform = 'rotate(90deg)';
         const rocketFrames = [
           './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png',
           './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png',

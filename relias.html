@@ -423,6 +423,8 @@
       const closingRocket = document.querySelector('.deep-dive-closing__rocket');
 
       if (closingRocket) {
+        closingRocket.style.animation = 'none';
+        closingRocket.style.transform = 'rotate(90deg)';
         const rocketFrames = [
           './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png',
           './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png',
@@ -752,5 +754,5 @@
       });
     });
   </script>
-  <script src="./main.js?v=45"></script>
+  <script src="./main.js?v=46"></script>
 </html>
