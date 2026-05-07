@@ -1852,13 +1852,13 @@
           toyota: 'Toyota Racing',
         };
         const PROJECT_THUMBNAIL_TAGS = {
-          toyota: 'Product Design, Strategy, AI',
-          relias: 'Product Design, Strategy, AI',
-          nestbank: 'Product Design, Strategy, Visual',
-          orion: 'Product Design, Strategy, DS',
-          medigo: 'Product Design, Visual, DS',
-          medbridge: 'Product Design, Visual, DS',
-          logofolio: 'Branding, Visual, Logo Design',
+          toyota: 'Systems Design, AI-Driven Development, Product Infrastructure, Creative Direction',
+          relias: 'Agentic UX, AI Prototyping, Systems Design, Workflow Automation',
+          nestbank: 'UX Strategy, Creative Direction, Behavioural Design, Trust & Adoption',
+          orion: 'UX Strategy, Systems Design, Accessibility, Creative Direction',
+          medigo: 'Mobile Product Design, Healthcare UX, Interaction Design, Visual Direction',
+          medbridge: 'Mobile Product Design, Healthcare UX, Interaction Design, Visual Direction',
+          logofolio: 'Brand Identity Design, Logo Design, Visual Systems, Art Direction',
           apendito: 'Branding, Strategy, Visual',
           dinobytes: 'Branding, Visual',
           tom: 'Branding, Strategy, Visual',
@@ -1916,6 +1916,20 @@
               const topLeft = document.createElement('span');
               topLeft.className = 'tile-frame-meta__text tile-frame-meta__text--client';
               topLeft.textContent = PROJECT_DISPLAY_TITLES[proj] || title || client || 'Project';
+              if (proj === 'toyota' || proj === 'relias') {
+                const lockIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                lockIcon.setAttribute('class', 'tile-frame-meta__lock-icon');
+                lockIcon.setAttribute('aria-hidden', 'true');
+                lockIcon.setAttribute('viewBox', '0 0 24 24');
+                lockIcon.setAttribute('width', '12');
+                lockIcon.setAttribute('height', '12');
+                lockIcon.setAttribute('fill', 'currentColor');
+                lockIcon.setAttribute('focusable', 'false');
+                const lockPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                lockPath.setAttribute('d', 'M17 9h-1V7c0-2.76-2.24-5-5-5S6 4.24 6 7v2H5c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-9c0-1.1-.9-2-2-2m-6 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-8H7.9V7c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1z');
+                lockIcon.appendChild(lockPath);
+                topLeft.prepend(lockIcon);
+              }
               const topRight = document.createElement('span');
               topRight.className = 'tile-frame-meta__text tile-frame-meta__text--title';
               topRight.textContent = role || categoryLabel || industry || '';
@@ -1996,31 +2010,6 @@
                 }
 
                 tile.appendChild(tagsWrap);
-              }
-
-              if (proj === 'toyota' || proj === 'relias') {
-                const lockBadgeWrap = document.createElement('div');
-                lockBadgeWrap.className = 'tile-lock-badge';
-
-                const lockTag = document.createElement('div');
-                lockTag.className = 'tile-tag tile-tag--locked';
-                lockTag.setAttribute('aria-label', 'Password protected project');
-
-                const lockIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                lockIcon.setAttribute('class', 'tile-tag__locked');
-                lockIcon.setAttribute('aria-hidden', 'true');
-                lockIcon.setAttribute('viewBox', '0 0 24 24');
-                lockIcon.setAttribute('width', '14');
-                lockIcon.setAttribute('height', '14');
-                lockIcon.setAttribute('fill', 'currentColor');
-                lockIcon.setAttribute('focusable', 'false');
-                const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                iconPath.setAttribute('d', 'M17 9h-1V7c0-2.76-2.24-5-5-5S6 4.24 6 7v2H5c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-9c0-1.1-.9-2-2-2m-6 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-8H7.9V7c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1z');
-                lockIcon.appendChild(iconPath);
-
-                lockTag.appendChild(lockIcon);
-                lockBadgeWrap.appendChild(lockTag);
-                tile.appendChild(lockBadgeWrap);
               }
 
               if (OPEN_IN_NEW_PROJECTS.has(proj) && !NON_CLICKABLE_PROJECTS.has(proj)) {

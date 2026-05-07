@@ -3842,6 +3842,19 @@ p { margin: 0; }
   white-space: nowrap;
 }
 
+.tile-grid .tile .tile-frame-meta__text--client {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tile-grid .tile .tile-frame-meta__lock-icon {
+  width: 12px;
+  height: 12px;
+  display: block;
+  opacity: 0.92;
+}
+
 .tile-grid .tile .tile-frame-meta__text--title,
 .tile-grid .tile .tile-frame-meta__text--year {
   text-align: right;
