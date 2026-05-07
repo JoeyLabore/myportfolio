@@ -793,6 +793,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 
 .page[data-name="home page"].home-game-active .home-game-stage {
   display: block;
+  margin-bottom: 32px;
 }
 
 .page[data-name="home page"] .home-game-stage__inner {
@@ -1802,7 +1803,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   }
 
   .page[data-name="home page"] .home-game-over__actions {
-    flex-direction: column-reverse;
+    flex-direction: column;
     gap: 24px;
   }
 

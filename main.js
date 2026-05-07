@@ -1006,6 +1006,9 @@
           const isSmallGameBreakpoint = () => {
             try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
           };
+          const isHeroStackedBreakpoint = () => {
+            try { return window.matchMedia && window.matchMedia('(max-width: 900px)').matches; } catch (_) { return false; }
+          };
           const isButtonTouchBreakpoint = () => {
             try { return window.matchMedia && window.matchMedia('(max-width: 1000px)').matches; } catch (_) { return false; }
           };
@@ -1750,6 +1753,16 @@
             }
             window.setTimeout(finalizeAction, delay);
           };
+          const scrollGameStageIntoView = () => {
+            if (!isHeroStackedBreakpoint()) return;
+            requestAnimationFrame(() => {
+              try {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } catch (_) {
+                try { window.scrollTo(0, 0); } catch (_) {}
+              }
+            });
+          };
           if (moreInfoPlayLink) {
             moreInfoPlayLink.addEventListener('click', (e) => {
               e.preventDefault();
@@ -1757,6 +1770,7 @@
               runButtonAction(() => {
                 try { if (homePageRoot) homePageRoot.classList.add('home-game-active'); } catch (_) {}
                 markGameStarted();
+                scrollGameStageIntoView();
               });
             });
           }
