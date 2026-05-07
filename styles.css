@@ -683,6 +683,14 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   text-decoration: none;
 }
 
+.page[data-name="home page"] .home-hero__more-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+
 @media (max-width: 1320px) {
   .page[data-name="home page"] .home-hero {
     gap: 64px;
@@ -723,6 +731,53 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 
   .page[data-name="home page"] .home-hero__body {
     font-size: 14px;
+  }
+
+  .page[data-name="home page"] .home-hero__column--more {
+    gap: 24px;
+  }
+
+  .page[data-name="home page"] .home-hero__more-links {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    padding: 2px 0 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .page[data-name="home page"] .home-hero__more-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .page[data-name="home page"] .home-hero__column--more .home-hero__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    font-family: var(--font-family-manrope);
+    min-height: 44px;
+    padding: 8px 16px;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(10px) saturate(130%);
+    backdrop-filter: blur(10px) saturate(130%);
+    color: #ffffff;
+  }
+
+  .page[data-name="home page"] .home-hero__column--more .home-hero__link:hover,
+  .page[data-name="home page"] .home-hero__column--more .home-hero__link:focus-visible {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
   }
 }
 
@@ -854,6 +909,40 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   opacity: 1;
 }
 
+.page[data-name="home page"] .home-game-score {
+  opacity: 1;
+}
+
+.page[data-name="home page"] .home-game-pause-hint {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  z-index: 3;
+  font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.page[data-name="home page"] .home-game-stage__inner.has-started .home-game-pause-hint {
+  opacity: 1;
+}
+
+.page[data-name="home page"] .home-game-stage__inner.is-game-over .home-game-pause-hint {
+  opacity: 0;
+}
+
+@media (max-width: 1050px) {
+  .page[data-name="home page"] .home-game-pause-hint {
+    opacity: 0;
+  }
+}
+
 .page[data-name="home page"] .home-game-over {
   position: absolute;
   top: 50%;
@@ -905,14 +994,12 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 
 .page[data-name="home page"] .home-game-over__title {
   max-width: 24ch;
-  font-family: "Fraunces", serif;
-  font-optical-sizing: auto;
-  font-style: normal;
-  font-variation-settings: "SOFT" 0, "WONK" 0;
+  font-family: var(--font-family-manrope);
   font-size: 60px;
   line-height: 1;
-  font-weight: 400;
+  font-weight: 600;
   color: #ffffff;
+  letter-spacing: -0.08em;
 }
 
 .page[data-name="home page"] .home-game-over__actions {
@@ -1003,11 +1090,19 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   transform: translate(0, 0);
 }
 
+.page[data-name="home page"] .home-game-over__cta-wrap.is-action-pending .home-game-over__cta {
+  transform: translate(0, 0);
+}
+
 .page[data-name="home page"] .home-game-over__cta-wrap:active::after {
   opacity: 0;
 }
 
 .page[data-name="home page"] .home-game-over__cta-wrap.is-touch-press::after {
+  opacity: 0;
+}
+
+.page[data-name="home page"] .home-game-over__cta-wrap.is-action-pending::after {
   opacity: 0;
 }
 
@@ -1574,11 +1669,11 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   }
 
   .page[data-name="about page"] .about-heading {
-    font-size: 24px !important;
+    font-size: 40px !important;
   }
 
   .page[data-name="about page"] .about-skill-list li span {
-    font-size: 12px !important;
+    font-size: 14px !important;
   }
 
   .page[data-name="about page"] .about-logos img {
@@ -1685,6 +1780,11 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   .page[data-name="home page"] .home-game-score {
     top: 18px;
     left: 20px;
+  }
+
+  .page[data-name="home page"] .home-game-pause-hint {
+    top: 18px;
+    right: 20px;
   }
 
   .page[data-name="home page"] .home-game-over {
@@ -3042,8 +3142,8 @@ p { margin: 0; }
 }
 
 .page[data-name="about page"] .about-heading {
-  font-family: "Inter", sans-serif;
-  font-weight: 600;
+  font-family: var(--font-family-manrope);
+  font-weight: var(--font-weight-semiBold);
   font-size: 70px;
   line-height: 1;
   letter-spacing: -0.08em;

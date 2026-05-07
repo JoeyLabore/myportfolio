@@ -908,16 +908,16 @@
         try {
           const stage = document.querySelector('.home-game-stage__inner');
           const scoreEl = document.querySelector('.home-game-score');
-          const hintEl = document.querySelector('.home-game-hint');
-          const playHintWrap = document.querySelector('.home-game-hint__play-wrap');
-          const playHintBtn = document.querySelector('.home-game-hint__play');
           const moreInfoPlayLink = document.querySelector('.page[data-name="home page"] .home-hero__link[data-home-game-start="true"]');
           const moreInfoReviewsLink = document.querySelector('.page[data-name="home page"] .home-hero__link[href="./about.html?scroll=reviews"]');
           const homePageRoot = document.querySelector('.page[data-name="home page"]');
           const gameOverEl = document.querySelector('.home-game-over');
           const gameOverScoreEl = document.querySelector('.home-game-over__eyebrow');
+          const gameOverTitleEl = document.querySelector('.home-game-over__title');
           const playAgainBtn = document.querySelector('.home-game-over__replay');
           const gameOverTalkLink = document.querySelector('.home-game-over__cta--secondary');
+          const pauseHintEl = document.querySelector('.home-game-pause-hint');
+          const pauseEl = document.querySelector('.home-game-pause');
           const asteroidLayer = document.querySelector('.home-game-asteroid-layer');
           const rocketWrap = document.querySelector('.home-game-rocket-wrap');
           const rocket = document.querySelector('.home-game-rocket');
@@ -929,7 +929,7 @@
               try { window.location.href = './about.html?scroll=reviews'; } catch (_) {}
             });
           }
-          if (!stage || !scoreEl || !hintEl || !playHintWrap || !playHintBtn || !gameOverEl || !gameOverScoreEl || !playAgainBtn || !gameOverTalkLink || !asteroidLayer || !rocketWrap || !rocket) return;
+          if (!stage || !scoreEl || !gameOverEl || !gameOverScoreEl || !playAgainBtn || !gameOverTalkLink || !asteroidLayer || !rocketWrap || !rocket) return;
           try { rocket.setAttribute('draggable', 'false'); } catch (_) {}
           try { rocket.addEventListener('dragstart', (e) => e.preventDefault()); } catch (_) {}
 
@@ -1009,7 +1009,47 @@
           const isButtonTouchBreakpoint = () => {
             try { return window.matchMedia && window.matchMedia('(max-width: 1000px)').matches; } catch (_) { return false; }
           };
+          const isPauseResumeHintSuppressedBreakpoint = () => {
+            try { return window.matchMedia && window.matchMedia('(max-width: 1050px)').matches; } catch (_) { return false; }
+          };
+          const GAME_OVER_BUTTON_ACTION_DELAY = 200;
           const getButtonActionDelay = () => isButtonTouchBreakpoint() ? 250 : 0;
+          const GAME_SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+          const scrambleGameText = (el, finalText, duration = 480) => {
+            if (!el) return;
+            const targetText = String(finalText == null ? el.textContent || '' : finalText);
+            if (!targetText) return;
+
+            try {
+              if (el.__gameScrambleRaf) cancelAnimationFrame(el.__gameScrambleRaf);
+            } catch (_) {}
+
+            const startAt = performance.now();
+            const len = targetText.length;
+            const step = (now) => {
+              const progress = Math.min(1, (now - startAt) / Math.max(1, duration));
+              const revealed = Math.floor(progress * len);
+
+              if (progress >= 1) {
+                el.textContent = targetText;
+                el.__gameScrambleRaf = 0;
+                return;
+              }
+
+              let next = targetText.slice(0, revealed);
+              for (let i = revealed; i < len; i += 1) {
+                const ch = targetText[i];
+                if (/\s/.test(ch) || /[^A-Za-z0-9]/.test(ch)) next += ch;
+                else next += GAME_SCRAMBLE_CHARS[Math.floor(Math.random() * GAME_SCRAMBLE_CHARS.length)];
+              }
+
+              el.textContent = next;
+              el.__gameScrambleRaf = requestAnimationFrame(step);
+            };
+
+            el.textContent = targetText;
+            el.__gameScrambleRaf = requestAnimationFrame(step);
+          };
           const applyRocketOffset = () => {
             rocket.style.setProperty('--rocket-offset-y', `${rocketOffsetY}px`);
           };
@@ -1090,7 +1130,10 @@
             gameStartedAt = performance.now();
             lastAsteroidTick = gameStartedAt;
             lastSpawnAt = gameStartedAt;
-            stage.classList.add('has-started');
+            stage.classList.add('has-started', 'is-ready');
+            scrambleGameText(scoreEl, 'Score: 0', 520);
+            syncPauseHintVisibility();
+            if (!isPauseResumeHintSuppressedBreakpoint()) scrambleGameText(pauseHintEl, 'Press ␣ to pause', 460);
           };
           const syncPausedState = () => {
             stage.classList.toggle('is-paused', isPaused);
@@ -1098,6 +1141,16 @@
           };
           const syncGameOverState = () => {
             stage.classList.toggle('is-game-over', isGameOver);
+          };
+          const syncPauseHintVisibility = () => {
+            if (!pauseHintEl) return;
+            if (isPauseResumeHintSuppressedBreakpoint()) {
+              pauseHintEl.style.display = 'none';
+              pauseHintEl.textContent = '';
+            } else {
+              pauseHintEl.style.display = '';
+              if (hasStartedGame && !isPaused && !isGameOver) pauseHintEl.textContent = 'Press ␣ to pause';
+            }
           };
           const finishRelaunch = () => {
             isRelaunching = false;
@@ -1216,6 +1269,8 @@
             isCrashPending = false;
             isGameOver = true;
             gameOverScoreEl.textContent = `Score: ${currentScore}`;
+            scrambleGameText(gameOverTitleEl, 'Mission Failed', 460);
+            scrambleGameText(gameOverScoreEl, `Score: ${currentScore}`, 520);
             syncGameOverState();
           };
           const resetGame = () => {
@@ -1263,6 +1318,81 @@
               relaunchTimer = 0;
               finishRelaunch();
             }, 820);
+          };
+          const replayHomeHeroIntro = () => {
+            try {
+              const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+              const homeHeroSections = Array.from(document.querySelectorAll('.page[data-name="home page"] .home-hero > *'));
+
+              homeHeroSections.forEach((section) => {
+                section.classList.remove('home-intro-section-visible');
+                section.classList.add('home-intro-section-hidden');
+              });
+
+              void document.body.offsetWidth;
+
+              if (prefersReducedMotion) {
+                homeHeroSections.forEach((section) => {
+                  section.classList.remove('home-intro-section-hidden');
+                  section.classList.add('home-intro-section-visible');
+                });
+                return;
+              }
+
+              const HERO_BASE_DELAY = 260;
+              const HERO_STEP = 140;
+              homeHeroSections.forEach((section, i) => {
+                window.setTimeout(() => {
+                  section.classList.remove('home-intro-section-hidden');
+                  section.classList.add('home-intro-section-visible');
+                  const heroTitleTarget = section.querySelector && section.querySelector('.home-hero__headline .text-reveal-scramble, .home-hero__headline');
+                  if (heroTitleTarget) {
+                    const finalTitleText = String((heroTitleTarget.dataset && heroTitleTarget.dataset.finalText) || heroTitleTarget.textContent || '').trim();
+                    if (finalTitleText) scrambleGameText(heroTitleTarget, finalTitleText, 520);
+                  }
+                }, HERO_BASE_DELAY + (i * HERO_STEP));
+              });
+            } catch (_) {}
+          };
+          const exitGameToHero = () => {
+            resetGameButtonStates();
+            isGameOver = false;
+            isCrashPending = false;
+            isPaused = false;
+            isDangerPhase = false;
+            hasStartedGame = false;
+            isRelaunching = false;
+            currentScore = 0;
+            rocketOffsetY = 0;
+            rocketVelocityY = 0;
+            pressedKeys.clear();
+            pointerDirection = 'neutral';
+            activePointerId = null;
+            activePointerIntent = 'neutral';
+            pointerStartedGame = false;
+            if (mobileTapReleaseTimer) window.clearTimeout(mobileTapReleaseTimer);
+            mobileTapReleaseTimer = 0;
+            if (relaunchTimer) window.clearTimeout(relaunchTimer);
+            relaunchTimer = 0;
+            lastAsteroidTick = 0;
+            lastSpawnAt = 0;
+            spawnsSinceRocketLane = 0;
+            gameStartedAt = 0;
+            pauseStartedAt = 0;
+            nextAsteroidSpawnIn = ASTEROID_SPAWN_MIN + Math.random() * (ASTEROID_SPAWN_MAX - ASTEROID_SPAWN_MIN);
+            resetAsteroids();
+            syncCrashScene(null);
+            scoreEl.textContent = 'Score: 0';
+            gameOverScoreEl.textContent = 'Score: 0';
+            if (gameOverTitleEl) gameOverTitleEl.textContent = 'Mission Failed';
+            if (pauseEl) pauseEl.textContent = 'Paused';
+            stage.classList.remove('has-started', 'is-ready', 'is-danger');
+            syncPausedState();
+            syncGameOverState();
+            applyRocketOffset();
+            syncRocketFrame(true);
+            try { if (homePageRoot) homePageRoot.classList.remove('home-game-active'); } catch (_) {}
+            replayHomeHeroIntro();
           };
           const isColliding = (a, b) => {
             return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
@@ -1448,6 +1578,7 @@
           syncRocketFrame(true);
           syncPausedState();
           syncGameOverState();
+          syncPauseHintVisibility();
           asteroidLoopRAF = requestAnimationFrame(tickAsteroids);
 
           requestAnimationFrame(() => {
@@ -1459,6 +1590,7 @@
           window.addEventListener('resize', () => {
             rocketOffsetY = clampRocketOffset(rocketOffsetY);
             applyRocketOffset();
+            syncPauseHintVisibility();
           });
 
           window.addEventListener('keydown', (e) => {
@@ -1523,14 +1655,22 @@
               pointerDirection = 'neutral';
               activePointerIntent = 'neutral';
               rocketVelocityY = 0;
+              scrambleGameText(pauseEl, 'Paused', 420);
+              if (isPauseResumeHintSuppressedBreakpoint()) {
+                try { if (pauseHintEl) pauseHintEl.textContent = ''; } catch (_) {}
+              } else {
+                scrambleGameText(pauseHintEl, 'Press ␣ to resume', 360);
+              }
             } else if (pauseStartedAt && gameStartedAt) {
               const pausedDuration = now - pauseStartedAt;
               gameStartedAt += pausedDuration;
               lastSpawnAt += pausedDuration;
               lastAsteroidTick = now;
               pauseStartedAt = 0;
+              if (!isPauseResumeHintSuppressedBreakpoint()) scrambleGameText(pauseHintEl, 'Press ␣ to pause', 360);
             }
             syncPausedState();
+            syncPauseHintVisibility();
             if (!isPaused) ensureMovementLoop();
           };
 
@@ -1582,33 +1722,34 @@
               if (!hasStartedGame) return;
             }
           });
-          attachTouchButtonFeedback(playHintWrap);
           try {
             document.querySelectorAll('.home-game-over__cta-wrap').forEach((wrap) => attachTouchButtonFeedback(wrap));
           } catch (_) {}
-          const runButtonAction = (action) => {
-            const delay = getButtonActionDelay();
-            if (!delay) {
+          const runButtonAction = (action, opts = {}) => {
+            const delay = typeof opts.delay === 'number' ? opts.delay : getButtonActionDelay();
+            const pressWrap = opts.pressWrap || null;
+            if (pressWrap && pressWrap.dataset && pressWrap.dataset.actionPending === 'true') return;
+            if (pressWrap) {
+              try {
+                pressWrap.classList.add('is-action-pending');
+                if (pressWrap.dataset) pressWrap.dataset.actionPending = 'true';
+              } catch (_) {}
+            }
+            const finalizeAction = () => {
+              if (pressWrap) {
+                try {
+                  pressWrap.classList.remove('is-action-pending');
+                  if (pressWrap.dataset) delete pressWrap.dataset.actionPending;
+                } catch (_) {}
+              }
               action();
+            };
+            if (!delay) {
+              finalizeAction();
               return;
             }
-            window.setTimeout(action, delay);
+            window.setTimeout(finalizeAction, delay);
           };
-          playHintBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            runButtonAction(() => {
-              markGameStarted();
-            });
-          });
-          playHintWrap.addEventListener('click', (e) => {
-            if (e.target === playHintBtn) return;
-            e.preventDefault();
-            e.stopPropagation();
-            runButtonAction(() => {
-              markGameStarted();
-            });
-          });
           if (moreInfoPlayLink) {
             moreInfoPlayLink.addEventListener('click', (e) => {
               e.preventDefault();
@@ -1622,16 +1763,18 @@
           playAgainBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            const pressWrap = playAgainBtn.closest('.home-game-over__cta-wrap');
             runButtonAction(() => {
               resetGame();
-            });
+            }, { delay: GAME_OVER_BUTTON_ACTION_DELAY, pressWrap });
           });
           gameOverTalkLink.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            const pressWrap = gameOverTalkLink.closest('.home-game-over__cta-wrap');
             runButtonAction(() => {
-              try { window.location.href = gameOverTalkLink.href; } catch (_) {}
-            });
+              exitGameToHero();
+            }, { delay: GAME_OVER_BUTTON_ACTION_DELAY, pressWrap });
           });
 
           const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;

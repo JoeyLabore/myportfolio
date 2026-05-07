@@ -15,7 +15,7 @@
     <!-- Material Symbols for MUI icons (lock) -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=110" />
+    <link rel="stylesheet" href="./styles.css?v=125" />
     <style>
       /* Disable hover/pressed/selected widen and tilt on home page tiles */
       @media (min-width: 601px) {
@@ -118,25 +118,20 @@
           </div>
           <div class="home-hero__column home-hero__column--more">
             <p class="home-hero__label">More</p>
-            <a class="home-hero__link" href="./about.html">Skills</a>
-            <a class="home-hero__link" href="./about.html?scroll=reviews">Reviews</a>
-            <a class="home-hero__link" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <a class="home-hero__link" href="mailto:joey.greenwood1997@gmail.com">Email</a>
-            <a class="home-hero__link" href="#" data-home-game-start="true">Fun</a>
+            <div class="home-hero__more-links">
+              <a class="home-hero__link" href="./about.html">Skills</a>
+              <a class="home-hero__link" href="./about.html?scroll=reviews">Reviews</a>
+              <a class="home-hero__link" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              <a class="home-hero__link" href="mailto:joey.greenwood1997@gmail.com">Email</a>
+              <a class="home-hero__link" href="#" data-home-game-start="true">Fun</a>
+            </div>
           </div>
         </section>
 
         <section class="home-game-stage" aria-label="Rocket game">
           <div class="home-game-stage__inner" role="button" tabindex="0" aria-pressed="false" aria-label="Rocket game stage">
             <div class="home-game-score" aria-live="polite">Score: 0</div>
-
-            <div class="home-game-hint">
-              <span class="home-game-hint__title">Rocket Run</span>
-              <span class="home-game-hint__body">Dodge asteroids and survive as long as you can.</span>
-              <span class="home-game-hint__play-wrap">
-                <a class="home-game-hint__play" href="#">Play</a>
-              </span>
-            </div>
+            <div class="home-game-pause-hint" aria-hidden="true">Press ␣ to pause</div>
 
             <div class="home-game-over" aria-live="polite">
               <div class="home-game-over__card">
@@ -147,11 +142,13 @@
                     <a class="home-game-over__cta home-game-over__cta--primary home-game-over__replay" href="#">Play Again</a>
                   </span>
                   <span class="home-game-over__cta-wrap">
-                    <a class="home-game-over__cta home-game-over__cta--secondary" href="mailto:joey.greenwood1997@gmail.com">Let&apos;s Talk</a>
+                    <a class="home-game-over__cta home-game-over__cta--secondary" href="#">Quit</a>
                   </span>
                 </div>
               </div>
             </div>
+
+            <div class="home-game-pause" aria-hidden="true">Paused</div>
 
             <div class="home-game-asteroid-layer" aria-hidden="true"></div>
             <div class="home-game-rocket-wrap" aria-hidden="true">
@@ -190,6 +187,6 @@
         </div>
       </footer>
     </div>
-    <script src="./main.js?v=85"></script>
+    <script src="./main.js?v=98"></script>
   </body>
 </html>
