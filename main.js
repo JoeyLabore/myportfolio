@@ -374,12 +374,20 @@
           const isHomeHeroStaticSideRoot = !!(
             root.matches && root.matches('.page[data-name="home page"] .home-hero__column .home-hero__label, .page[data-name="home page"] .home-hero__column .home-hero__body')
           );
+          const isHomeHeroMoreLinkRoot = !!(
+            root.matches && root.matches('.page[data-name="home page"] .home-hero__column--more .home-hero__link')
+          );
           const isThumbnailTileRoot = !!(root.matches && root.matches('.tile-grid .tile'));
           const isAboutHeading = !!(root.matches && root.matches('.page[data-name="about page"] .about-heading'));
           if (isCaseStudyRoot || isTabNavItem || isLetsConnectNavItem || isHomeHeroHeadline || isHomeHeroStaticSideRoot || isThumbnailTileRoot || isAboutHeading) return;
           root.__scrambleReplayBound = true;
           let lastReplayAt = 0;
           const triggerReplay = (event) => {
+            if (isHomeHeroMoreLinkRoot) {
+              try {
+                if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) return;
+              } catch (_) {}
+            }
             if (event && event.type === 'focusin') {
               const keyboardFocused = !!(root.matches(':focus-visible') || root.querySelector(':focus-visible'));
               if (!keyboardFocused) return;
