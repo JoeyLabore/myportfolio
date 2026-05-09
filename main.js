@@ -1334,6 +1334,9 @@
             try {
               const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
               const homeHeroSections = Array.from(document.querySelectorAll('.page[data-name="home page"] .home-hero > *'));
+              const HERO_BASE_DELAY = 260;
+              const HERO_STEP = 140;
+              const HERO_TRANSITION_MS = 520;
 
               homeHeroSections.forEach((section) => {
                 section.classList.remove('home-intro-section-visible');
@@ -1347,11 +1350,9 @@
                   section.classList.remove('home-intro-section-hidden');
                   section.classList.add('home-intro-section-visible');
                 });
-                return;
+                return 0;
               }
 
-              const HERO_BASE_DELAY = 260;
-              const HERO_STEP = 140;
               homeHeroSections.forEach((section, i) => {
                 window.setTimeout(() => {
                   section.classList.remove('home-intro-section-hidden');
@@ -1363,8 +1364,11 @@
                   }
                 }, HERO_BASE_DELAY + (i * HERO_STEP));
               });
+              return HERO_BASE_DELAY + (Math.max(0, homeHeroSections.length - 1) * HERO_STEP) + HERO_TRANSITION_MS;
             } catch (_) {}
+            return 0;
           };
+          try { window.__homeReplayHeroIntro = replayHomeHeroIntro; } catch (_) {}
           const exitGameToHero = () => {
             resetGameButtonStates();
             isGameOver = false;
@@ -2363,92 +2367,150 @@
         } catch (_) {}
 
         // Intro animation: slide tiles in from the left with a small stagger
-        try {
-          const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          const footer = document.querySelector('.site-footer');
-          if (footer) {
-            footer.classList.remove('scroll-reveal-visible', 'scroll-reveal-hidden');
-            footer.classList.add(prefersReduced ? 'scroll-reveal-visible' : 'scroll-reveal-hidden');
-          }
-          if (!prefersReduced) {
-            const orderedTiles = sortByCssOrder(tiles);
-            orderedTiles.forEach((tile) => {
-              tile.classList.remove('intro-visible');
-              tile.classList.add('intro-hidden');
+        let tileIntroRunId = 0;
+        let tileIntroKickoffTimer = 0;
+        const tileIntroPendingTimers = new Set();
+        const replayHomeTileIntro = (startDelayMs = 0) => {
+          try {
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const footer = document.querySelector('.site-footer');
+            const homePageRoot = document.querySelector('.page[data-name="home page"]');
+            const kickoffDelay = Math.max(0, Number(startDelayMs) || 0);
+            tileIntroRunId += 1;
+            const runId = tileIntroRunId;
+            if (tileIntroKickoffTimer) {
+              try { window.clearTimeout(tileIntroKickoffTimer); } catch (_) { /* ignore */ }
+              tileIntroKickoffTimer = 0;
+            }
+            tileIntroPendingTimers.forEach((timerId) => {
+              try { window.clearTimeout(timerId); } catch (_) { /* ignore */ }
             });
+            tileIntroPendingTimers.clear();
+            try { if (homePageRoot) homePageRoot.classList.add('home-recent-intro-prep'); } catch (_) { /* ignore */ }
 
-            let revealIndex = 0;
-            const revealTile = (tile) => {
-              if (!tile || tile.__introRevealed) return;
-              tile.__introRevealed = true;
-              const delay = Math.min(120, revealIndex * 28);
-              revealIndex += 1;
-              setTimeout(() => {
-                try {
-                  tile.classList.remove('intro-hidden');
-                  tile.classList.add('intro-visible');
-                } catch (_) { /* ignore tile intro reveal errors */ }
-              }, delay);
-            };
-
-            if ('IntersectionObserver' in window) {
-              const tileObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach((entry) => {
-                  if (!entry.isIntersecting) return;
-                  revealTile(entry.target);
-                  observer.unobserve(entry.target);
-                });
-              }, { threshold: 0.01, rootMargin: '0px 0px 18% 0px' });
-
-              const viewportHeight = Math.max(window.innerHeight || 0, 1);
-              orderedTiles.forEach((tile) => {
-                try {
-                  const rect = tile.getBoundingClientRect();
-                  const inInitialView = rect.top < viewportHeight * 0.92 && rect.bottom > 0;
-                  if (inInitialView) {
-                    revealTile(tile);
-                    return;
-                  }
-                } catch (_) { /* ignore initial viewport checks */ }
-                tileObserver.observe(tile);
+            if (!prefersReduced) {
+              const orderedTilesForReset = sortByCssOrder(tiles);
+              orderedTilesForReset.forEach((tile) => {
+                tile.__introRevealed = false;
+                tile.classList.remove('intro-visible');
+                tile.classList.add('intro-hidden');
               });
+            }
 
-              if (footer) {
-                const footerObserver = new IntersectionObserver((entries, observer) => {
-                  if (!entries.some((entry) => entry.isIntersecting)) return;
+            const startIntro = () => {
+            if (runId !== tileIntroRunId) return;
+            try { if (homePageRoot) homePageRoot.classList.remove('home-recent-intro-prep'); } catch (_) { /* ignore */ }
+            if (footer) {
+              footer.classList.remove('scroll-reveal-visible', 'scroll-reveal-hidden');
+              footer.classList.add(prefersReduced ? 'scroll-reveal-visible' : 'scroll-reveal-hidden');
+            }
+            if (!prefersReduced) {
+              const orderedTiles = sortByCssOrder(tiles);
+              let revealIndex = 0;
+              const revealTile = (tile) => {
+                if (!tile || tile.__introRevealed) return;
+                tile.__introRevealed = true;
+                const delay = revealIndex * 150;
+                revealIndex += 1;
+                const revealTimerId = window.setTimeout(() => {
+                  tileIntroPendingTimers.delete(revealTimerId);
+                  if (runId !== tileIntroRunId) return;
                   try {
-                    footer.classList.remove('scroll-reveal-hidden');
-                    footer.classList.add('scroll-reveal-visible');
-                  } catch (_) { /* ignore footer intro errors */ }
-                  observer.disconnect();
-                }, { threshold: 0.01, rootMargin: '0px 0px 20% 0px' });
-                footerObserver.observe(footer);
+                    tile.classList.remove('intro-hidden');
+                    tile.classList.add('intro-visible');
+                  } catch (_) { /* ignore tile intro reveal errors */ }
+                }, delay);
+                tileIntroPendingTimers.add(revealTimerId);
+              };
+
+              if ('IntersectionObserver' in window) {
+                const tileObserver = new IntersectionObserver((entries, observer) => {
+                  entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    revealTile(entry.target);
+                    observer.unobserve(entry.target);
+                  });
+                }, { threshold: 0.01, rootMargin: '0px 0px 18% 0px' });
+
+                const viewportHeight = Math.max(window.innerHeight || 0, 1);
+                orderedTiles.forEach((tile) => {
+                  try {
+                    const rect = tile.getBoundingClientRect();
+                    const inInitialView = rect.top < viewportHeight * 0.92 && rect.bottom > 0;
+                    if (inInitialView) {
+                      revealTile(tile);
+                      return;
+                    }
+                  } catch (_) { /* ignore initial viewport checks */ }
+                  tileObserver.observe(tile);
+                });
+
+                const safetyRevealTimerId = window.setTimeout(() => {
+                  tileIntroPendingTimers.delete(safetyRevealTimerId);
+                  if (runId !== tileIntroRunId) return;
+                  orderedTiles.forEach((tile) => revealTile(tile));
+                }, 900);
+                tileIntroPendingTimers.add(safetyRevealTimerId);
+
+                if (footer) {
+                  const footerObserver = new IntersectionObserver((entries, observer) => {
+                    if (!entries.some((entry) => entry.isIntersecting)) return;
+                    try {
+                      footer.classList.remove('scroll-reveal-hidden');
+                      footer.classList.add('scroll-reveal-visible');
+                    } catch (_) { /* ignore footer intro errors */ }
+                    observer.disconnect();
+                  }, { threshold: 0.01, rootMargin: '0px 0px 20% 0px' });
+                  footerObserver.observe(footer);
+                }
+              } else {
+                const BASE_DELAY = 0;
+                const STEP = 150;
+                orderedTiles.forEach((tile, i) => {
+                  setTimeout(() => {
+                    tile.classList.remove('intro-hidden');
+                    tile.classList.add('intro-visible');
+                  }, BASE_DELAY + i * STEP);
+                });
+                if (footer) {
+                  setTimeout(() => {
+                    try {
+                      footer.classList.remove('scroll-reveal-hidden');
+                      footer.classList.add('scroll-reveal-visible');
+                    } catch (_) { /* ignore footer intro errors */ }
+                  }, BASE_DELAY + orderedTiles.length * STEP);
+                }
               }
             } else {
-              const BASE_DELAY = 200;
-              const STEP = 70;
-              orderedTiles.forEach((tile, i) => {
-                setTimeout(() => {
-                  tile.classList.remove('intro-hidden');
-                  tile.classList.add('intro-visible');
-                }, BASE_DELAY + i * STEP);
-              });
               if (footer) {
-                setTimeout(() => {
-                  try {
-                    footer.classList.remove('scroll-reveal-hidden');
-                    footer.classList.add('scroll-reveal-visible');
-                  } catch (_) { /* ignore footer intro errors */ }
-                }, BASE_DELAY + orderedTiles.length * STEP);
+                footer.classList.remove('scroll-reveal-hidden');
+                footer.classList.add('scroll-reveal-visible');
               }
             }
-          } else {
-            if (footer) {
-              footer.classList.remove('scroll-reveal-hidden');
-              footer.classList.add('scroll-reveal-visible');
+            };
+            if (kickoffDelay > 0) {
+              tileIntroKickoffTimer = window.setTimeout(() => {
+                tileIntroKickoffTimer = 0;
+                startIntro();
+              }, kickoffDelay);
+            } else {
+              startIntro();
             }
-          }
-        } catch (_) { /* ignore animation errors */ }
+          } catch (_) { /* ignore animation errors */ }
+        };
+        const getHomeHeroIntroDelayForTiles = () => {
+          try {
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReduced) return 0;
+            const homeHeroSections = Array.from(document.querySelectorAll('.page[data-name="home page"] .home-hero > *'));
+            const HERO_BASE_DELAY = 260;
+            const HERO_STEP = 140;
+            const HERO_TRANSITION_MS = 520;
+            return HERO_BASE_DELAY + (Math.max(0, homeHeroSections.length - 1) * HERO_STEP) + HERO_TRANSITION_MS;
+          } catch (_) { return 0; }
+        };
+        replayHomeTileIntro(getHomeHeroIntroDelayForTiles());
+        try { window.__homeReplayTileIntro = replayHomeTileIntro; } catch (_) { /* ignore */ }
         // Lazy-init the NestBank video and attach to the NestBank tile (by data-project)
         function ensureNestbankVideo() {
           if (nestbankVideo) return;
@@ -2952,38 +3014,33 @@
         let archiveInitialized = false;
         let archiveRelayoutRequest = null;
         let archiveEnterResetTimer = 0;
-        let archiveRevealKickoffRaf = 0;
         let archiveVideoObserver = null;
         const archiveVideos = new Set();
         let archiveTypingTimer = 0;
         const archiveIntroFullText = archiveIntro ? String(archiveIntro.textContent || '').trim() : '';
-        let clearArchiveScrollRevealQueue = () => {};
         let archiveLightbox = null;
         let archiveLightboxMediaWrap = null;
         let archiveLightboxCloseTimer = 0;
         let archiveLightboxSourceEl = null;
         let archiveLightboxViewerNode = null;
 
-        const ARCHIVE_VIDEO_IDS = new Set([38, 39, 42, 43, 104, 106, 118, 121]);
-        const ARCHIVE_PNG_IDS = new Set([59, 65, 68, 73, 74, 83, 86, 89, 91, 94, 105, 107, 108, 119]);
+        const ARCHIVE_VIDEO_IDS = new Set([38, 39, 42, 43, 97, 104, 106, 118, 121]);
         const ARCHIVE_GIF_IDS = new Set([2, 21, 22, 71, 102]);
-        const ARCHIVE_MISSING_IDS = new Set([44, 46]);
+        const ARCHIVE_MISSING_IDS = new Set([17, 44, 46, 50, 51, 67, 70, 88]);
         const ARCHIVE_MEDIA = [];
         for (let id = 1; id <= 121; id += 1) {
           if (ARCHIVE_MISSING_IDS.has(id)) continue;
           let type = 'image';
-          let ext = 'jpg';
+          let ext = 'avif';
           if (ARCHIVE_VIDEO_IDS.has(id)) {
             type = 'video';
             ext = 'mp4';
-          } else if (ARCHIVE_PNG_IDS.has(id)) {
-            ext = 'png';
           } else if (ARCHIVE_GIF_IDS.has(id)) {
             ext = 'gif';
           }
           ARCHIVE_MEDIA.push({
             type,
-            src: `./assets/archive/${id}.${ext}`,
+            src: `./assets/archive-thumbnails/${id}.${ext}`,
           });
         }
 
@@ -3161,151 +3218,27 @@
           archiveTrack.innerHTML = '';
 
           let archiveRelayoutRaf = 0;
-          const prefersReducedMotion = (() => {
-            try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { return false; }
-          })();
           const archiveItems = [];
-          let archiveRevealObserver = null;
-          const archiveScrollRevealQueue = [];
-          let archiveScrollRevealTimer = 0;
 
-          clearArchiveScrollRevealQueue = () => {
-            archiveScrollRevealQueue.length = 0;
-            if (archiveScrollRevealTimer) {
-              try { window.clearTimeout(archiveScrollRevealTimer); } catch (_) { /* ignore */ }
-              archiveScrollRevealTimer = 0;
-            }
-          };
-
-          const flushArchiveScrollRevealQueue = () => {
-            archiveScrollRevealTimer = 0;
-            if (!homePage.classList.contains('home-archive-active')) {
-              clearArchiveScrollRevealQueue();
-              return;
-            }
-            const nextItem = archiveScrollRevealQueue.shift();
-            if (nextItem && nextItem.isConnected && nextItem.dataset.archiveReady === 'true' && !nextItem.classList.contains('is-visible')) {
-              nextItem.dataset.archiveScrollQueued = 'false';
-              revealItem(nextItem, 0);
-            }
-            if (archiveScrollRevealQueue.length) {
-              archiveScrollRevealTimer = window.setTimeout(flushArchiveScrollRevealQueue, 95);
-            }
-          };
-
-          const enqueueArchiveScrollReveal = (item) => {
-            if (!item || item.classList.contains('is-visible')) return;
-            if (item.dataset.archiveScrollQueued === 'true') return;
-            item.dataset.archiveScrollQueued = 'true';
-            archiveScrollRevealQueue.push(item);
-            if (!archiveScrollRevealTimer) {
-              archiveScrollRevealTimer = window.setTimeout(flushArchiveScrollRevealQueue, 95);
-            }
-          };
-
-          const revealItem = (item, delayMs = 0) => {
+          const revealItem = (item) => {
             if (!item) return;
             if (item.classList.contains('is-visible')) return;
-            if (item.dataset.archiveRevealQueued === 'true') return;
-            if (prefersReducedMotion) {
-              item.classList.add('is-visible');
-              item.dataset.archiveScrollQueued = 'false';
-              return;
-            }
-            item.dataset.archiveRevealQueued = 'true';
-            item.classList.remove('is-visible');
-            const revealDelay = Math.max(0, delayMs);
-            const slowEnter = homePage.classList.contains('home-archive-entering');
-            const duration = slowEnter ? 1800 : 1200;
-            const easing = 'cubic-bezier(0.2, 0.7, 0.2, 1)';
-            item.style.opacity = '0';
-            item.style.transform = 'translate3d(0, 14px, 0) scale(0.985)';
-            void item.offsetHeight;
-            window.requestAnimationFrame(() => {
-              try {
-                const animation = item.animate([
-                  { opacity: 0, transform: 'translate3d(0, 14px, 0) scale(0.985)' },
-                  { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' },
-                ], {
-                  duration,
-                  delay: revealDelay,
-                  easing,
-                  fill: 'forwards',
-                });
-                animation.onfinish = () => {
-                  item.classList.add('is-visible');
-                  item.style.opacity = '1';
-                  item.style.transform = 'translate3d(0, 0, 0) scale(1)';
-                  item.dataset.archiveRevealQueued = 'false';
-                  item.dataset.archiveScrollQueued = 'false';
-                };
-              } catch (_) {
-                item.classList.add('is-visible');
-                item.dataset.archiveRevealQueued = 'false';
-                item.dataset.archiveScrollQueued = 'false';
-              }
-            });
+            item.classList.add('is-visible');
+            item.style.opacity = '1';
+            item.style.transform = 'translate3d(0, 0, 0) scale(1)';
           };
 
-          const setupArchiveRevealObserver = () => {
+          const revealReadyArchiveItems = () => {
             if (!archiveViewport || !archiveItems.length) return;
             const isArchiveActive = homePage.classList.contains('home-archive-active');
             if (!isArchiveActive) return;
             if (!homePage.classList.contains('home-archive-assets-ready')) return;
             if (!homePage.classList.contains('home-archive-intro-done')) return;
-            if (prefersReducedMotion) {
-              archiveItems.forEach((item) => revealItem(item, 0));
-              return;
-            }
 
-            if (!archiveRevealObserver) {
-              archiveRevealObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach((entry) => {
-                  if (!entry.isIntersecting) return;
-                  const target = entry.target;
-                  if (!target || target.dataset.archiveReady !== 'true') return;
-                  enqueueArchiveScrollReveal(target);
-                  observer.unobserve(target);
-                });
-              }, {
-                root: archiveViewport,
-                rootMargin: '0px 0px -6% 0px',
-                threshold: 0.08,
-              });
-            }
-
-            const slowEnter = homePage.classList.contains('home-archive-entering');
-            const staggerStep = slowEnter ? 95 : 50;
-            const viewportRect = archiveViewport.getBoundingClientRect();
-            const inViewportReadyItems = [];
-
-            archiveItems.forEach((item, idx) => {
+            archiveItems.forEach((item) => {
               if (!item || item.dataset.archiveReady !== 'true') return;
-              const rect = item.getBoundingClientRect();
-              const isInInitialViewport = rect.top < (viewportRect.bottom * 0.98) && rect.bottom > viewportRect.top;
-              if (isInInitialViewport) {
-                inViewportReadyItems.push({ item, top: rect.top, left: rect.left, idx });
-              } else if (!item.classList.contains('is-visible')) {
-                archiveRevealObserver.observe(item);
-              }
+              revealItem(item);
             });
-
-            inViewportReadyItems
-              .sort((a, b) => {
-                const rowBandA = Math.round(a.top / 44);
-                const rowBandB = Math.round(b.top / 44);
-                if (rowBandA !== rowBandB) return rowBandA - rowBandB;
-                if (!a.item.dataset.archiveRevealRand) a.item.dataset.archiveRevealRand = String(Math.random());
-                if (!b.item.dataset.archiveRevealRand) b.item.dataset.archiveRevealRand = String(Math.random());
-                const randA = Number(a.item.dataset.archiveRevealRand || 0);
-                const randB = Number(b.item.dataset.archiveRevealRand || 0);
-                if (Math.abs(randA - randB) > 0.0001) return randA - randB;
-                if (Math.abs(a.left - b.left) > 1) return a.left - b.left;
-                return a.idx - b.idx;
-              })
-              .forEach((entry, visualIndex) => {
-                revealItem(entry.item, visualIndex * staggerStep);
-              });
           };
 
           const isArchiveActive = () => homePage.classList.contains('home-archive-active');
@@ -3346,7 +3279,7 @@
               try {
                 if (!archiveTrack || !archiveTrack.isConnected) return;
                 void archiveTrack.offsetHeight;
-                setupArchiveRevealObserver();
+                revealReadyArchiveItems();
               } catch (_) { /* ignore archive relayout failures */ }
             });
           };
@@ -3356,9 +3289,10 @@
           let resolvedArchiveMedia = 0;
           const markArchiveMediaResolved = () => {
             resolvedArchiveMedia += 1;
-            if (resolvedArchiveMedia < totalArchiveMedia) return;
-            homePage.classList.add('home-archive-assets-ready');
-            requestArchiveRelayout();
+            if (resolvedArchiveMedia >= totalArchiveMedia) {
+              homePage.classList.add('home-archive-assets-ready');
+              requestArchiveRelayout();
+            }
           };
 
           ARCHIVE_MEDIA.forEach((media, index) => {
@@ -3377,19 +3311,19 @@
             const insertReadyItem = () => {
               if (item.dataset.archiveReady === 'true') return;
               item.dataset.archiveReady = 'true';
-              archiveTrack.appendChild(item);
-              if (index === 0) item.classList.add('home-archive-stage__item--anchor');
               requestArchiveRelayout();
             };
 
+            if (index === 0) item.classList.add('home-archive-stage__item--anchor');
+
             if (media.type === 'video') {
               const video = document.createElement('video');
-              video.src = media.src;
+              video.dataset.src = media.src;
               video.muted = true;
               video.loop = true;
               video.autoplay = true;
               video.playsInline = true;
-              video.preload = 'metadata';
+              video.preload = 'none';
               video.setAttribute('playsinline', '');
               video.setAttribute('muted', '');
               video.setAttribute('aria-label', '');
@@ -3399,13 +3333,14 @@
               video.addEventListener('contextmenu', (event) => {
                 event.preventDefault();
               });
-              video.style.cursor = 'zoom-in';
+              video.style.cursor = 'pointer';
               video.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
                 openArchiveLightbox(media, video);
               });
               item.appendChild(video);
+              archiveTrack.appendChild(item);
               registerArchiveVideo(video);
               const ensurePlay = () => {
                 if (!isArchiveActive()) return;
@@ -3421,18 +3356,30 @@
                 markArchiveMediaResolvedOnce();
                 requestArchiveRelayout();
               }, { once: true });
-              ensurePlay();
-              if (video.readyState >= 2) {
-                insertReadyItem();
-                markArchiveMediaResolvedOnce();
+              if (video.dataset.archiveHydrated !== 'true') {
+                video.dataset.archiveHydrated = 'true';
+                const nextSrc = String(video.dataset.src || '').trim();
+                if (!nextSrc) {
+                  insertReadyItem();
+                  markArchiveMediaResolvedOnce();
+                } else {
+                  video.preload = 'metadata';
+                  video.src = nextSrc;
+                  try { video.load(); } catch (_) { /* ignore */ }
+                  ensurePlay();
+                  if (video.readyState >= 2) {
+                    insertReadyItem();
+                    markArchiveMediaResolvedOnce();
+                  }
+                }
               }
             } else {
               const img = document.createElement('img');
-              img.src = media.src;
+              img.dataset.src = media.src;
               img.alt = '';
               img.draggable = false;
-              img.loading = 'eager';
-              try { img.fetchPriority = 'high'; } catch (_) { /* ignore */ }
+              img.loading = 'lazy';
+              try { img.fetchPriority = 'auto'; } catch (_) { /* ignore */ }
               img.decoding = 'async';
               img.addEventListener('dragstart', (event) => {
                 event.preventDefault();
@@ -3440,7 +3387,7 @@
               img.addEventListener('contextmenu', (event) => {
                 event.preventDefault();
               });
-              img.style.cursor = 'zoom-in';
+              img.style.cursor = 'pointer';
               img.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -3456,9 +3403,20 @@
                 requestArchiveRelayout();
               }, { once: true });
               item.appendChild(img);
-              if (img.complete && Number(img.naturalWidth || 0) > 0) {
-                insertReadyItem();
-                markArchiveMediaResolvedOnce();
+              archiveTrack.appendChild(item);
+              if (img.dataset.archiveHydrated !== 'true') {
+                img.dataset.archiveHydrated = 'true';
+                const nextSrc = String(img.dataset.src || '').trim();
+                if (!nextSrc) {
+                  insertReadyItem();
+                  markArchiveMediaResolvedOnce();
+                } else {
+                  img.src = nextSrc;
+                  if (img.complete && Number(img.naturalWidth || 0) > 0) {
+                    insertReadyItem();
+                    markArchiveMediaResolvedOnce();
+                  }
+                }
               }
             }
           });
@@ -3529,17 +3487,12 @@
             homePage.classList.remove('home-archive-intro-running');
             homePage.classList.remove('home-archive-intro-done');
             homePage.classList.remove('home-archive-entering');
-            clearArchiveScrollRevealQueue();
             archiveVideos.forEach((video) => {
               try { video.pause(); } catch (_) { /* ignore */ }
             });
             if (archiveEnterResetTimer) {
               try { window.clearTimeout(archiveEnterResetTimer); } catch (_) { /* ignore */ }
               archiveEnterResetTimer = 0;
-            }
-            if (archiveRevealKickoffRaf) {
-              try { window.cancelAnimationFrame(archiveRevealKickoffRaf); } catch (_) { /* ignore */ }
-              archiveRevealKickoffRaf = 0;
             }
             if (archiveTypingTimer) {
               try { window.clearTimeout(archiveTypingTimer); } catch (_) { /* ignore */ }
@@ -3550,6 +3503,7 @@
         };
 
         const setActive = (idx) => {
+          const wasArchiveActive = homePage.classList.contains('home-archive-active');
           tabs.forEach((t, i) => {
             const active = i === idx;
             t.classList.toggle('active', active);
@@ -3559,6 +3513,15 @@
           const tab = tabs[idx];
           const tabName = (tab && tab.dataset) ? String(tab.dataset.tab || '').toLowerCase() : 'recent';
           syncArchiveState(tabName === 'archive');
+          if (tabName === 'recent' && wasArchiveActive) {
+            try {
+              let tileIntroDelay = 0;
+              if (typeof window.__homeReplayHeroIntro === 'function') {
+                tileIntroDelay = Number(window.__homeReplayHeroIntro()) || 0;
+              }
+              if (typeof window.__homeReplayTileIntro === 'function') window.__homeReplayTileIntro(tileIntroDelay);
+            } catch (_) { /* ignore replay errors on tab switch */ }
+          }
         };
 
         const setHomeTabByName = (tabName) => {

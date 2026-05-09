@@ -15,29 +15,7 @@
     <!-- Material Symbols for MUI icons (lock) -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=161" />
-    <style>
-      /* Disable hover/pressed/selected widen and tilt on home page tiles */
-      @media (min-width: 601px) {
-        .page[data-name="home page"] .tile-grid .tile.selected {
-          flex: initial !important;
-          transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
-        }
-      }
-      .page[data-name="home page"] .tile-grid .tile:not(.selected):hover,
-      .page[data-name="home page"] .tile-grid .tile.hover-proxy:not(.selected),
-      .page[data-name="home page"] .tile-grid .tile:not(.selected):focus-visible {
-        flex: initial !important;
-      }
-      /* Keep the tile container still so the offset shadow only fades in. */
-      .page[data-name="home page"] .tile-grid .tile:hover,
-      .page[data-name="home page"] .tile-grid .tile:focus-visible {
-        transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
-      }
-      .page[data-name="home page"] .tile-grid .tile:active {
-        transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
-      }
-    </style>
+    <link rel="stylesheet" href="./styles.css?v=163" />
   </head>
   <body>
     <!-- Home: black route overlay used to swipe in before navigating to NestBank -->
@@ -184,6 +162,6 @@
         </div>
       </footer>
     </div>
-    <script src="./main.js?v=166"></script>
+    <script src="./main.js?v=192"></script>
   </body>
 </html>
