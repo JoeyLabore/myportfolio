@@ -3041,6 +3041,7 @@
           ARCHIVE_MEDIA.push({
             type,
             src: `./assets/archive-thumbnails/${id}.${ext}`,
+            lightboxSrc: type === 'video' ? `./assets/archive-thumbnails/${id}.${ext}` : `./assets/archive/${id}.${ext}`,
           });
         }
 
@@ -3124,6 +3125,8 @@
 
         const openArchiveLightbox = (media, sourceEl = null) => {
           if (!media || !media.src) return;
+          const lightboxSrc = String((media && media.lightboxSrc) || media.src || '').trim();
+          if (!lightboxSrc) return;
           ensureArchiveLightbox();
           if (!archiveLightbox || !archiveLightboxMediaWrap) return;
           if (archiveLightboxCloseTimer) {
@@ -3136,7 +3139,7 @@
           let viewerNode = null;
           if (media.type === 'video') {
             const viewerVideo = document.createElement('video');
-            viewerVideo.src = media.src;
+            viewerVideo.src = lightboxSrc;
             viewerVideo.controls = false;
             viewerVideo.autoplay = true;
             viewerVideo.loop = true;
@@ -3154,7 +3157,7 @@
             viewerNode = viewerVideo;
           } else {
             const viewerImg = document.createElement('img');
-            viewerImg.src = media.src;
+            viewerImg.src = lightboxSrc;
             viewerImg.alt = '';
             viewerImg.draggable = false;
             viewerImg.addEventListener('dragstart', (event) => {
@@ -3171,12 +3174,17 @@
           archiveLightbox.setAttribute('aria-hidden', 'false');
 
           if (viewerNode && sourceEl && sourceEl instanceof Element) {
-            window.requestAnimationFrame(() => {
+            const playZoomIn = (attempt = 0) => {
               try {
                 const sourceRect = sourceEl.getBoundingClientRect();
                 const targetRect = viewerNode.getBoundingClientRect();
                 if (!sourceRect || !targetRect) return;
-                if (sourceRect.width <= 0 || sourceRect.height <= 0 || targetRect.width <= 0 || targetRect.height <= 0) return;
+                const hasSize = sourceRect.width > 0 && sourceRect.height > 0 && targetRect.width > 0 && targetRect.height > 0;
+                if (!hasSize) {
+                  if (attempt >= 10) return;
+                  window.requestAnimationFrame(() => playZoomIn(attempt + 1));
+                  return;
+                }
 
                 const sourceCenterX = sourceRect.left + (sourceRect.width / 2);
                 const sourceCenterY = sourceRect.top + (sourceRect.height / 2);
@@ -3202,7 +3210,9 @@
                   fill: 'both',
                 });
               } catch (_) { /* ignore lightbox zoom animation failures */ }
-            });
+            };
+
+            window.requestAnimationFrame(() => playZoomIn(0));
           }
         };
 
