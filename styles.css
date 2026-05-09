@@ -799,8 +799,226 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   margin: 0 0 var(--space-s);
 }
 
+.page[data-name="home page"] .home-archive-stage {
+  display: none;
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh;
+  margin: 0;
+  border-radius: 0;
+  background: #0a0a0a;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.page[data-name="home page"] .home-archive-stage__viewport {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #0a0a0a;
+  cursor: default;
+}
+
+.page[data-name="home page"] .home-archive-stage__viewport.is-dragging {
+  cursor: default;
+}
+
+.page[data-name="home page"] .home-archive-stage__intro {
+  position: relative;
+  padding: calc(var(--nav-card-height) + (2 * var(--space-s))) 10px 8px;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.page[data-name="home page"] .home-archive-stage__intro p {
+  margin: 0;
+  max-width: 780px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+}
+
+.page[data-name="home page"] .home-archive-stage__track {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  min-height: 0;
+  padding: 120px 10px 10px;
+  column-width: clamp(84px, 9vw, 128px);
+  column-gap: 10px;
+  column-fill: balance;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.page[data-name="home page"].home-archive-intro-running .home-archive-stage__viewport {
+  overflow: hidden;
+}
+
+.page[data-name="home page"].home-archive-intro-running .home-archive-stage__track {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page[data-name="home page"].home-archive-active:not(.home-archive-assets-ready) .home-archive-stage__track {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page[data-name="home page"].home-archive-active:not(.home-archive-intro-done) .home-archive-stage__track {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page[data-name="home page"].home-archive-intro-done.home-archive-assets-ready .home-archive-stage__track {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.page[data-name="home page"] .home-archive-stage__item {
+  position: relative;
+  width: 100%;
+  display: inline-block;
+  margin: 0 0 10px;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  border-radius: 0;
+  overflow: hidden;
+  background: transparent;
+  opacity: 0;
+  transform: translate3d(0, 14px, 0) scale(0.985);
+  transition: none;
+}
+
+.page[data-name="home page"] .home-archive-stage__item.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.page[data-name="home page"].home-archive-entering .home-archive-stage__item {
+  will-change: auto;
+}
+
+.page[data-name="home page"] .home-archive-stage__item img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.page[data-name="home page"] .home-archive-stage__item video {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+  background: transparent;
+}
+
+.page[data-name="home page"] .home-archive-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.88);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 280ms ease, visibility 0s linear 280ms;
+}
+
+.page[data-name="home page"] .home-archive-lightbox.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 280ms ease;
+}
+
+.page[data-name="home page"] .home-archive-lightbox__media {
+  width: min(96vw, 1600px);
+  height: min(92vh, 1100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page[data-name="home page"] .home-archive-lightbox__media img,
+.page[data-name="home page"] .home-archive-lightbox__media video {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page[data-name="home page"] .home-archive-stage__item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .page[data-name="home page"] .home-archive-stage__intro {
+    padding: calc(var(--nav-card-height) + (2 * var(--space-s))) 8px 8px;
+  }
+
+  .page[data-name="home page"] .home-archive-stage__intro p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .page[data-name="home page"] .home-archive-stage__track {
+    column-width: clamp(72px, 18vw, 96px);
+    column-gap: 8px;
+    padding: 120px 8px 8px;
+  }
+
+  .page[data-name="home page"] .home-archive-stage__item {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
 .page[data-name="home page"].home-game-active .home-hero {
   display: none;
+}
+
+.page[data-name="home page"].home-archive-active .home-hero,
+.page[data-name="home page"].home-archive-active .home-game-stage,
+.page[data-name="home page"].home-archive-active .tile-grid,
+.page[data-name="home page"].home-archive-active .site-footer {
+  display: none !important;
+}
+
+.page[data-name="home page"].home-archive-active .home-archive-stage {
+  display: block;
+}
+
+.page[data-name="home page"].home-archive-active .main {
+  margin-top: 0 !important;
 }
 
 .page[data-name="home page"].home-game-active .home-game-stage {
@@ -3858,12 +4076,17 @@ p { margin: 0; }
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  line-height: 1.2;
 }
 
 .tile-grid .tile .tile-frame-meta__lock-icon {
   width: 12px;
   height: 12px;
-  display: block;
+  display: inline-block;
+  align-self: center;
+  flex: 0 0 auto;
+  margin: 0;
+  vertical-align: middle;
   opacity: 0.92;
 }
 
@@ -5050,6 +5273,9 @@ p { margin: 0; }
     max-width: calc(100vw - 32px) !important;
     margin-left: calc(50% - 50vw + 16px) !important;
     margin-right: calc(50% - 50vw + 16px) !important;
+  }
+  .page[data-name="home page"].home-archive-active .main .tile-grid {
+    display: none !important;
   }
   .page[data-name="home page"] .tile-grid .tile {
     margin: 0 !important;

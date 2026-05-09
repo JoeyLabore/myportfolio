@@ -15,7 +15,7 @@
     <!-- Material Symbols for MUI icons (lock) -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=129" />
+    <link rel="stylesheet" href="./styles.css?v=161" />
     <style>
       /* Disable hover/pressed/selected widen and tilt on home page tiles */
       @media (min-width: 601px) {
@@ -56,12 +56,8 @@
         </header>
         <header class="nav-bar nav-middle" data-name="nav-tabs" aria-label="Case study filters">
           <nav class="tabs" role="tablist" aria-label="Filter case studies">
-            <a href="#" class="nav-item active" role="tab" aria-selected="true" tabindex="0" data-tab="all">All</a>
-            <a href="#" class="nav-item" role="tab" aria-selected="false" tabindex="-1" data-tab="ux">Product</a>
-            <a href="#" class="nav-item" role="tab" aria-selected="false" tabindex="-1" data-tab="branding">
-              <span class="nav-item__label-full">Branding</span>
-              <span class="nav-item__label-compact">Brand</span>
-            </a>
+            <a href="#" class="nav-item active" role="tab" aria-selected="true" tabindex="0" data-tab="recent">Recent</a>
+            <a href="#" class="nav-item" role="tab" aria-selected="false" tabindex="-1" data-tab="archive">Archive</a>
           </nav>
         </header>
         <div class="nav-right-wrap" aria-label="Actions">
@@ -94,6 +90,7 @@
         <div class="mobile-menu-overlay" aria-hidden="true" role="dialog" aria-label="Menu">
           <div class="mobile-menu-panel">
             <a class="nav-item" href="./about.html">About</a>
+            <a class="nav-item" href="#" data-mobile-tab="archive">Archive</a>
             <a class="nav-item" href="mailto:joey.greenwood1997@gmail.com">
               Lets Connect
               <svg class="icon-arrow" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" focusable="false">
@@ -125,6 +122,12 @@
               <a class="home-hero__link" href="mailto:joey.greenwood1997@gmail.com">Email</a>
               <a class="home-hero__link" href="#" data-home-game-start="true">Fun</a>
             </div>
+          </div>
+        </section>
+
+        <section class="home-archive-stage" aria-label="Archive stage" aria-hidden="true">
+          <div class="home-archive-stage__viewport" data-archive-viewport="true">
+            <div class="home-archive-stage__track" data-archive-track="true"></div>
           </div>
         </section>
 
@@ -164,12 +167,6 @@
           <div class="tile" data-category="ux" data-project="nestbank" data-title="NestBank Mobile App" data-desc="Designing a mobile platform for underserved communities. Transforming in-person lending processes into a scalable digital experience." data-industry="Mobile App" data-role="Sr Product Designer"></div>
           <div class="tile" data-category="ux" data-project="medigo" data-title="Medigo Mobile App" data-desc="Designing a patient-centered rehabilitation experience. Using user insights to improve recovery through a redesigned mobile platform." data-industry="Mobile App" data-role="Product Designer"></div>
           <div class="tile" data-category="branding" data-project="logofolio" data-title="Logofolio" data-desc="Purpose in Form. A study in clarity, symbolism, and identity." data-industry="Freelance" data-role="Freelance"></div>
-          <div class="tile" data-category="branding" data-project="apendito" data-title="Aprendito" data-desc="Building a playful, scalable identity system designed for clarity across digital and print touchpoints." data-industry="Brand Identity" data-role="Freelance"></div>
-          <div class="tile" data-category="branding" data-project="dinobytes" data-title="DinoBytes" data-desc="Developing a character-led brand identity that balances personality with strategic brand clarity." data-industry="Brand Identity" data-role="Freelance"></div>
-          <div class="tile" data-category="branding" data-project="tom" data-title="TOM" data-desc="Designing and refining digital product experiences through structured UX strategy and visual execution." data-industry="Brand Identity" data-role="Visual Design Lead"></div>
-          <div class="tile" data-category="ux branding" data-project="skilldex" data-title="Skilldex" data-desc="Defining the product and brand direction for a modern skills platform with a cohesive UX and visual system." data-industry="UI/UX &amp; Branding" data-role="Product Designer"></div>
-          <div class="tile" data-category="branding" data-project="kinti" data-title="Kinti" data-desc="Crafting a distinctive brand identity with a strong visual language and consistent storytelling." data-industry="Brand Identity" data-role="Freelance"></div>
-          <div class="tile" data-category="branding" data-project="kakaoala" data-title="Kakaoala" data-desc="Designing a friendly, memorable identity system with clear hierarchy and cohesive brand assets." data-industry="Brand Identity" data-role="Freelance"></div>
         </div>
       </main>
       <footer class="site-footer" aria-label="Footer">
@@ -187,6 +184,6 @@
         </div>
       </footer>
     </div>
-    <script src="./main.js?v=116"></script>
+    <script src="./main.js?v=166"></script>
   </body>
 </html>
