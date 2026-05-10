@@ -90,6 +90,14 @@
   const IS_SMALL_SCREEN = (() => {
     try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch { return false; }
   })();
+  const IS_SAFARI_BROWSER = (() => {
+    try {
+      const ua = String((window.navigator && window.navigator.userAgent) || '');
+      return /safari/i.test(ua) && !/chrome|chromium|crios|android/i.test(ua);
+    } catch (_) {
+      return false;
+    }
+  })();
 
   // Site-wide: one-time load text scramble reveal (subtle, left-to-right)
   (function setupSiteLoadTextReveal() {
@@ -2422,64 +2430,17 @@
                 }, delay);
                 tileIntroPendingTimers.add(revealTimerId);
               };
-
-              if ('IntersectionObserver' in window) {
-                const tileObserver = new IntersectionObserver((entries, observer) => {
-                  entries.forEach((entry) => {
-                    if (!entry.isIntersecting) return;
-                    revealTile(entry.target);
-                    observer.unobserve(entry.target);
-                  });
-                }, { threshold: 0.01, rootMargin: '0px 0px 18% 0px' });
-
-                const viewportHeight = Math.max(window.innerHeight || 0, 1);
-                orderedTiles.forEach((tile) => {
-                  try {
-                    const rect = tile.getBoundingClientRect();
-                    const inInitialView = rect.top < viewportHeight * 0.92 && rect.bottom > 0;
-                    if (inInitialView) {
-                      revealTile(tile);
-                      return;
-                    }
-                  } catch (_) { /* ignore initial viewport checks */ }
-                  tileObserver.observe(tile);
-                });
-
-                const safetyRevealTimerId = window.setTimeout(() => {
-                  tileIntroPendingTimers.delete(safetyRevealTimerId);
+              orderedTiles.forEach((tile) => revealTile(tile));
+              if (footer) {
+                const footerRevealTimerId = window.setTimeout(() => {
+                  tileIntroPendingTimers.delete(footerRevealTimerId);
                   if (runId !== tileIntroRunId) return;
-                  orderedTiles.forEach((tile) => revealTile(tile));
-                }, 900);
-                tileIntroPendingTimers.add(safetyRevealTimerId);
-
-                if (footer) {
-                  const footerObserver = new IntersectionObserver((entries, observer) => {
-                    if (!entries.some((entry) => entry.isIntersecting)) return;
-                    try {
-                      footer.classList.remove('scroll-reveal-hidden');
-                      footer.classList.add('scroll-reveal-visible');
-                    } catch (_) { /* ignore footer intro errors */ }
-                    observer.disconnect();
-                  }, { threshold: 0.01, rootMargin: '0px 0px 20% 0px' });
-                  footerObserver.observe(footer);
-                }
-              } else {
-                const BASE_DELAY = 0;
-                const STEP = 150;
-                orderedTiles.forEach((tile, i) => {
-                  setTimeout(() => {
-                    tile.classList.remove('intro-hidden');
-                    tile.classList.add('intro-visible');
-                  }, BASE_DELAY + i * STEP);
-                });
-                if (footer) {
-                  setTimeout(() => {
-                    try {
-                      footer.classList.remove('scroll-reveal-hidden');
-                      footer.classList.add('scroll-reveal-visible');
-                    } catch (_) { /* ignore footer intro errors */ }
-                  }, BASE_DELAY + orderedTiles.length * STEP);
-                }
+                  try {
+                    footer.classList.remove('scroll-reveal-hidden');
+                    footer.classList.add('scroll-reveal-visible');
+                  } catch (_) { /* ignore footer intro errors */ }
+                }, Math.max(0, (orderedTiles.length - 1) * 150));
+                tileIntroPendingTimers.add(footerRevealTimerId);
               }
             } else {
               if (footer) {
@@ -3018,6 +2979,8 @@
         const archiveVideos = new Set();
         let archiveTypingTimer = 0;
         const archiveIntroFullText = archiveIntro ? String(archiveIntro.textContent || '').trim() : '';
+        let scheduleArchiveVirtualizationUpdate = () => {};
+        let restoreArchiveVirtualizedMedia = () => {};
         let archiveLightbox = null;
         let archiveLightboxMediaWrap = null;
         let archiveLightboxCloseTimer = 0;
@@ -3229,13 +3192,94 @@
 
           let archiveRelayoutRaf = 0;
           const archiveItems = [];
+          const ARCHIVE_VIRTUALIZE_PADDING_PX = IS_SAFARI_BROWSER
+            ? (IS_SMALL_SCREEN ? 700 : 1000)
+            : (IS_SMALL_SCREEN ? 1000 : 1400);
+          let archiveVirtualizeRaf = 0;
+
+          const pauseArchiveVideo = (video) => {
+            if (!(video instanceof HTMLVideoElement)) return;
+            try { video.pause(); } catch (_) { /* ignore */ }
+            if (archiveVideoObserver) {
+              try { archiveVideoObserver.unobserve(video); } catch (_) { /* ignore */ }
+            }
+          };
+
+          const restoreArchiveItemMedia = (item) => {
+            if (!item || item.dataset.archiveVirtualized !== 'true') return;
+            const mediaNode = item.__archiveMediaNode;
+            if (!(mediaNode instanceof Element)) return;
+            try {
+              if (!mediaNode.isConnected) item.appendChild(mediaNode);
+            } catch (_) { /* ignore media restore failures */ }
+            item.dataset.archiveVirtualized = 'false';
+            item.style.height = '';
+            item.style.minHeight = '';
+            if (mediaNode instanceof HTMLVideoElement) {
+              registerArchiveVideo(mediaNode);
+              if (isArchiveActive()) {
+                try { mediaNode.play().catch(() => {}); } catch (_) { /* ignore */ }
+              }
+            }
+          };
+
+          const virtualizeArchiveItemMedia = (item) => {
+            if (!item || item.dataset.archiveVirtualized === 'true') return;
+            const mediaNode = item.__archiveMediaNode;
+            if (!(mediaNode instanceof Element)) return;
+            const measuredHeight = Math.max(
+              Number(item.getBoundingClientRect().height || 0),
+              Number(mediaNode.getBoundingClientRect().height || 0),
+              Number(item.offsetHeight || 0),
+              1,
+            );
+            if (mediaNode instanceof HTMLVideoElement) pauseArchiveVideo(mediaNode);
+            try {
+              if (mediaNode.isConnected) mediaNode.remove();
+            } catch (_) { /* ignore media unmount failures */ }
+            item.dataset.archiveVirtualized = 'true';
+            item.style.height = `${Math.ceil(measuredHeight)}px`;
+            item.style.minHeight = `${Math.ceil(measuredHeight)}px`;
+          };
+
+          const applyArchiveWindowing = () => {
+            if (!archiveViewport || !archiveItems.length) return;
+            if (!homePage.classList.contains('home-archive-active')) {
+              archiveItems.forEach((item) => restoreArchiveItemMedia(item));
+              return;
+            }
+            if (!homePage.classList.contains('home-archive-assets-ready')) return;
+            if (!homePage.classList.contains('home-archive-intro-done')) return;
+            const viewportRect = archiveViewport.getBoundingClientRect();
+            const windowTop = viewportRect.top - ARCHIVE_VIRTUALIZE_PADDING_PX;
+            const windowBottom = viewportRect.bottom + ARCHIVE_VIRTUALIZE_PADDING_PX;
+            archiveItems.forEach((item) => {
+              if (!item || item.dataset.archiveReady !== 'true') return;
+              const rect = item.getBoundingClientRect();
+              const shouldVirtualize = rect.bottom < windowTop || rect.top > windowBottom;
+              if (shouldVirtualize) virtualizeArchiveItemMedia(item);
+              else restoreArchiveItemMedia(item);
+            });
+          };
+
+          const requestArchiveWindowing = () => {
+            if (archiveVirtualizeRaf) return;
+            archiveVirtualizeRaf = window.requestAnimationFrame(() => {
+              archiveVirtualizeRaf = 0;
+              applyArchiveWindowing();
+            });
+          };
+
+          scheduleArchiveVirtualizationUpdate = requestArchiveWindowing;
+          restoreArchiveVirtualizedMedia = () => {
+            archiveItems.forEach((item) => restoreArchiveItemMedia(item));
+          };
 
           const revealItem = (item) => {
             if (!item) return;
             if (item.classList.contains('is-visible')) return;
             item.classList.add('is-visible');
             item.style.opacity = '1';
-            item.style.transform = 'translate3d(0, 0, 0) scale(1)';
           };
 
           const revealReadyArchiveItems = () => {
@@ -3290,10 +3334,22 @@
                 if (!archiveTrack || !archiveTrack.isConnected) return;
                 void archiveTrack.offsetHeight;
                 revealReadyArchiveItems();
+                requestArchiveWindowing();
               } catch (_) { /* ignore archive relayout failures */ }
             });
           };
           archiveRelayoutRequest = requestArchiveRelayout;
+
+          if (archiveViewport && !archiveViewport.__archiveWindowingBound) {
+            archiveViewport.__archiveWindowingBound = true;
+            try {
+              archiveViewport.addEventListener('scroll', requestArchiveWindowing, { passive: true });
+            } catch (_) {
+              archiveViewport.addEventListener('scroll', requestArchiveWindowing);
+            }
+            window.addEventListener('resize', requestArchiveWindowing);
+            window.addEventListener('orientationchange', requestArchiveWindowing);
+          }
 
           const totalArchiveMedia = ARCHIVE_MEDIA.length;
           let resolvedArchiveMedia = 0;
@@ -3349,6 +3405,7 @@
                 event.stopPropagation();
                 openArchiveLightbox(media, video);
               });
+              item.__archiveMediaNode = video;
               item.appendChild(video);
               archiveTrack.appendChild(item);
               registerArchiveVideo(video);
@@ -3403,6 +3460,7 @@
                 event.stopPropagation();
                 openArchiveLightbox(media, img);
               });
+              item.__archiveMediaNode = img;
               img.addEventListener('load', () => {
                 insertReadyItem();
                 markArchiveMediaResolvedOnce();
@@ -3455,6 +3513,7 @@
                   archiveRelayoutRequest();
                 } catch (_) { /* ignore */ }
               }
+              try { scheduleArchiveVirtualizationUpdate(); } catch (_) { /* ignore */ }
             };
 
             ensureArchiveStage();
@@ -3497,6 +3556,7 @@
             homePage.classList.remove('home-archive-intro-running');
             homePage.classList.remove('home-archive-intro-done');
             homePage.classList.remove('home-archive-entering');
+            try { restoreArchiveVirtualizedMedia(); } catch (_) { /* ignore */ }
             archiveVideos.forEach((video) => {
               try { video.pause(); } catch (_) { /* ignore */ }
             });

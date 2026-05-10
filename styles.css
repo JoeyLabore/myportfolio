@@ -863,7 +863,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   height: auto;
   min-height: 0;
   padding: 120px 10px 10px;
-  column-width: clamp(84px, 9vw, 128px);
+  column-width: clamp(140px, 18vw, 220px);
   column-gap: 10px;
   column-fill: balance;
   opacity: 0;
@@ -906,23 +906,17 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   overflow: hidden;
   background: transparent;
   opacity: 0;
-  transform: translate3d(0, 14px, 0) scale(0.985);
   transition: none;
 }
 
 .page[data-name="home page"] .home-archive-stage__item.is-visible {
   opacity: 1;
-  transform: translate3d(0, 0, 0) scale(1);
-}
-
-.page[data-name="home page"].home-archive-entering .home-archive-stage__item {
-  will-change: auto;
 }
 
 .page[data-name="home page"] .home-archive-stage__item img {
   width: 100%;
   height: auto;
-  max-width: 100%;
+  max-width: 450px;
   object-fit: contain;
   display: block;
   -webkit-user-drag: none;
@@ -933,7 +927,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 .page[data-name="home page"] .home-archive-stage__item video {
   width: 100%;
   height: auto;
-  max-width: 100%;
+  max-width: 450px;
   display: block;
   background: transparent;
 }
@@ -984,7 +978,6 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 @media (prefers-reduced-motion: reduce) {
   .page[data-name="home page"] .home-archive-stage__item {
     opacity: 1;
-    transform: none;
     transition: none;
   }
 }
@@ -1000,7 +993,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   }
 
   .page[data-name="home page"] .home-archive-stage__track {
-    column-width: clamp(72px, 18vw, 96px);
+    column-width: clamp(140px, 42vw, 220px);
     column-gap: 8px;
     padding: 120px 8px 8px;
   }
