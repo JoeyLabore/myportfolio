@@ -15,7 +15,7 @@
     <!-- Material Symbols for MUI icons (lock) -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=166" />
+    <link rel="stylesheet" href="./styles.css?v=169" />
   </head>
   <body>
     <!-- Home: black route overlay used to swipe in before navigating to NestBank -->
@@ -25,20 +25,20 @@
     <div class="page" data-name="home page" data-node-id="816:11957">
       <!-- Top row: logo left, tabs middle, LinkedIn right -->
       <div class="nav-split" data-name="nav-split">
-        <header class="nav-bar nav-left" aria-label="Logo">
+        <header class="nav-bar nav-left intro-top-hidden" aria-label="Logo">
           <div class="nav-logo" data-name="logo-svg">
             <a class="nav-logo-link" href="./index.html" aria-label="Home">
               <img alt="" src="./assets/logo.svg" />
             </a>
           </div>
         </header>
-        <header class="nav-bar nav-middle" data-name="nav-tabs" aria-label="Case study filters">
+        <header class="nav-bar nav-middle intro-top-hidden" data-name="nav-tabs" aria-label="Case study filters">
           <nav class="tabs" role="tablist" aria-label="Filter case studies">
             <a href="#" class="nav-item active" role="tab" aria-selected="true" tabindex="0" data-tab="recent">Recent</a>
             <a href="#" class="nav-item" role="tab" aria-selected="false" tabindex="-1" data-tab="archive">Archive</a>
           </nav>
         </header>
-        <div class="nav-right-wrap" aria-label="Actions">
+        <div class="nav-right-wrap intro-top-hidden" aria-label="Actions">
           <header class="nav-bar nav-right nav-about" aria-label="About">
             <a class="nav-item" href="./about.html" aria-label="About">
               <img class="avatar" src="./assets/profile-photo.jpg" alt="Profile photo" />
@@ -54,7 +54,7 @@
           </header>
         </div>
         <!-- Mobile-only menu button (<=600px) placed at top-right -->
-        <header class="nav-bar nav-right nav-menu" aria-label="Menu">
+        <header class="nav-bar nav-right nav-menu intro-top-hidden" aria-label="Menu">
           <a class="nav-item" href="#" aria-label="Open menu">
             <svg class="icon-menu" aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" focusable="false">
               <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"></path>
@@ -80,10 +80,10 @@
         <!-- Page transition overlay (used when navigating to case studies) -->
         <div class="nav-transition" aria-hidden="true"></div>
         <section class="home-hero" aria-label="Intro">
-          <div class="home-hero__headline-wrap">
+          <div class="home-hero__headline-wrap home-intro-section-hidden">
             <h1 class="home-hero__headline">Product Designer, Strategist &amp; Builder</h1>
           </div>
-          <div class="home-hero__column home-hero__column--about">
+          <div class="home-hero__column home-hero__column--about home-intro-section-hidden">
             <p class="home-hero__label">About</p>
             <p class="home-hero__body">
               Over the past 7 years, I&apos;ve led product design initiatives across healthcare, fintech, motorsports, and AI for companies including Toyota Racing, Relias, and Rocket Companies.
@@ -91,7 +91,7 @@
             <p class="home-hero__body">My work combines strategy, research, systems thinking, AI-assisted prototyping and development, and end-to-end product design leadership to help teams validate ideas and build products people genuinely use.</p>
             <p class="home-hero__body">From early collaboration to AI-powered design-to-code workflows, I&apos;m driven by creating thoughtful products with ambitious, creative teams.</p>
           </div>
-          <div class="home-hero__column home-hero__column--more">
+          <div class="home-hero__column home-hero__column--more home-intro-section-hidden">
             <p class="home-hero__label">More</p>
             <div class="home-hero__more-links">
               <a class="home-hero__link" href="./about.html">Skills</a>
@@ -162,6 +162,6 @@
         </div>
       </footer>
     </div>
-    <script src="./main.js?v=199"></script>
+    <script src="./main.js?v=202"></script>
   </body>
 </html>

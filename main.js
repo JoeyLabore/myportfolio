@@ -2976,6 +2976,7 @@
         let archiveRelayoutRequest = null;
         let archiveEnterResetTimer = 0;
         let archiveVideoObserver = null;
+        let archiveRevealObserver = null;
         const archiveVideos = new Set();
         let archiveTypingTimer = 0;
         const archiveIntroFullText = archiveIntro ? String(archiveIntro.textContent || '').trim() : '';
@@ -3192,10 +3193,17 @@
 
           let archiveRelayoutRaf = 0;
           const archiveItems = [];
+          const archivePrefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
           const ARCHIVE_VIRTUALIZE_PADDING_PX = IS_SAFARI_BROWSER
             ? (IS_SMALL_SCREEN ? 700 : 1000)
             : (IS_SMALL_SCREEN ? 1000 : 1400);
+          const ARCHIVE_REVEAL_ROW_STEP_MS = 56;
+          const ARCHIVE_REVEAL_ROW_MAX_MS = 168;
+          const ARCHIVE_REVEAL_ROW_TOLERANCE_PX = 72;
+          const ARCHIVE_REVEAL_PAINT_DELAY_MS = IS_SAFARI_BROWSER ? 180 : 140;
           let archiveVirtualizeRaf = 0;
+          let archiveRevealQueueRaf = 0;
+          const archiveRevealQueue = new Set();
 
           const pauseArchiveVideo = (video) => {
             if (!(video instanceof HTMLVideoElement)) return;
@@ -3215,6 +3223,7 @@
             item.dataset.archiveVirtualized = 'false';
             item.style.height = '';
             item.style.minHeight = '';
+            observeArchiveItemReveal(item);
             if (mediaNode instanceof HTMLVideoElement) {
               registerArchiveVideo(mediaNode);
               if (isArchiveActive()) {
@@ -3275,11 +3284,107 @@
             archiveItems.forEach((item) => restoreArchiveItemMedia(item));
           };
 
+          const applyArchiveReveal = (item) => {
+            if (!item) return;
+            if (!item.isConnected) {
+              item.dataset.archiveRevealQueued = 'false';
+              return;
+            }
+            if (item.classList.contains('is-visible')) return;
+            item.dataset.archiveRevealQueued = 'false';
+            if (archiveRevealObserver) {
+              try { archiveRevealObserver.unobserve(item); } catch (_) { /* ignore */ }
+            }
+            item.classList.add('is-visible');
+          };
+
+          const flushArchiveRevealQueue = () => {
+            archiveRevealQueueRaf = 0;
+            const queuedItems = Array.from(archiveRevealQueue);
+            const items = queuedItems.filter((item) => {
+              const canReveal = item instanceof HTMLElement
+                && item.isConnected
+                && !item.classList.contains('is-visible')
+                && item.dataset.archiveReady === 'true'
+                && item.dataset.archiveMediaReady === 'true';
+              if (!canReveal && item instanceof HTMLElement) item.dataset.archiveRevealQueued = 'false';
+              return canReveal;
+            });
+            archiveRevealQueue.clear();
+            if (!items.length) return;
+            const sortedItems = items
+              .map((item) => ({ item, rect: item.getBoundingClientRect() }))
+              .sort((a, b) => {
+                const topDelta = a.rect.top - b.rect.top;
+                if (Math.abs(topDelta) > ARCHIVE_REVEAL_ROW_TOLERANCE_PX) return topDelta;
+                return a.rect.left - b.rect.left;
+              });
+            let rowIndex = -1;
+            let rowTop = null;
+            sortedItems.forEach(({ item, rect }) => {
+              if (rowTop === null || Math.abs(rect.top - rowTop) > ARCHIVE_REVEAL_ROW_TOLERANCE_PX) {
+                rowIndex += 1;
+                rowTop = rect.top;
+              }
+              const revealDelay = Math.min(rowIndex * ARCHIVE_REVEAL_ROW_STEP_MS, ARCHIVE_REVEAL_ROW_MAX_MS);
+              item.style.setProperty('--archive-reveal-delay', `${revealDelay}ms`);
+            });
+            window.requestAnimationFrame(() => {
+              window.requestAnimationFrame(() => {
+                window.setTimeout(() => {
+                  sortedItems.forEach(({ item }) => applyArchiveReveal(item));
+                }, ARCHIVE_REVEAL_PAINT_DELAY_MS);
+              });
+            });
+          };
+
           const revealItem = (item) => {
             if (!item) return;
             if (item.classList.contains('is-visible')) return;
-            item.classList.add('is-visible');
-            item.style.opacity = '1';
+            if (archivePrefersReducedMotion) {
+              applyArchiveReveal(item);
+              return;
+            }
+            if (item.dataset.archiveRevealQueued === 'true') return;
+            item.dataset.archiveRevealQueued = 'true';
+            archiveRevealQueue.add(item);
+            if (archiveRevealQueueRaf) return;
+            archiveRevealQueueRaf = window.requestAnimationFrame(flushArchiveRevealQueue);
+          };
+
+          const ensureArchiveRevealObserver = () => {
+            if (archiveRevealObserver || !archiveViewport) return;
+            if (!('IntersectionObserver' in window)) return;
+            archiveRevealObserver = new IntersectionObserver((entries) => {
+              entries.forEach((entry) => {
+                const item = entry.target;
+                if (!(item instanceof HTMLElement)) return;
+                if (!entry.isIntersecting) return;
+                if (item.dataset.archiveReady !== 'true') return;
+                if (item.dataset.archiveMediaReady !== 'true') return;
+                revealItem(item);
+              });
+            }, {
+              root: archiveViewport,
+              rootMargin: '0px 0px 20% 0px',
+              threshold: 0.01,
+            });
+          };
+
+          const observeArchiveItemReveal = (item) => {
+            if (!item || item.dataset.archiveReady !== 'true') return;
+            if (item.dataset.archiveMediaReady !== 'true') return;
+            if (item.classList.contains('is-visible')) return;
+            if (archivePrefersReducedMotion) {
+              revealItem(item);
+              return;
+            }
+            ensureArchiveRevealObserver();
+            if (!archiveRevealObserver) {
+              revealItem(item);
+              return;
+            }
+            archiveRevealObserver.observe(item);
           };
 
           const revealReadyArchiveItems = () => {
@@ -3291,7 +3396,8 @@
 
             archiveItems.forEach((item) => {
               if (!item || item.dataset.archiveReady !== 'true') return;
-              revealItem(item);
+              if (item.dataset.archiveMediaReady !== 'true') return;
+              observeArchiveItemReveal(item);
             });
           };
 
@@ -3365,6 +3471,7 @@
             const item = document.createElement('div');
             item.className = 'home-archive-stage__item';
             item.dataset.archiveReady = 'false';
+            item.dataset.archiveMediaReady = 'false';
             archiveItems.push(item);
             let mediaResolved = false;
 
@@ -3378,6 +3485,18 @@
               if (item.dataset.archiveReady === 'true') return;
               item.dataset.archiveReady = 'true';
               requestArchiveRelayout();
+            };
+
+            const markArchiveItemMediaReady = () => {
+              if (item.dataset.archiveMediaReady === 'true') return;
+              const applyReadyState = () => {
+                if (item.dataset.archiveMediaReady === 'true') return;
+                item.dataset.archiveMediaReady = 'true';
+                insertReadyItem();
+              };
+              window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(applyReadyState);
+              });
             };
 
             if (index === 0) item.classList.add('home-archive-stage__item--anchor');
@@ -3415,8 +3534,8 @@
               };
               video.addEventListener('loadeddata', () => {
                 ensurePlay();
-                insertReadyItem();
                 markArchiveMediaResolvedOnce();
+                markArchiveItemMediaReady();
               }, { once: true });
               video.addEventListener('error', () => {
                 try { item.remove(); } catch (_) { /* ignore */ }
@@ -3427,16 +3546,16 @@
                 video.dataset.archiveHydrated = 'true';
                 const nextSrc = String(video.dataset.src || '').trim();
                 if (!nextSrc) {
-                  insertReadyItem();
                   markArchiveMediaResolvedOnce();
+                  markArchiveItemMediaReady();
                 } else {
                   video.preload = 'metadata';
                   video.src = nextSrc;
                   try { video.load(); } catch (_) { /* ignore */ }
                   ensurePlay();
                   if (video.readyState >= 2) {
-                    insertReadyItem();
                     markArchiveMediaResolvedOnce();
+                    markArchiveItemMediaReady();
                   }
                 }
               }
@@ -3461,9 +3580,18 @@
                 openArchiveLightbox(media, img);
               });
               item.__archiveMediaNode = img;
+              const markDecodedImageReady = () => {
+                if (item.dataset.archiveMediaReady === 'true') return;
+                const finish = () => markArchiveItemMediaReady();
+                if (img.decode) {
+                  img.decode().catch(() => {}).then(finish);
+                  return;
+                }
+                finish();
+              };
               img.addEventListener('load', () => {
-                insertReadyItem();
                 markArchiveMediaResolvedOnce();
+                markDecodedImageReady();
               }, { once: true });
               img.addEventListener('error', () => {
                 try { item.remove(); } catch (_) { /* ignore */ }
@@ -3476,13 +3604,13 @@
                 img.dataset.archiveHydrated = 'true';
                 const nextSrc = String(img.dataset.src || '').trim();
                 if (!nextSrc) {
-                  insertReadyItem();
                   markArchiveMediaResolvedOnce();
+                  markArchiveItemMediaReady();
                 } else {
                   img.src = nextSrc;
                   if (img.complete && Number(img.naturalWidth || 0) > 0) {
-                    insertReadyItem();
                     markArchiveMediaResolvedOnce();
+                    markDecodedImageReady();
                   }
                 }
               }
@@ -3496,6 +3624,7 @@
           homePage.classList.toggle('home-archive-active', isArchiveActive);
           if (isArchiveActive) {
             homePage.classList.remove('home-game-active');
+            homePage.classList.remove('home-archive-content-visible');
             const startArchiveImageReveal = () => {
               homePage.classList.remove('home-archive-intro-running');
               homePage.classList.add('home-archive-intro-done');
@@ -3517,6 +3646,10 @@
             };
 
             ensureArchiveStage();
+            window.requestAnimationFrame(() => {
+              if (!homePage.classList.contains('home-archive-active')) return;
+              homePage.classList.add('home-archive-content-visible');
+            });
 
             if (archiveIntro && archiveIntroFullText) {
               if (archiveTypingTimer) {
@@ -3553,6 +3686,7 @@
             try { archiveStage.setAttribute('aria-hidden', isArchiveActive ? 'false' : 'true'); } catch (_) { /* ignore */ }
           }
           if (!isArchiveActive) {
+            homePage.classList.remove('home-archive-content-visible');
             homePage.classList.remove('home-archive-intro-running');
             homePage.classList.remove('home-archive-intro-done');
             homePage.classList.remove('home-archive-entering');
