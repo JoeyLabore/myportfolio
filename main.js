@@ -3445,7 +3445,7 @@
               img.dataset.src = media.src;
               img.alt = '';
               img.draggable = false;
-              img.loading = 'lazy';
+              img.loading = 'eager';
               try { img.fetchPriority = 'auto'; } catch (_) { /* ignore */ }
               img.decoding = 'async';
               img.addEventListener('dragstart', (event) => {
