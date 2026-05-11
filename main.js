@@ -3165,23 +3165,53 @@
           120: [1440, 1080],
           121: [1490, 1484],
         };
+        const ARCHIVE_SOURCE_ID_SWAPS = {
+          1: 3,
+          3: 5,
+          5: 78,
+          10: 111,
+          25: 41,
+          27: 34,
+          32: 121,
+          34: 27,
+          35: 32,
+          36: 95,
+          39: 40,
+          40: 25,
+          41: 87,
+          42: 39,
+          49: 56,
+          56: 49,
+          69: 1,
+          78: 69,
+          85: 96,
+          86: 89,
+          87: 85,
+          89: 86,
+          95: 107,
+          96: 42,
+          107: 36,
+          111: 10,
+          121: 35,
+        };
         const ARCHIVE_MEDIA = [];
         for (let id = 1; id <= 121; id += 1) {
           if (ARCHIVE_MISSING_IDS.has(id)) continue;
+          const sourceId = ARCHIVE_SOURCE_ID_SWAPS[id] || id;
           let type = 'image';
           let ext = 'avif';
-          if (ARCHIVE_VIDEO_IDS.has(id)) {
+          if (ARCHIVE_VIDEO_IDS.has(sourceId)) {
             type = 'video';
             ext = 'mp4';
-          } else if (ARCHIVE_GIF_IDS.has(id)) {
+          } else if (ARCHIVE_GIF_IDS.has(sourceId)) {
             type = 'gif';
             ext = 'gif';
           }
-          const dimensions = ARCHIVE_MEDIA_DIMENSIONS[id] || null;
+          const dimensions = ARCHIVE_MEDIA_DIMENSIONS[sourceId] || null;
           ARCHIVE_MEDIA.push({
             type,
-            src: id === 1 ? `./assets/archive/${id}.${ext}` : `./assets/archive-thumbnails/${id}.${ext}`,
-            lightboxSrc: `./assets/archive/${id}.${ext}`,
+            src: sourceId === 1 ? `./assets/archive/${sourceId}.${ext}` : `./assets/archive-thumbnails/${sourceId}.${ext}`,
+            lightboxSrc: `./assets/archive/${sourceId}.${ext}`,
             width: dimensions ? dimensions[0] : null,
             height: dimensions ? dimensions[1] : null,
           });
