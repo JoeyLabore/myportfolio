@@ -2451,6 +2451,7 @@
         let tileIntroRunId = 0;
         let tileIntroKickoffTimer = 0;
         const tileIntroPendingTimers = new Set();
+        const TILE_INTRO_STAGGER_MS = 95;
         const replayHomeTileIntro = (startDelayMs = 0) => {
           try {
             const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2491,7 +2492,7 @@
               const revealTile = (tile) => {
                 if (!tile || tile.__introRevealed) return;
                 tile.__introRevealed = true;
-                const delay = revealIndex * 150;
+                const delay = revealIndex * TILE_INTRO_STAGGER_MS;
                 revealIndex += 1;
                 const revealTimerId = window.setTimeout(() => {
                   tileIntroPendingTimers.delete(revealTimerId);
@@ -2512,7 +2513,7 @@
                     footer.classList.remove('scroll-reveal-hidden');
                     footer.classList.add('scroll-reveal-visible');
                   } catch (_) { /* ignore footer intro errors */ }
-                }, Math.max(0, (orderedTiles.length - 1) * 150));
+                }, Math.max(0, (orderedTiles.length - 1) * TILE_INTRO_STAGGER_MS));
                 tileIntroPendingTimers.add(footerRevealTimerId);
               }
             } else {

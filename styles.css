@@ -889,6 +889,10 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   color: #ffffff;
 }
 
+.page[data-name="home page"] .home-archive-stage__body + .home-archive-stage__body {
+  margin-top: 14px;
+}
+
 .page[data-name="home page"] .home-archive-stage__intro {
   position: relative;
   padding: calc(var(--nav-card-height) + (2 * var(--space-s))) 10px 8px;
