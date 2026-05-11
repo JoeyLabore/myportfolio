@@ -2229,6 +2229,79 @@
         let logofolioVideo = null;
         let skilldexVideo = null;
         let reliasVideo = null;
+        const homeTileVideos = new Set();
+        let homeTileVideoObserver = null;
+
+        const isArchiveTabOpen = () => {
+          try {
+            const homeRoot = document.querySelector('.page[data-name="home page"]');
+            return !!(homeRoot && homeRoot.classList.contains('home-archive-active'));
+          } catch (_) { return false; }
+        };
+
+        const canPlayHomeTileVideo = (video) => {
+          if (!(video instanceof HTMLVideoElement)) return false;
+          if (document.visibilityState === 'hidden') return false;
+          if (isArchiveTabOpen()) return false;
+          return video.dataset.homeTileVideoVisible !== 'false';
+        };
+
+        const playHomeTileVideo = (video) => {
+          if (!(video instanceof HTMLVideoElement)) return;
+          if (!canPlayHomeTileVideo(video)) {
+            try { video.pause(); } catch (_) { /* ignore */ }
+            return;
+          }
+          try { video.play().catch(() => {}); } catch (_) { /* ignore */ }
+        };
+
+        const pauseHomeTileVideos = () => {
+          homeTileVideos.forEach((video) => {
+            try { video.pause(); } catch (_) { /* ignore */ }
+          });
+        };
+
+        const resumeVisibleHomeTileVideos = () => {
+          homeTileVideos.forEach((video) => playHomeTileVideo(video));
+        };
+
+        const ensureHomeTileVideoObserver = () => {
+          if (homeTileVideoObserver || !('IntersectionObserver' in window)) return;
+          homeTileVideoObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              const video = entry.target;
+              if (!(video instanceof HTMLVideoElement)) return;
+              const isVisible = entry.isIntersecting && entry.intersectionRatio >= 0.12;
+              video.dataset.homeTileVideoVisible = isVisible ? 'true' : 'false';
+              if (isVisible) playHomeTileVideo(video);
+              else {
+                try { video.pause(); } catch (_) { /* ignore */ }
+              }
+            });
+          }, {
+            root: null,
+            rootMargin: '8% 0px',
+            threshold: [0, 0.12],
+          });
+        };
+
+        const registerHomeTileVideo = (video) => {
+          if (!(video instanceof HTMLVideoElement)) return;
+          homeTileVideos.add(video);
+          video.dataset.homeTileVideoVisible = 'true';
+          ensureHomeTileVideoObserver();
+          if (homeTileVideoObserver) homeTileVideoObserver.observe(video);
+          playHomeTileVideo(video);
+        };
+
+        try {
+          window.__homePauseTileVideos = pauseHomeTileVideos;
+          window.__homeResumeTileVideos = resumeVisibleHomeTileVideos;
+          document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') pauseHomeTileVideos();
+            else resumeVisibleHomeTileVideos();
+          });
+        } catch (_) { /* ignore home tile video controls */ }
 
         // Make tiles focusable and clickable
         tiles.forEach((tile) => {
@@ -2482,12 +2555,12 @@
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
-          try { v.preload = 'auto'; } catch (_) {}
-          v.autoplay = true;
+          try { v.preload = 'metadata'; } catch (_) {}
+          v.autoplay = false;
           v.setAttribute('aria-hidden', 'true');
           const onMeta = () => {
             try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
-            try { v.play().catch(() => {}); } catch (_) {}
+            playHomeTileVideo(v);
           };
           v.addEventListener('loadedmetadata', onMeta, { once: true });
           // Do NOT clear innerHTML; preserve tags/overlays
@@ -2499,7 +2572,7 @@
             try { t.appendChild(v); } catch (_) {}
           }
           nestbankVideo = v;
-          try { v.play().catch(() => {}); } catch (_) {}
+          registerHomeTileVideo(v);
         }
 
         // Lazy-init the Logofolio video and attach to the Logofolio tile (by data-project)
@@ -2512,12 +2585,12 @@
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
-          try { v.preload = 'auto'; } catch (_) {}
-          v.autoplay = true;
+          try { v.preload = 'metadata'; } catch (_) {}
+          v.autoplay = false;
           v.setAttribute('aria-hidden', 'true');
           const onMeta = () => {
             try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
-            try { v.play().catch(() => {}); } catch (_) {}
+            playHomeTileVideo(v);
           };
           v.addEventListener('loadedmetadata', onMeta, { once: true });
           // Do NOT clear innerHTML; preserve tags/overlays
@@ -2527,7 +2600,7 @@
             try { t.appendChild(v); } catch (_) {}
           }
           logofolioVideo = v;
-          try { v.play().catch(() => {}); } catch (_) {}
+          registerHomeTileVideo(v);
         }
 
         // Lazy-init the Orion video and attach to the Orion tile (by data-project)
@@ -2545,12 +2618,12 @@
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
-          try { v.preload = 'auto'; } catch (_) {}
-          v.autoplay = true;
+          try { v.preload = 'metadata'; } catch (_) {}
+          v.autoplay = false;
           v.setAttribute('aria-hidden', 'true');
           const onMeta = () => {
             try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
-            try { v.play().catch(() => {}); } catch (_) {}
+            playHomeTileVideo(v);
           };
           v.addEventListener('loadedmetadata', onMeta, { once: true });
           // Do NOT clear innerHTML; preserve tags/overlays
@@ -2560,8 +2633,7 @@
             try { t.appendChild(v); } catch (_) {}
           }
           kintiVideo = v;
-          // Attempt immediate play in case metadata already available
-          try { v.play().catch(() => {}); } catch (_) {}
+          registerHomeTileVideo(v);
         }
         
         // Lazy-init the Skilldex video and attach to the Skilldex tile (by data-project)
@@ -2574,12 +2646,12 @@
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
-          try { v.preload = 'auto'; } catch (_) {}
-          v.autoplay = true;
+          try { v.preload = 'metadata'; } catch (_) {}
+          v.autoplay = false;
           v.setAttribute('aria-hidden', 'true');
           const onMeta = () => {
             try { if (v.currentTime === 0) v.currentTime = 0.01; } catch (_) {}
-            try { v.play().catch(() => {}); } catch (_) {}
+            playHomeTileVideo(v);
           };
           v.addEventListener('loadedmetadata', onMeta, { once: true });
           // Do NOT clear innerHTML; preserve tags/overlays
@@ -2589,8 +2661,7 @@
             try { t.appendChild(v); } catch (_) {}
           }
           skilldexVideo = v;
-          // Attempt immediate play in case metadata already available
-          try { v.play().catch(() => {}); } catch (_) {}
+          registerHomeTileVideo(v);
         }
         
         // Lazy-init the Relias image and attach to the Relias tile (by data-project)
@@ -2620,14 +2691,14 @@
           try {
             // Ensure videos exist and play continuously
             try { if (!nestbankVideo) ensureNestbankVideo(); } catch (_) {}
-            try { if (nestbankVideo && nestbankVideo.paused) nestbankVideo.play().catch(() => {}); } catch (_) {}
+            try { playHomeTileVideo(nestbankVideo); } catch (_) {}
             try { if (!logofolioVideo) ensureLogofolioVideo(); } catch (_) {}
-            try { if (logofolioVideo && logofolioVideo.paused) logofolioVideo.play().catch(() => {}); } catch (_) {}
+            try { playHomeTileVideo(logofolioVideo); } catch (_) {}
             // Ensure videos exist and play continuously
             try { if (!orionVideo) ensureOrionVideo(); } catch (_) {}
-            try { if (orionVideo && orionVideo.paused) orionVideo.play().catch(() => {}); } catch (_) {}
+            try { playHomeTileVideo(orionVideo); } catch (_) {}
             try { if (!kintiVideo) ensureKintiVideo(); } catch (_) {}
-            try { if (kintiVideo && kintiVideo.paused) kintiVideo.play().catch(() => {}); } catch (_) {}
+            try { playHomeTileVideo(kintiVideo); } catch (_) {}
             try { if (!reliasVideo) ensureReliasVideo(); } catch (_) {}
           } catch (_) { /* ignore */ }
         };
@@ -2990,7 +3061,110 @@
 
         const ARCHIVE_VIDEO_IDS = new Set([38, 39, 42, 43, 97, 104, 106, 118, 121]);
         const ARCHIVE_GIF_IDS = new Set([2, 21, 22, 71, 102]);
-        const ARCHIVE_MISSING_IDS = new Set([17, 44, 46, 50, 51, 67, 70, 88]);
+        const ARCHIVE_MISSING_IDS = new Set([7, 8, 9, 17, 44, 46, 47, 48, 50, 51, 64, 66, 67, 68, 70, 81, 82, 88, 109, 110]);
+        const ARCHIVE_MEDIA_DIMENSIONS = {
+          1: [1136, 1518],
+          2: [1920, 1080],
+          3: [1135, 1516],
+          4: [1139, 1519],
+          5: [1140, 1517],
+          6: [5906, 5906],
+          10: [3000, 3000],
+          11: [1648, 1467],
+          12: [808, 632],
+          13: [798, 798],
+          14: [1760, 920],
+          15: [1210, 1312],
+          16: [1090, 1122],
+          18: [1262, 1370],
+          19: [1728, 1352],
+          20: [3000, 3000],
+          21: [1194, 1058],
+          22: [1158, 649],
+          23: [798, 798],
+          24: [1440, 920],
+          25: [788, 920],
+          26: [1440, 920],
+          27: [1490, 884],
+          28: [1438, 1844],
+          29: [1700, 1844],
+          30: [2292, 1518],
+          31: [954, 540],
+          32: [1128, 1128],
+          33: [1762, 1110],
+          34: [1616, 1264],
+          35: [2788, 1568],
+          36: [4500, 3000],
+          37: [2800, 1621],
+          38: [1254, 1252],
+          39: [1254, 1252],
+          40: [2500, 3000],
+          41: [6000, 4500],
+          42: [842, 596],
+          43: [1920, 1080],
+          45: [3508, 1016],
+          49: [1920, 1080],
+          52: [4000, 3000],
+          53: [3508, 2480],
+          54: [1920, 1280],
+          55: [1542, 1542],
+          56: [1542, 1542],
+          57: [3508, 4546],
+          58: [2000, 2000],
+          59: [4167, 4167],
+          60: [4460, 2975],
+          61: [3508, 4961],
+          62: [5000, 5000],
+          63: [3600, 2400],
+          65: [800, 800],
+          69: [800, 800],
+          71: [787, 408],
+          72: [1542, 1542],
+          73: [4057, 4057],
+          74: [3785, 3785],
+          75: [5815, 3893],
+          76: [3000, 3000],
+          77: [3000, 3000],
+          78: [3000, 3000],
+          79: [3000, 3000],
+          80: [3000, 3000],
+          83: [2782, 2782],
+          84: [2480, 3508],
+          85: [3508, 2480],
+          86: [4057, 4057],
+          87: [2500, 2200],
+          89: [2782, 2782],
+          90: [1050, 600],
+          91: [1712, 1712],
+          92: [3508, 2480],
+          93: [1080, 1920],
+          94: [2000, 2000],
+          95: [1080, 1920],
+          96: [2000, 2000],
+          97: [1920, 1080],
+          98: [2000, 2000],
+          99: [2000, 2000],
+          100: [1000, 1000],
+          101: [1136, 1512],
+          102: [1920, 1080],
+          103: [954, 1276],
+          104: [1450, 1372],
+          105: [4167, 4167],
+          106: [996, 994],
+          107: [4057, 4057],
+          108: [4057, 4057],
+          111: [1500, 1500],
+          112: [5000, 5000],
+          113: [2500, 2500],
+          114: [2000, 2000],
+          115: [1000, 750],
+          116: [1296, 864],
+          117: [5000, 5000],
+          118: [1954, 1246],
+          119: [3000, 3000],
+          120: [1440, 1080],
+          121: [1490, 1484],
+        };
         const ARCHIVE_MEDIA = [];
         for (let id = 1; id <= 121; id += 1) {
           if (ARCHIVE_MISSING_IDS.has(id)) continue;
@@ -3000,12 +3174,16 @@
             type = 'video';
             ext = 'mp4';
           } else if (ARCHIVE_GIF_IDS.has(id)) {
+            type = 'gif';
             ext = 'gif';
           }
+          const dimensions = ARCHIVE_MEDIA_DIMENSIONS[id] || null;
           ARCHIVE_MEDIA.push({
             type,
-            src: `./assets/archive-thumbnails/${id}.${ext}`,
-            lightboxSrc: type === 'video' ? `./assets/archive-thumbnails/${id}.${ext}` : `./assets/archive/${id}.${ext}`,
+            src: id === 1 ? `./assets/archive/${id}.${ext}` : `./assets/archive-thumbnails/${id}.${ext}`,
+            lightboxSrc: `./assets/archive/${id}.${ext}`,
+            width: dimensions ? dimensions[0] : null,
+            height: dimensions ? dimensions[1] : null,
           });
         }
 
@@ -3201,8 +3379,13 @@
           const ARCHIVE_REVEAL_ROW_MAX_MS = 168;
           const ARCHIVE_REVEAL_ROW_TOLERANCE_PX = 72;
           const ARCHIVE_REVEAL_PAINT_DELAY_MS = IS_SAFARI_BROWSER ? 180 : 140;
+          const ARCHIVE_INITIAL_EAGER_COUNT = IS_SAFARI_BROWSER ? 8 : 12;
+          const ARCHIVE_HYDRATE_ROOT_MARGIN = IS_SAFARI_BROWSER ? '90% 0px 120% 0px' : '120% 0px 140% 0px';
+          const ARCHIVE_GIF_VIRTUALIZE_PADDING_PX = IS_SMALL_SCREEN ? 160 : 260;
+          const ARCHIVE_VIDEO_PLAY_THRESHOLD = IS_SAFARI_BROWSER ? 0.35 : 0.22;
           let archiveVirtualizeRaf = 0;
           let archiveRevealQueueRaf = 0;
+          let archiveHydrationObserver = null;
           const archiveRevealQueue = new Set();
 
           const pauseArchiveVideo = (video) => {
@@ -3217,18 +3400,36 @@
             if (!item || item.dataset.archiveVirtualized !== 'true') return;
             const mediaNode = item.__archiveMediaNode;
             if (!(mediaNode instanceof Element)) return;
+            let holdVirtualizedSize = false;
+            const releaseVirtualizedSize = () => {
+              if (!item || item.dataset.archiveVirtualized !== 'false') return;
+              item.style.height = '';
+              item.style.minHeight = '';
+              requestArchiveRelayout();
+            };
+            if (mediaNode instanceof HTMLImageElement && item.dataset.archiveMediaType === 'gif') {
+              const restoreSrc = String(mediaNode.dataset.archiveRestoreSrc || mediaNode.dataset.src || '').trim();
+              if (restoreSrc && !mediaNode.getAttribute('src')) {
+                holdVirtualizedSize = true;
+                mediaNode.addEventListener('load', releaseVirtualizedSize, { once: true });
+                mediaNode.src = restoreSrc;
+                if (mediaNode.complete && Number(mediaNode.naturalWidth || 0) > 0) {
+                  holdVirtualizedSize = false;
+                }
+              }
+            }
             try {
               if (!mediaNode.isConnected) item.appendChild(mediaNode);
             } catch (_) { /* ignore media restore failures */ }
             item.dataset.archiveVirtualized = 'false';
-            item.style.height = '';
-            item.style.minHeight = '';
+            if (!holdVirtualizedSize) {
+              item.style.height = '';
+              item.style.minHeight = '';
+            }
             observeArchiveItemReveal(item);
             if (mediaNode instanceof HTMLVideoElement) {
               registerArchiveVideo(mediaNode);
-              if (isArchiveActive()) {
-                try { mediaNode.play().catch(() => {}); } catch (_) { /* ignore */ }
-              }
+              tryPlayArchiveVideo(mediaNode);
             }
           };
 
@@ -3243,6 +3444,11 @@
               1,
             );
             if (mediaNode instanceof HTMLVideoElement) pauseArchiveVideo(mediaNode);
+            if (mediaNode instanceof HTMLImageElement && item.dataset.archiveMediaType === 'gif') {
+              const restoreSrc = String(mediaNode.getAttribute('src') || mediaNode.currentSrc || mediaNode.dataset.src || '').trim();
+              if (restoreSrc) mediaNode.dataset.archiveRestoreSrc = restoreSrc;
+              try { mediaNode.removeAttribute('src'); } catch (_) { /* ignore gif src cleanup */ }
+            }
             try {
               if (mediaNode.isConnected) mediaNode.remove();
             } catch (_) { /* ignore media unmount failures */ }
@@ -3260,11 +3466,14 @@
             if (!homePage.classList.contains('home-archive-assets-ready')) return;
             if (!homePage.classList.contains('home-archive-intro-done')) return;
             const viewportRect = archiveViewport.getBoundingClientRect();
-            const windowTop = viewportRect.top - ARCHIVE_VIRTUALIZE_PADDING_PX;
-            const windowBottom = viewportRect.bottom + ARCHIVE_VIRTUALIZE_PADDING_PX;
             archiveItems.forEach((item) => {
               if (!item || item.dataset.archiveReady !== 'true') return;
               const rect = item.getBoundingClientRect();
+              const padding = item.dataset.archiveMediaType === 'gif'
+                ? ARCHIVE_GIF_VIRTUALIZE_PADDING_PX
+                : ARCHIVE_VIRTUALIZE_PADDING_PX;
+              const windowTop = viewportRect.top - padding;
+              const windowBottom = viewportRect.bottom + padding;
               const shouldVirtualize = rect.bottom < windowTop || rect.top > windowBottom;
               if (shouldVirtualize) virtualizeArchiveItemMedia(item);
               else restoreArchiveItemMedia(item);
@@ -3403,33 +3612,100 @@
 
           const isArchiveActive = () => homePage.classList.contains('home-archive-active');
 
+          const tryPlayArchiveVideo = (video) => {
+            if (!(video instanceof HTMLVideoElement)) return;
+            const canPlay = isArchiveActive()
+              && document.visibilityState !== 'hidden'
+              && video.dataset.archiveHydrated === 'true'
+              && video.dataset.archiveVideoInView === 'true';
+            if (!canPlay) {
+              try { video.pause(); } catch (_) { /* ignore */ }
+              return;
+            }
+            try { video.play().catch(() => {}); } catch (_) { /* ignore */ }
+          };
+
           const ensureArchiveVideoObserver = () => {
             if (archiveVideoObserver || !archiveViewport) return;
             archiveVideoObserver = new IntersectionObserver((entries) => {
               entries.forEach((entry) => {
                 const video = entry.target;
                 if (!(video instanceof HTMLVideoElement)) return;
-                if (!isArchiveActive() || !entry.isIntersecting) {
+                const isPlayableViewport = entry.isIntersecting && entry.intersectionRatio >= ARCHIVE_VIDEO_PLAY_THRESHOLD;
+                video.dataset.archiveVideoInView = isPlayableViewport ? 'true' : 'false';
+                if (!isPlayableViewport) {
                   try { video.pause(); } catch (_) { /* ignore */ }
                   return;
                 }
-                try { video.play().catch(() => {}); } catch (_) { /* ignore */ }
+                tryPlayArchiveVideo(video);
               });
             }, {
               root: archiveViewport,
-              rootMargin: '12% 0px 12% 0px',
-              threshold: 0.15,
+              rootMargin: '4% 0px 4% 0px',
+              threshold: [0, ARCHIVE_VIDEO_PLAY_THRESHOLD],
             });
           };
 
           const registerArchiveVideo = (video) => {
             if (!(video instanceof HTMLVideoElement)) return;
             archiveVideos.add(video);
+            if (!video.dataset.archiveVideoInView) video.dataset.archiveVideoInView = 'false';
             ensureArchiveVideoObserver();
             if (archiveVideoObserver) archiveVideoObserver.observe(video);
-            if (!isArchiveActive()) {
-              try { video.pause(); } catch (_) { /* ignore */ }
+            tryPlayArchiveVideo(video);
+          };
+
+          if (!archiveViewport.__archiveVideoVisibilityBound) {
+            archiveViewport.__archiveVideoVisibilityBound = true;
+            document.addEventListener('visibilitychange', () => {
+              archiveVideos.forEach((video) => {
+                if (document.visibilityState === 'hidden') {
+                  try { video.pause(); } catch (_) { /* ignore */ }
+                } else {
+                  tryPlayArchiveVideo(video);
+                }
+              });
+            });
+          }
+
+          const hydrateArchiveItem = (item) => {
+            if (!item || typeof item.__archiveHydrate !== 'function') return;
+            if (archiveHydrationObserver) {
+              try { archiveHydrationObserver.unobserve(item); } catch (_) { /* ignore */ }
             }
+            try { item.__archiveHydrate(); } catch (_) { /* ignore archive hydration errors */ }
+          };
+
+          const ensureArchiveHydrationObserver = () => {
+            if (archiveHydrationObserver || !archiveViewport) return;
+            if (!('IntersectionObserver' in window)) return;
+            archiveHydrationObserver = new IntersectionObserver((entries) => {
+              entries.forEach((entry) => {
+                const item = entry.target;
+                if (!(item instanceof HTMLElement)) return;
+                if (!entry.isIntersecting) return;
+                hydrateArchiveItem(item);
+              });
+            }, {
+              root: archiveViewport,
+              rootMargin: ARCHIVE_HYDRATE_ROOT_MARGIN,
+              threshold: 0.01,
+            });
+          };
+
+          const scheduleArchiveHydration = (item, index) => {
+            if (!item) return;
+            const isAnimatedGif = item.dataset.archiveMediaType === 'gif';
+            if (!isAnimatedGif && (archivePrefersReducedMotion || index < ARCHIVE_INITIAL_EAGER_COUNT)) {
+              hydrateArchiveItem(item);
+              return;
+            }
+            ensureArchiveHydrationObserver();
+            if (!archiveHydrationObserver) {
+              hydrateArchiveItem(item);
+              return;
+            }
+            archiveHydrationObserver.observe(item);
           };
 
           const requestArchiveRelayout = () => {
@@ -3457,21 +3733,17 @@
             window.addEventListener('orientationchange', requestArchiveWindowing);
           }
 
-          const totalArchiveMedia = ARCHIVE_MEDIA.length;
-          let resolvedArchiveMedia = 0;
-          const markArchiveMediaResolved = () => {
-            resolvedArchiveMedia += 1;
-            if (resolvedArchiveMedia >= totalArchiveMedia) {
-              homePage.classList.add('home-archive-assets-ready');
-              requestArchiveRelayout();
-            }
-          };
+          const markArchiveMediaResolved = () => {};
 
           ARCHIVE_MEDIA.forEach((media, index) => {
             const item = document.createElement('div');
             item.className = 'home-archive-stage__item';
             item.dataset.archiveReady = 'false';
             item.dataset.archiveMediaReady = 'false';
+            item.dataset.archiveMediaType = media.type;
+            if (media.width && media.height) {
+              item.style.setProperty('--archive-media-aspect-ratio', `${media.width} / ${media.height}`);
+            }
             archiveItems.push(item);
             let mediaResolved = false;
 
@@ -3506,9 +3778,16 @@
               video.dataset.src = media.src;
               video.muted = true;
               video.loop = true;
-              video.autoplay = true;
+              video.autoplay = false;
               video.playsInline = true;
               video.preload = 'none';
+              video.dataset.archiveVideoInView = 'false';
+              if (media.width && media.height) {
+                video.width = media.width;
+                video.height = media.height;
+                video.setAttribute('width', String(media.width));
+                video.setAttribute('height', String(media.height));
+              }
               video.setAttribute('playsinline', '');
               video.setAttribute('muted', '');
               video.setAttribute('aria-label', '');
@@ -3529,8 +3808,7 @@
               archiveTrack.appendChild(item);
               registerArchiveVideo(video);
               const ensurePlay = () => {
-                if (!isArchiveActive()) return;
-                try { video.play().catch(() => {}); } catch (_) { /* ignore */ }
+                tryPlayArchiveVideo(video);
               };
               video.addEventListener('loadeddata', () => {
                 ensurePlay();
@@ -3542,7 +3820,8 @@
                 markArchiveMediaResolvedOnce();
                 requestArchiveRelayout();
               }, { once: true });
-              if (video.dataset.archiveHydrated !== 'true') {
+              item.__archiveHydrate = () => {
+                if (video.dataset.archiveHydrated === 'true') return;
                 video.dataset.archiveHydrated = 'true';
                 const nextSrc = String(video.dataset.src || '').trim();
                 if (!nextSrc) {
@@ -3558,14 +3837,22 @@
                     markArchiveItemMediaReady();
                   }
                 }
-              }
+              };
             } else {
               const img = document.createElement('img');
               img.dataset.src = media.src;
               img.alt = '';
               img.draggable = false;
-              img.loading = 'eager';
-              try { img.fetchPriority = 'auto'; } catch (_) { /* ignore */ }
+              if (media.width && media.height) {
+                img.width = media.width;
+                img.height = media.height;
+                img.setAttribute('width', String(media.width));
+                img.setAttribute('height', String(media.height));
+              }
+              const isAnimatedGif = media.type === 'gif';
+              const isEagerImage = !isAnimatedGif && index < ARCHIVE_INITIAL_EAGER_COUNT;
+              img.loading = isEagerImage ? 'eager' : 'lazy';
+              try { img.fetchPriority = isEagerImage ? 'high' : 'low'; } catch (_) { /* ignore */ }
               img.decoding = 'async';
               img.addEventListener('dragstart', (event) => {
                 event.preventDefault();
@@ -3600,7 +3887,8 @@
               }, { once: true });
               item.appendChild(img);
               archiveTrack.appendChild(item);
-              if (img.dataset.archiveHydrated !== 'true') {
+              item.__archiveHydrate = () => {
+                if (img.dataset.archiveHydrated === 'true') return;
                 img.dataset.archiveHydrated = 'true';
                 const nextSrc = String(img.dataset.src || '').trim();
                 if (!nextSrc) {
@@ -3613,16 +3901,21 @@
                     markDecodedImageReady();
                   }
                 }
-              }
+              };
             }
+            scheduleArchiveHydration(item, index);
           });
 
+          homePage.classList.add('home-archive-assets-ready');
           requestArchiveRelayout();
         };
 
         const syncArchiveState = (isArchiveActive) => {
           homePage.classList.toggle('home-archive-active', isArchiveActive);
           if (isArchiveActive) {
+            try {
+              if (typeof window.__homePauseTileVideos === 'function') window.__homePauseTileVideos();
+            } catch (_) { /* ignore hidden tile video pause failures */ }
             homePage.classList.remove('home-game-active');
             homePage.classList.remove('home-archive-content-visible');
             const startArchiveImageReveal = () => {
@@ -3686,6 +3979,9 @@
             try { archiveStage.setAttribute('aria-hidden', isArchiveActive ? 'false' : 'true'); } catch (_) { /* ignore */ }
           }
           if (!isArchiveActive) {
+            try {
+              if (typeof window.__homeResumeTileVideos === 'function') window.__homeResumeTileVideos();
+            } catch (_) { /* ignore tile video resume failures */ }
             homePage.classList.remove('home-archive-content-visible');
             homePage.classList.remove('home-archive-intro-running');
             homePage.classList.remove('home-archive-intro-done');
