@@ -3942,6 +3942,10 @@
 
         const syncArchiveState = (isArchiveActive) => {
           homePage.classList.toggle('home-archive-active', isArchiveActive);
+          try {
+            document.documentElement.classList.toggle('home-archive-root-active', isArchiveActive);
+            document.body.classList.toggle('home-archive-body-active', isArchiveActive);
+          } catch (_) { /* ignore archive scroll lock failures */ }
           if (isArchiveActive) {
             try {
               if (typeof window.__homePauseTileVideos === 'function') window.__homePauseTileVideos();
