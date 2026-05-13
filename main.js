@@ -312,6 +312,48 @@
         });
       };
 
+      const formatHomeHeroHeadlineText = (text) => {
+        return String(text || '').replace('Strategist &', 'Strategist\u00A0&');
+      };
+
+      const replayHomeHeroHeadlineScramble = () => {
+        try {
+          const root = document.querySelector('.page[data-name="home page"] .home-hero__headline');
+          if (!root) return false;
+
+          const existingSpan = root.querySelector('.text-reveal-scramble');
+          const finalText = formatHomeHeroHeadlineText(
+            String((existingSpan && existingSpan.dataset && existingSpan.dataset.finalText) || root.textContent || '').replace(/\s+/g, ' ').trim()
+          );
+          if (!finalText) return false;
+
+          stopRootScramble(root);
+
+          let span = root.querySelector('.text-reveal-scramble');
+          if (!span) {
+            span = document.createElement('span');
+            span.className = 'text-reveal-scramble';
+            span.style.display = 'inline';
+            span.style.whiteSpace = 'normal';
+            span.style.verticalAlign = 'baseline';
+            span.dataset.noWidthLock = 'true';
+            root.textContent = '';
+            root.appendChild(span);
+          }
+
+          span.dataset.finalText = finalText;
+          span.textContent = finalText;
+          animateSpan(span, finalText, 0, randomDuration());
+          return true;
+        } catch (_) {
+          return false;
+        }
+      };
+
+      try {
+        window.__replayHomeHeroHeadlineScramble = replayHomeHeroHeadlineScramble;
+      } catch (_) { /* ignore */ }
+
       const run = () => {
         rebuildTargets();
         if (!queue.length) return false;
@@ -342,15 +384,18 @@
           const finalText = wrappingHeadingRoot
             ? String((wrappingHeadingRoot.textContent || '')).replace(/\s+/g, ' ').trim()
             : getFinalTextForNode(textNode);
-          if (!finalText.trim()) return;
+          const resolvedFinalText = isHomeHeroHeadlineText
+            ? formatHomeHeroHeadlineText(finalText)
+            : finalText;
+          if (!resolvedFinalText.trim()) return;
 
           if (wrappingHeadingRoot) processedWrappingHeadingRoots.add(wrappingHeadingRoot);
           if (tabClipRoot) tabClipRoot.style.overflow = 'hidden';
 
           const span = document.createElement('span');
           span.className = 'text-reveal-scramble';
-          span.textContent = finalText;
-          span.dataset.finalText = finalText;
+          span.textContent = resolvedFinalText;
+          span.dataset.finalText = resolvedFinalText;
           span.style.display = isFlowingText ? 'inline' : 'inline-block';
           span.style.whiteSpace = isFlowingText ? 'normal' : 'pre';
           if (isFlowingText) span.dataset.noWidthLock = 'true';
@@ -368,7 +413,7 @@
           }
 
           const shouldRunOnLoad = runOnLoad && (!isHomePage || isHomeHeroHeadlineText);
-          if (shouldRunOnLoad) animateSpan(span, finalText, delay, duration);
+          if (shouldRunOnLoad) animateSpan(span, resolvedFinalText, delay, duration);
         });
 
         interactiveRoots.forEach((root) => {
@@ -1066,7 +1111,13 @@
               el.__gameScrambleRaf = requestAnimationFrame(step);
             };
 
-            el.textContent = targetText;
+            let initial = '';
+            for (let i = 0; i < len; i += 1) {
+              const ch = targetText[i];
+              if (/\s/.test(ch) || /[^A-Za-z0-9]/.test(ch)) initial += ch;
+              else initial += GAME_SCRAMBLE_CHARS[Math.floor(Math.random() * GAME_SCRAMBLE_CHARS.length)];
+            }
+            el.textContent = initial;
             el.__gameScrambleRaf = requestAnimationFrame(step);
           };
           const applyRocketOffset = () => {
@@ -1365,10 +1416,11 @@
                 window.setTimeout(() => {
                   section.classList.remove('home-intro-section-hidden');
                   section.classList.add('home-intro-section-visible');
-                  const heroTitleTarget = section.querySelector && section.querySelector('.home-hero__headline .text-reveal-scramble, .home-hero__headline');
-                  if (heroTitleTarget) {
-                    const finalTitleText = String((heroTitleTarget.dataset && heroTitleTarget.dataset.finalText) || heroTitleTarget.textContent || '').trim();
-                    if (finalTitleText) scrambleGameText(heroTitleTarget, finalTitleText, 520);
+                  const heroHeadline = section.querySelector && section.querySelector('.home-hero__headline');
+                  if (heroHeadline && typeof window.__replayHomeHeroHeadlineScramble === 'function') {
+                    window.requestAnimationFrame(() => {
+                      try { window.__replayHomeHeroHeadlineScramble(); } catch (_) { /* ignore */ }
+                    });
                   }
                 }, HERO_BASE_DELAY + (i * HERO_STEP));
               });
@@ -3062,7 +3114,7 @@
 
         const ARCHIVE_VIDEO_IDS = new Set([38, 39, 42, 43, 97, 104, 106, 118, 121]);
         const ARCHIVE_GIF_IDS = new Set([2, 21, 22, 71, 102]);
-        const ARCHIVE_MISSING_IDS = new Set([7, 8, 9, 17, 44, 46, 47, 48, 50, 51, 64, 66, 67, 68, 70, 81, 82, 88, 109, 110]);
+        const ARCHIVE_MISSING_IDS = new Set([7, 8, 9, 17, 44, 46, 47, 48, 50, 51, 53, 64, 66, 67, 68, 70, 81, 82, 88, 109, 110, 112]);
         const ARCHIVE_MEDIA_DIMENSIONS = {
           1: [1136, 1518],
           2: [1920, 1080],
@@ -3169,32 +3221,47 @@
         const ARCHIVE_SOURCE_ID_SWAPS = {
           1: 3,
           3: 5,
+          4: 21,
           5: 78,
           10: 111,
+          13: 4,
+          15: 23,
+          18: 94,
+          21: 13,
+          23: 15,
           25: 41,
           27: 34,
           32: 121,
-          34: 27,
+          34: 77,
           35: 32,
           36: 95,
-          39: 40,
-          40: 25,
+          38: 40,
+          39: 25,
+          40: 35,
           41: 87,
           42: 39,
           49: 56,
           56: 49,
           69: 1,
-          78: 69,
+          77: 69,
+          78: 27,
+          54: 86,
           85: 96,
           86: 89,
-          87: 85,
-          89: 86,
+          87: 120,
+          89: 85,
+          91: 117,
+          94: 18,
           95: 107,
           96: 42,
+          100: 38,
           107: 36,
           111: 10,
-          121: 35,
+          117: 91,
+          120: 54,
+          121: 100,
         };
+        const ARCHIVE_FULL_SOURCE_IDS = new Set([1, 23, 25]);
         const ARCHIVE_MEDIA = [];
         for (let id = 1; id <= 121; id += 1) {
           if (ARCHIVE_MISSING_IDS.has(id)) continue;
@@ -3211,7 +3278,7 @@
           const dimensions = ARCHIVE_MEDIA_DIMENSIONS[sourceId] || null;
           ARCHIVE_MEDIA.push({
             type,
-            src: sourceId === 1 ? `./assets/archive/${sourceId}.${ext}` : `./assets/archive-thumbnails/${sourceId}.${ext}`,
+            src: ARCHIVE_FULL_SOURCE_IDS.has(sourceId) ? `./assets/archive/${sourceId}.${ext}` : `./assets/archive-thumbnails/${sourceId}.${ext}`,
             lightboxSrc: `./assets/archive/${sourceId}.${ext}`,
             width: dimensions ? dimensions[0] : null,
             height: dimensions ? dimensions[1] : null,
