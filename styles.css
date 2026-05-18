@@ -715,7 +715,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   line-height: 1;
   font-weight: 400;
   color: #ffffff;
-  padding: 1px 2px;
+  padding: 4px 2px;
   text-decoration: none;
   transition: background-color 160ms ease, color 160ms ease;
 }
@@ -761,7 +761,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
 }
 
@@ -869,7 +869,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     overflow-x: auto;
     overflow-y: hidden;
     width: 100%;
@@ -3638,6 +3638,7 @@ p { margin: 0; }
   .page[data-name="about page"] .about-layout {
     flex-direction: column;
     align-items: stretch;
+    gap: 16px;
   }
   .page[data-name="about page"] .about-left {
     width: 100%;
@@ -3906,6 +3907,12 @@ p { margin: 0; }
   padding-top: 24px;
 }
 
+.page[data-name="about page"] .about-card.about-process-card {
+  row-gap: 32px;
+  padding-top: 24px;
+  overflow-anchor: none;
+}
+
 .page[data-name="about page"] .about-reviews__title {
   margin: 0;
   font-family: var(--font-family-manrope);
@@ -3913,6 +3920,178 @@ p { margin: 0; }
   line-height: 1;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.66);
+}
+
+.page[data-name="about page"] .about-process__title {
+  margin: 0;
+  font-family: var(--font-family-manrope);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.page[data-name="about page"] .about-process__tabs-wrap {
+  --about-process-arrow-width: 44px;
+  --about-process-tabs-gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  box-shadow: none;
+  position: relative;
+}
+
+.page[data-name="about page"] .about-process__tabs-wrap::before,
+.page[data-name="about page"] .about-process__tabs-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+  z-index: 3;
+}
+
+.page[data-name="about page"] .about-process__tabs-wrap::before {
+  left: calc(var(--about-process-arrow-width) + var(--about-process-tabs-gap));
+  background: linear-gradient(to right, #0a0a0a 0%, rgba(10, 10, 10, 0) 100%);
+}
+
+.page[data-name="about page"] .about-process__tabs-wrap::after {
+  right: calc(var(--about-process-arrow-width) + var(--about-process-tabs-gap));
+  background: linear-gradient(to left, #0a0a0a 0%, rgba(10, 10, 10, 0) 100%);
+}
+
+.page[data-name="about page"] .about-process__tabs-wrap.can-scroll-left::before {
+  opacity: 1;
+}
+
+.page[data-name="about page"] .about-process__tabs-wrap.can-scroll-right::after {
+  opacity: 1;
+}
+
+.page[data-name="about page"] .about-process__tabs-scroll {
+  position: relative;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.page[data-name="about page"] .about-process__tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.page[data-name="about page"] .about-process__tabs {
+  width: max-content;
+  min-width: max-content;
+  justify-content: flex-start;
+}
+
+.page[data-name="about page"] .about-process__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease, opacity 160ms ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.page[data-name="about page"] .about-process__arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.page[data-name="about page"] .about-process__arrow:hover,
+.page[data-name="about page"] .about-process__arrow:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.page[data-name="about page"] .about-process__arrow[disabled] {
+  opacity: 0.32;
+  cursor: default;
+  pointer-events: none;
+}
+
+.page[data-name="about page"] .about-process__tabs .nav-item {
+  border: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+@media (max-width: 600px) {
+  .page[data-name="about page"] .about-process__tabs .nav-item {
+    padding: 10px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+}
+
+.page[data-name="about page"] .about-process-page-spacer {
+  width: 100%;
+  height: 0;
+  flex: 0 0 auto;
+  pointer-events: none;
+  overflow-anchor: none;
+}
+
+.page[data-name="about page"] .about-process__panels {
+  width: 100%;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.page[data-name="about page"] .about-process__panel[hidden] {
+  display: none !important;
+}
+
+.page[data-name="about page"] .about-process__item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page[data-name="about page"] .about-process__step,
+.page[data-name="about page"] .about-process__body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+.page[data-name="about page"] .about-process__step {
+  font-size: var(--font-size-base);
+  line-height: 1.25;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.page[data-name="about page"] .about-process__step-total {
+  font-size: 12px;
+  font-weight: 400;
+  color: #ffffff;
+  opacity: 0.68;
+}
+
+.page[data-name="about page"] .about-process__body {
+  color: #ffffff;
 }
 
 .page[data-name="about page"] .about-reviews__list {
@@ -4033,9 +4212,14 @@ p { margin: 0; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0;
+  padding: 4px 0;
   background: transparent;
   transition: background-color 160ms ease, color 160ms ease, padding 160ms ease;
+}
+
+.page[data-name="about page"] .about-review-item__name a .text-reveal-scramble {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }
 
 .page[data-name="about page"] .about-review-item__name a .about-awards__external {
@@ -4047,7 +4231,7 @@ p { margin: 0; }
 
 .page[data-name="about page"] .about-review-item__name a:hover,
 .page[data-name="about page"] .about-review-item__name a:focus-visible {
-  padding: 0 2px;
+  padding: 4px 2px;
   background: #ffffff;
   color: #0a0a0a;
   text-decoration: underline;

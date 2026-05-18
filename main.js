@@ -374,8 +374,11 @@
           const isAboutAwardsHeadlineText = !!(
             parentEl && parentEl.matches('.page[data-name="about page"] .about-awards__headline, .page[data-name="about page"] .about-awards__headline *')
           );
+          const isAboutReviewNameText = !!(
+            parentEl && parentEl.matches('.page[data-name="about page"] .about-review-item__name a')
+          );
           const isWrappingHeadingText = isHomeHeroHeadlineText || isAboutHeadingText;
-          const isFlowingText = isWrappingHeadingText || isHomeHeroSideText || isAboutAwardsHeadlineText;
+          const isFlowingText = isWrappingHeadingText || isHomeHeroSideText || isAboutAwardsHeadlineText || isAboutReviewNameText;
           const wrappingHeadingRoot = isWrappingHeadingText ? textNode.parentElement : null;
 
           if (wrappingHeadingRoot && processedWrappingHeadingRoots.has(wrappingHeadingRoot)) return;

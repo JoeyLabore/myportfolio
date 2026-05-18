@@ -126,6 +126,80 @@
                 </article>
               </div>
             </section>
+
+            <section id="process" class="about-card about-process-card scroll-reveal" aria-label="Process">
+              <h2 class="about-process__title">Process</h2>
+              <div class="about-process__tabs-wrap">
+                <button class="about-process__arrow" type="button" aria-label="Previous process step" data-process-arrow="prev">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                    <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                  </svg>
+                </button>
+                <div class="about-process__tabs-scroll">
+                  <nav class="tabs about-process__tabs" role="tablist" aria-label="Process steps">
+                    <button class="nav-item active" type="button" role="tab" aria-selected="true" aria-controls="process-panel-01" id="process-tab-01" tabindex="0" data-process-tab="01">Investigate</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-02" id="process-tab-02" tabindex="-1" data-process-tab="02">Diagnose</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-03" id="process-tab-03" tabindex="-1" data-process-tab="03">Explore</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-04" id="process-tab-04" tabindex="-1" data-process-tab="04">Validate</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-05" id="process-tab-05" tabindex="-1" data-process-tab="05">Build</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-06" id="process-tab-06" tabindex="-1" data-process-tab="06">Deliver</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-07" id="process-tab-07" tabindex="-1" data-process-tab="07">Iterate</button>
+                  </nav>
+                </div>
+                <button class="about-process__arrow" type="button" aria-label="Next process step" data-process-arrow="next">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                    <path fill="currentColor" d="m10 6-1.41 1.41L13.17 12l-4.58 4.59L10 18l6-6z"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="about-process__panels">
+                <div class="about-process__panel" role="tabpanel" id="process-panel-01" aria-labelledby="process-tab-01">
+                  <div class="about-process__item">
+                    <p class="about-process__step">01 <span class="about-process__step-total">/ 07</span> — Investigate Current State:</p>
+                    <p class="about-process__body">User &amp; stakeholder interviews, audits, current state analysis, journey maps, product diagrams, user flows, user profiles, OOUX artifacts, object maps. Whatever is necessary to understand the current state.</p>
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-02" aria-labelledby="process-tab-02" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">02 <span class="about-process__step-total">/ 07</span> — Diagnosis of the Problem(s):</p>
+                    <p class="about-process__body">Current state analysis, documentation of user pain points, workflow and system inefficiencies, documentation of business goals &amp; defining KPIs. What are we solving for and how will we measure success?</p>
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-03" aria-labelledby="process-tab-03" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">03 <span class="about-process__step-total">/ 07</span> — Future State Exploration:</p>
+                    <p class="about-process__body">On site or virtual workshops, future state artifacts (journey maps, product diagrams, user flows, wireframes, initial concepts and ideas). Everyone should be involved in this process, dev, product, users, stakeholders. Everyone has good &amp; bad ideas.</p>
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-04" aria-labelledby="process-tab-04" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">04 <span class="about-process__step-total">/ 07</span> — Refine, Validate, &amp; Define MVP Scope:</p>
+                    <p class="about-process__body">Initial scoping of effort for promising ideas via a prioritisation matrix; business goals vs user needs vs project budget. How can we validate which solution best solves user needs, business goals &amp; fits within the budget &amp; scope?</p>
+                    <p class="about-process__body">User testing of initial concepts too validate assumptions before committing resources. User testing reports presented to stakeholders and refine the ideas based testing insights.</p>
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-05" aria-labelledby="process-tab-05" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">05 <span class="about-process__step-total">/ 07</span> — Build the Final Designs:</p>
+                    <p class="about-process__body">Final high fidelity designs with real data and copy. Building production like prototypes via Figma&apos;s MCP &amp; Codex to conduct accurate usability testing for further validation before committing to development.</p>
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-06" aria-labelledby="process-tab-06" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">06 <span class="about-process__step-total">/ 07</span> — Dev Hand Off:</p>
+                    <p class="about-process__body">Design System documentation built of atomic design methodology; primitive &amp; tokens variables, components. This is then built and translated to storybook, again, via Figma&apos;s MCP &amp; codex and handed off to development teams.</p>
+                    <p class="about-process__body">Accessibility documentation, such as: read order, focus order, aria labels, colour contrast, line height, letter spacing etc... Clear and organised Figma files, responsive design documentation via auto-layout. What do we need to give development teams in order to build accurately &amp; efficiently?</p>
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-07" aria-labelledby="process-tab-07" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">07 <span class="about-process__step-total">/ 07</span> — Iterate &amp; Repeat:</p>
+                    <p class="about-process__body">Monitor performance post launch, quantitative &amp; qualitative insights, metric analyses, user sentiment analysis, all aligned to initial KPIs. Where is the product working and where can we improve?</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <div class="about-process-page-spacer" aria-hidden="true"></div>
           </div>
 
           <figure class="about-photo scroll-reveal" aria-hidden="true">
@@ -150,37 +224,211 @@
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
-        const shouldScrollToReviews = () => {
+        const getScrollTargetId = () => {
           try {
             const hash = String(window.location.hash || '').toLowerCase();
-            if (hash === '#reviews') return true;
+            if (hash === '#reviews') return 'reviews';
+            if (hash === '#process') return 'process';
             const params = new URLSearchParams(window.location.search || '');
-            return String(params.get('scroll') || '').toLowerCase() === 'reviews';
+            const scroll = String(params.get('scroll') || '').toLowerCase();
+            if (scroll === 'reviews' || scroll === 'process') return scroll;
+            return '';
           } catch (_) {
-            return false;
+            return '';
           }
         };
 
-        const scrollToReviews = () => {
-          if (!shouldScrollToReviews()) return;
-          const reviewsSection = document.getElementById('reviews');
-          if (!reviewsSection) return;
+        const scrollToSection = () => {
+          const targetId = getScrollTargetId();
+          if (!targetId) return;
+          const targetSection = document.getElementById(targetId);
+          if (!targetSection) return;
           const navSplit = document.querySelector('.page[data-name="about page"] .nav-split');
           const navHeight = navSplit ? Math.ceil(navSplit.getBoundingClientRect().height) : 0;
           const topOffset = navHeight + 16;
-          const targetTop = Math.max(0, window.scrollY + reviewsSection.getBoundingClientRect().top - topOffset);
+          const targetTop = Math.max(0, window.scrollY + targetSection.getBoundingClientRect().top - topOffset);
           const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
           window.scrollTo({ top: targetTop, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
         };
 
-        const runInitialReviewsScroll = () => {
+        const runInitialSectionScroll = () => {
           window.requestAnimationFrame(() => {
-            window.requestAnimationFrame(scrollToReviews);
+            window.requestAnimationFrame(scrollToSection);
           });
         };
-        if (document.readyState === 'complete') runInitialReviewsScroll();
-        else window.addEventListener('load', runInitialReviewsScroll, { once: true });
-        window.addEventListener('hashchange', scrollToReviews);
+        if (document.readyState === 'complete') runInitialSectionScroll();
+        else window.addEventListener('load', runInitialSectionScroll, { once: true });
+        window.addEventListener('hashchange', scrollToSection);
+
+        const processTabList = document.querySelector('.about-process__tabs[role="tablist"]');
+        if (processTabList) {
+          const processTabs = Array.from(processTabList.querySelectorAll('.nav-item[role="tab"]'));
+          const processPanels = Array.from(document.querySelectorAll('.about-process__panel[role="tabpanel"]'));
+          const processPanelsWrap = document.querySelector('.about-process__panels');
+          const processPageSpacer = document.querySelector('.about-process-page-spacer');
+          const processPrevArrow = document.querySelector('.about-process__arrow[data-process-arrow="prev"]');
+          const processNextArrow = document.querySelector('.about-process__arrow[data-process-arrow="next"]');
+          const processTabsScroll = document.querySelector('.about-process__tabs-scroll');
+          const processTabsWrap = document.querySelector('.about-process__tabs-wrap');
+
+          const updateProcessArrows = (activeIndex) => {
+            if (processPrevArrow) processPrevArrow.disabled = activeIndex <= 0;
+            if (processNextArrow) processNextArrow.disabled = activeIndex >= processTabs.length - 1;
+          };
+
+          const updateProcessScrollFades = () => {
+            if (!(processTabsScroll && processTabsWrap)) return;
+            const maxScrollLeft = Math.max(0, processTabsScroll.scrollWidth - processTabsScroll.clientWidth);
+            const hasOverflow = maxScrollLeft > 1;
+            const canScrollLeft = processTabsScroll.scrollLeft > 1;
+            const canScrollRight = processTabsScroll.scrollLeft < (maxScrollLeft - 1);
+            processTabsWrap.classList.toggle('has-overflow', hasOverflow);
+            processTabsWrap.classList.toggle('can-scroll-left', hasOverflow && canScrollLeft);
+            processTabsWrap.classList.toggle('can-scroll-right', hasOverflow && canScrollRight);
+          };
+
+          const centerProcessTab = (tab) => {
+            if (!(processTabsScroll && tab)) return;
+            try {
+              const scrollRect = processTabsScroll.getBoundingClientRect();
+              const tabRect = tab.getBoundingClientRect();
+              const tabCenter = (tabRect.left - scrollRect.left) + processTabsScroll.scrollLeft + (tabRect.width / 2);
+              const targetScrollLeft = Math.max(
+                0,
+                Math.min(
+                  processTabsScroll.scrollWidth - processTabsScroll.clientWidth,
+                  tabCenter - (processTabsScroll.clientWidth / 2)
+                )
+              );
+              processTabsScroll.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+            } catch (_) {
+              try { tab.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } catch (_) {}
+            }
+          };
+
+          const updateProcessPageSpacer = () => {
+            if (!(processPanelsWrap && processPanels.length && processPageSpacer)) return;
+            const isStackedMobileLayout = !!(window.matchMedia && window.matchMedia('(max-width: 450px)').matches);
+            const measurements = [];
+            processPanels.forEach((panel) => {
+              const wasHidden = panel.hidden;
+              const prevDisplay = panel.style.display;
+              const prevPosition = panel.style.position;
+              const prevVisibility = panel.style.visibility;
+              const prevPointerEvents = panel.style.pointerEvents;
+              const prevInset = panel.style.inset;
+              const prevWidth = panel.style.width;
+
+              panel.hidden = false;
+              panel.style.display = 'block';
+              panel.style.position = 'absolute';
+              panel.style.visibility = 'hidden';
+              panel.style.pointerEvents = 'none';
+              panel.style.inset = '0 auto auto 0';
+              panel.style.width = `${processPanelsWrap.clientWidth}px`;
+
+              measurements.push({
+                panel,
+                wasHidden,
+                prevDisplay,
+                prevPosition,
+                prevVisibility,
+                prevPointerEvents,
+                prevInset,
+                prevWidth,
+                height: Math.ceil(panel.getBoundingClientRect().height),
+              });
+            });
+
+            measurements.forEach(({ panel, wasHidden, prevDisplay, prevPosition, prevVisibility, prevPointerEvents, prevInset, prevWidth }) => {
+              panel.hidden = wasHidden;
+              panel.style.display = prevDisplay;
+              panel.style.position = prevPosition;
+              panel.style.visibility = prevVisibility;
+              panel.style.pointerEvents = prevPointerEvents;
+              panel.style.inset = prevInset;
+              panel.style.width = prevWidth;
+            });
+
+            const tallest = measurements.reduce((max, item) => Math.max(max, item.height || 0), 0);
+            const activePanel = processPanels.find((panel) => !panel.hidden) || processPanels[0];
+            const activeHeight = activePanel ? Math.ceil(activePanel.getBoundingClientRect().height) : 0;
+            const spacerHeight = isStackedMobileLayout ? 0 : Math.max(0, tallest - activeHeight);
+            processPanelsWrap.style.minHeight = '';
+            processPageSpacer.style.height = `${spacerHeight}px`;
+          };
+
+          const setActiveProcessTab = (nextTab) => {
+            if (!nextTab) return;
+            const lockedScrollY = window.scrollY || window.pageYOffset || 0;
+            const targetId = nextTab.getAttribute('aria-controls');
+            const activeIndex = processTabs.indexOf(nextTab);
+            processTabs.forEach((tab) => {
+              const isActive = tab === nextTab;
+              tab.classList.toggle('active', isActive);
+              tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+              tab.tabIndex = isActive ? 0 : -1;
+            });
+            processPanels.forEach((panel) => {
+              panel.hidden = panel.id !== targetId;
+            });
+            updateProcessPageSpacer();
+            updateProcessArrows(activeIndex);
+            centerProcessTab(nextTab);
+            window.scrollTo({ top: lockedScrollY, behavior: 'auto' });
+            window.requestAnimationFrame(() => {
+              window.scrollTo({ top: lockedScrollY, behavior: 'auto' });
+              updateProcessScrollFades();
+            });
+          };
+
+          processTabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => setActiveProcessTab(tab));
+            tab.addEventListener('keydown', (event) => {
+              let targetIndex = -1;
+              if (event.key === 'ArrowRight') targetIndex = (index + 1) % processTabs.length;
+              if (event.key === 'ArrowLeft') targetIndex = (index - 1 + processTabs.length) % processTabs.length;
+              if (event.key === 'Home') targetIndex = 0;
+              if (event.key === 'End') targetIndex = processTabs.length - 1;
+              if (targetIndex < 0) return;
+              event.preventDefault();
+              const targetTab = processTabs[targetIndex];
+              setActiveProcessTab(targetTab);
+              targetTab.focus({ preventScroll: true });
+            });
+          });
+
+          if (processPrevArrow) {
+            processPrevArrow.addEventListener('click', () => {
+              const activeIndex = processTabs.findIndex((tab) => tab.classList.contains('active') || tab.getAttribute('aria-selected') === 'true');
+              if (activeIndex <= 0) return;
+              const targetTab = processTabs[activeIndex - 1];
+              setActiveProcessTab(targetTab);
+              targetTab.focus({ preventScroll: true });
+            });
+          }
+
+          if (processNextArrow) {
+            processNextArrow.addEventListener('click', () => {
+              const activeIndex = processTabs.findIndex((tab) => tab.classList.contains('active') || tab.getAttribute('aria-selected') === 'true');
+              if (activeIndex < 0 || activeIndex >= processTabs.length - 1) return;
+              const targetTab = processTabs[activeIndex + 1];
+              setActiveProcessTab(targetTab);
+              targetTab.focus({ preventScroll: true });
+            });
+          }
+
+          updateProcessArrows(processTabs.findIndex((tab) => tab.classList.contains('active') || tab.getAttribute('aria-selected') === 'true'));
+          if (processTabsScroll) {
+            processTabsScroll.addEventListener('scroll', updateProcessScrollFades, { passive: true });
+            window.addEventListener('resize', updateProcessScrollFades);
+            window.addEventListener('load', updateProcessScrollFades, { once: true });
+            updateProcessScrollFades();
+          }
+          updateProcessPageSpacer();
+          window.addEventListener('resize', updateProcessPageSpacer);
+          window.addEventListener('load', updateProcessPageSpacer, { once: true });
+        }
 
         const reviewItems = Array.from(document.querySelectorAll('.about-review-item'));
         if (!reviewItems.length) return;
