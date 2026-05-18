@@ -4,7 +4,6 @@
 (function () {
   // Profiling toggle: set to true to show live performance stats
   const ENABLE_PROFILING = false;
-
   // Force top-left scroll position on refresh/navigation
   try {
     if ('scrollRestoration' in history) {
