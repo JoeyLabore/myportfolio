@@ -675,7 +675,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 .page[data-name="home page"] .home-hero__column--about .home-hero__body {
   font-size: 12px;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .page[data-name="home page"] .home-hero__column--about {
@@ -690,7 +690,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   display: block;
   margin-right: 0;
   margin-bottom: 4px;
-  font-weight: 300;
+  font-weight: 600;
   font-style: normal;
   color: #ffffff;
 }
@@ -2637,7 +2637,7 @@ p { margin: 0; }
 
 
 .site-footer {
-  padding: 24px;
+  padding: 0 16px 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2689,6 +2689,58 @@ p { margin: 0; }
   gap: 0;
 }
 
+.site-footer__orbit {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex: 0 0 120px;
+  color: #ffffff;
+  overflow: hidden;
+  contain: layout paint;
+  isolation: isolate;
+}
+
+.site-footer__orbit-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transform-origin: 50% 50%;
+  animation: site-footer-orbit-spin 20s linear infinite;
+  will-change: transform;
+}
+
+.site-footer__orbit:hover .site-footer__orbit-svg,
+.site-footer__orbit:focus-within .site-footer__orbit-svg {
+  animation-duration: 5s;
+}
+
+.site-footer__orbit-text {
+  fill: rgba(255, 255, 255, 0.96);
+  font-family: var(--font-family-manrope);
+  font-size: 10.75px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.site-footer__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes site-footer-orbit-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .site-footer__code {
   color: rgba(255, 255, 255, 0.66);
 }
@@ -2711,10 +2763,11 @@ p { margin: 0; }
   .page[data-name="case study page"] .site-footer {
     padding-left: 0;
     padding-right: 0;
+    padding-bottom: 32px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 24px;
+    gap: 0;
   }
 
   .page[data-name="home page"] .site-footer__text,
@@ -2725,6 +2778,17 @@ p { margin: 0; }
     justify-content: center;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .site-footer__orbit {
+    width: 138px;
+    height: 138px;
+    flex-basis: 138px;
+  }
+
+  .site-footer__orbit-text {
+    font-size: 9.75px;
+    letter-spacing: 0;
   }
 
   .page[data-name="home page"] .site-footer__icons,
@@ -2816,7 +2880,7 @@ p { margin: 0; }
   align-items: flex-start;
   padding: 14px 14px;
   border-radius: 22px;
-  background: rgba(0, 0, 0, 0.38);
+  background: rgba(255, 255, 255, 0.12);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   backdrop-filter: blur(12px) saturate(140%);
   color: #ffffff;
@@ -2987,7 +3051,7 @@ p { margin: 0; }
   /* Glass effect container with darker tint */
   background: rgba(0, 0, 0, 0.38);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  backdrop-filter: blur(4px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
   border: none;
   border-radius: 16px;
   margin: var(--space-s);
@@ -3641,7 +3705,7 @@ p { margin: 0; }
 .page[data-name="about page"] .nav-split .nav-bar {
   background: rgba(0, 0, 0, 0.38);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
-  backdrop-filter: blur(4px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
   background-clip: padding-box;
 }
 
@@ -4147,7 +4211,7 @@ p { margin: 0; }
 .page[data-name="about page"] .about-process__item {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
 }
 
 .page[data-name="about page"] .about-process__step,
@@ -4163,6 +4227,7 @@ p { margin: 0; }
   line-height: 1.25;
   font-weight: 600;
   color: #ffffff;
+  margin-bottom: 24px;
 }
 
 .page[data-name="about page"] .about-process__step-total {
@@ -4174,6 +4239,18 @@ p { margin: 0; }
 
 .page[data-name="about page"] .about-process__body {
   color: #ffffff;
+}
+
+.page[data-name="about page"] .about-process__body + .about-process__body {
+  margin-top: 24px;
+}
+
+.page[data-name="about page"] .about-process__media {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  margin-top: 24px;
 }
 
 .page[data-name="about page"] .about-reviews__list {
@@ -4475,6 +4552,7 @@ p { margin: 0; }
   width: 100%;
   margin-left: 0 !important;  /* cancel base negative margins */
   margin-right: 0 !important; /* cancel base negative margins */
+  overflow-anchor: none; /* prevent hover state changes from nudging page scroll */
 }
 .tile-grid .tile {
   --tile-radius: 8px;
@@ -4498,6 +4576,7 @@ p { margin: 0; }
   align-self: stretch; /* ensure each tile fills the tile-grid height */
   border-radius: var(--tile-radius);
   overflow: visible;
+  overflow-anchor: none; /* keep hover/overlay changes from affecting viewport anchor */
   position: relative; /* allow absolute-positioned tag container */
   /* Ensure child content cannot force a taller intrinsic height when filtering */
   position: relative; /* anchor absolutely-positioned media */
@@ -4788,9 +4867,9 @@ p { margin: 0; }
   padding: 4px 10px;
   border-radius: 999px;
   border: none;
-  background: rgba(255, 255, 255, 0.08);
-  -webkit-backdrop-filter: blur(10px) saturate(130%);
-  backdrop-filter: blur(10px) saturate(130%);
+  background: rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
   color: rgba(255, 255, 255, 0.88);
   letter-spacing: normal;
   text-transform: none;
@@ -5035,10 +5114,10 @@ p { margin: 0; }
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.01em;
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  background: rgba(15, 15, 15, 0.72);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
   color: #ffffff;
   box-shadow: none;
   white-space: nowrap;
@@ -5046,17 +5125,17 @@ p { margin: 0; }
 
 .tile-grid .tile .tile-tag--role,
 .tile-grid .tile .tile-tag--industry {
-  background: rgba(15, 15, 15, 0.72);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.62);
+  border: none;
   box-shadow: none;
 }
 
 .tile-grid .tile .tile-external-badge .tile-tag--external {
-  background: rgba(15, 15, 15, 0.72);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.62);
+  border: none;
   box-shadow: none;
 }
 
@@ -5918,6 +5997,13 @@ p { margin: 0; }
   margin-left: calc(50% - 50vw + 16px) !important;
   margin-right: calc(50% - 50vw + 16px) !important;
   gap: 16px !important;
+}
+
+@media (min-width: 1051px) and (hover: hover) and (pointer: fine) {
+  .page[data-name="home page"] .main {
+    overflow-y: clip;
+    overflow-anchor: none;
+  }
 }
 
 .page[data-name="home page"] .tile-grid .tile {

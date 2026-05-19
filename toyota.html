@@ -21,7 +21,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=115" />
+    <link rel="stylesheet" href="./styles.css?v=116" />
     <link rel="stylesheet" href="./impact-styles.css" />
     <style>
       .protected-image {
@@ -380,7 +380,17 @@
         </section>
       </main>
       <footer class="site-footer" aria-label="Footer">
-        <p class="site-footer__text"><span class="site-footer__line">Joseph Greenwood</span><span class="site-footer__line">©2019 / 2026</span></p>
+        <div class="site-footer__orbit" aria-label="Joseph Greenwood * 2019 / 2026">
+          <span class="site-footer__sr">Joseph Greenwood * 2019 / 2026</span>
+          <svg class="site-footer__orbit-svg" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <defs>
+              <path id="footer-circle-path" d="M 60,60 m -24,0 a 24,24 0 1,1 48,0 a 24,24 0 1,1 -48,0" />
+            </defs>
+            <text class="site-footer__orbit-text">
+              <textPath href="#footer-circle-path">JOSEPH GREENWOOD * 2019 / 2026 *</textPath>
+            </text>
+          </svg>
+        </div>
         <div class="site-footer__icons" aria-label="Links">
           <a class="site-footer__icon" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn (opens in new tab)">
             <i class="ph ph-linkedin-logo" aria-hidden="true"></i>
@@ -432,7 +442,7 @@
       window.__toyotaPageUnlocked = true;
     })();
   </script>
-  <script src="./main.js?v=42"></script>
+  <script src="./main.js?v=44"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       if (window.__toyotaPageUnlocked !== true) return;
@@ -655,6 +665,14 @@
           if (window.location.hash !== hash) window.history.replaceState(null, '', hash);
         } catch (_) {}
         if (deepDive) {
+          window.requestAnimationFrame(() => {
+            try {
+              if (typeof window.__refreshFooterOrbitFit === 'function') {
+                window.__refreshFooterOrbitFit();
+                window.requestAnimationFrame(() => window.__refreshFooterOrbitFit());
+              }
+            } catch (_) {}
+          });
           resetTocActiveToFirst();
           document.body.classList.remove('deep-dive-intro-visible');
           window.requestAnimationFrame(() => {

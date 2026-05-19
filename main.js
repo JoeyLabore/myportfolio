@@ -60,6 +60,79 @@
   } catch (_) { /* ignore */ }
 
   try {
+    const setupFooterOrbitFit = () => {
+      const orbitNodes = Array.from(document.querySelectorAll('.site-footer__orbit'));
+      if (!orbitNodes.length) return;
+
+      let fitRaf = 0;
+      const fitAllOrbits = () => {
+        orbitNodes.forEach((orbit) => {
+          try {
+            const svg = orbit.querySelector('.site-footer__orbit-svg');
+            const path = svg && svg.querySelector('path[id="footer-circle-path"]');
+            const textEl = svg && svg.querySelector('.site-footer__orbit-text');
+            const textPath = textEl && textEl.querySelector('textPath');
+            if (!(svg && path && textEl && textPath)) return;
+            if (typeof path.getTotalLength !== 'function' || typeof textEl.getComputedTextLength !== 'function') return;
+
+            const baseSize = parseFloat(window.getComputedStyle(textEl).fontSize) || 10;
+            const minSize = Math.max(5, baseSize * 0.6);
+            const pathLength = Math.max(0, path.getTotalLength() - 2);
+
+            let low = minSize;
+            let high = baseSize;
+            let best = minSize;
+
+            textEl.style.fontSize = `${minSize}px`;
+
+            for (let i = 0; i < 14; i += 1) {
+              const mid = (low + high) / 2;
+              textEl.style.fontSize = `${mid}px`;
+              const textLength = textEl.getComputedTextLength();
+              if (textLength <= pathLength) {
+                best = mid;
+                low = mid;
+              } else {
+                high = mid;
+              }
+            }
+
+            textEl.style.fontSize = `${best}px`;
+          } catch (_) { /* ignore individual footer orbit fit failures */ }
+        });
+      };
+
+      const scheduleFit = () => {
+        if (fitRaf) {
+          try { cancelAnimationFrame(fitRaf); } catch (_) {}
+        }
+        fitRaf = requestAnimationFrame(() => {
+          fitRaf = 0;
+          fitAllOrbits();
+        });
+      };
+
+      try { window.__refreshFooterOrbitFit = scheduleFit; } catch (_) {}
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(scheduleFit).catch(scheduleFit);
+      } else {
+        scheduleFit();
+      }
+
+      window.addEventListener('resize', scheduleFit, { passive: true });
+      window.addEventListener('pageshow', scheduleFit);
+      window.addEventListener('load', scheduleFit, { once: true });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupFooterOrbitFit, { once: true });
+    } else {
+      setupFooterOrbitFit();
+    }
+  } catch (_) { /* ignore */ }
+
+  try {
     const setupHomeHeroLinksScroller = () => {
       const homePage = document.querySelector('.page[data-name="home page"]');
       if (!homePage) return;
