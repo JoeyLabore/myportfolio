@@ -2710,11 +2710,6 @@ p { margin: 0; }
   will-change: transform;
 }
 
-.site-footer__orbit:hover .site-footer__orbit-svg,
-.site-footer__orbit:focus-within .site-footer__orbit-svg {
-  animation-duration: 5s;
-}
-
 .site-footer__orbit-text {
   fill: rgba(255, 255, 255, 0.96);
   font-family: var(--font-family-manrope);

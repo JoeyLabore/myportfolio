@@ -68,15 +68,94 @@
               </div>
             </section>
 
-            <section class="about-card about-awards-card scroll-reveal" aria-label="Awards">
-              <h2 class="about-awards__title">Awards</h2>
-              <div class="about-awards__item">
-                <a class="about-awards__headline" href="https://www.behance.net/gallery/168404757/NestBank-Mobile-Banking-UXUI-Design" target="_blank" rel="noopener noreferrer" aria-label="Behance: NestBank — Mobile Banking UX/UI Design (opens in new tab)"><strong>Featured by Adobe, Behance — UI Ribbon Award</strong><svg class="about-awards__external" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="currentColor" d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z"/><path fill="currentColor" d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3z"/></svg></a>
-                <p class="about-awards__desc">NestBank (Mobile Banking, UX/UI) was selected by the Behance curatorial team and awarded a UI Ribbon, recognising excellence in digital interface design and visual system execution.</p>
-                <p class="about-awards__meta">20.1K views · 1.1K appreciations</p>
+            <section id="process" class="about-card about-process-card scroll-reveal" aria-label="Process">
+              <h2 class="about-process__title">Process</h2>
+              <div class="about-process__tabs-wrap">
+                <button class="about-process__arrow" type="button" aria-label="Previous process step" data-process-arrow="prev">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                    <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                  </svg>
+                </button>
+                <div class="about-process__tabs-scroll">
+                  <nav class="tabs about-process__tabs" role="tablist" aria-label="Process steps">
+                    <button class="nav-item active" type="button" role="tab" aria-selected="true" aria-controls="process-panel-01" id="process-tab-01" tabindex="0" data-process-tab="01">Investigate</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-02" id="process-tab-02" tabindex="-1" data-process-tab="02">Diagnose</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-03" id="process-tab-03" tabindex="-1" data-process-tab="03">Explore</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-04" id="process-tab-04" tabindex="-1" data-process-tab="04">Validate</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-05" id="process-tab-05" tabindex="-1" data-process-tab="05">Build</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-06" id="process-tab-06" tabindex="-1" data-process-tab="06">Deliver</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-07" id="process-tab-07" tabindex="-1" data-process-tab="07">QA</button>
+                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-08" id="process-tab-08" tabindex="-1" data-process-tab="08">Iterate</button>
+                  </nav>
+                </div>
+                <button class="about-process__arrow" type="button" aria-label="Next process step" data-process-arrow="next">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                    <path fill="currentColor" d="m10 6-1.41 1.41L13.17 12l-4.58 4.59L10 18l6-6z"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="about-process__panels">
+                <div class="about-process__panel" role="tabpanel" id="process-panel-01" aria-labelledby="process-tab-01">
+                  <div class="about-process__item">
+                    <p class="about-process__step">01 <span class="about-process__step-total">/ 08</span> — Understand Current State:</p>
+                    <p class="about-process__body">User &amp; stakeholder interviews, audits, current state analysis, journey maps, product diagrams, user flows, user profiles, OOUX artifacts, object maps. Whatever is necessary to understand the current state.</p>
+                    <img class="about-process__media" src="./assets/investigation.gif" alt="Investigation process visual" />
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-02" aria-labelledby="process-tab-02" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">02 <span class="about-process__step-total">/ 08</span> — Diagnosis of the Problem(s):</p>
+                    <p class="about-process__body">Current state analysis, documentation of user pain points, workflow and system inefficiencies, documentation of business goals &amp; defining KPIs. What are we solving for and how will we measure success?</p>
+                    <img class="about-process__media" src="./assets/diagnosis.gif" alt="Diagnosis process visual" />
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-03" aria-labelledby="process-tab-03" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">03 <span class="about-process__step-total">/ 08</span> — Future State Exploration:</p>
+                    <p class="about-process__body">On site or virtual workshops, future state artifacts (journey maps, product diagrams, user flows, wireframes, initial concepts and ideas). Everyone should be involved in this process, dev, product, users, stakeholders. Everyone has good &amp; bad ideas.</p>
+                    <img class="about-process__media" src="./assets/explore.gif" alt="Explore process visual" />
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-04" aria-labelledby="process-tab-04" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">04 <span class="about-process__step-total">/ 08</span> — Refine, Validate, &amp; Define MVP Scope:</p>
+                    <p class="about-process__body">Initial scoping of effort for promising ideas via a prioritisation matrix; business goals vs user needs vs project budget. How can we validate which solution best solves user needs, business goals &amp; fits within the budget &amp; scope?</p>
+                    <p class="about-process__body">User testing of initial concepts too validate assumptions before committing resources. User testing reports presented to stakeholders and refine the ideas based testing insights.</p>
+                    <img class="about-process__media" src="./assets/validate.gif" alt="Validate process visual" />
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-05" aria-labelledby="process-tab-05" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">05 <span class="about-process__step-total">/ 08</span> — Build the Final Designs:</p>
+                    <p class="about-process__body">Final high fidelity designs with real data and copy. Building production like prototypes via Figma&apos;s MCP &amp; Codex to conduct accurate usability testing for further validation before committing to development.</p>
+                    <img class="about-process__media" src="./assets/build.gif" alt="Build process visual" />
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-06" aria-labelledby="process-tab-06" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">06 <span class="about-process__step-total">/ 08</span> — Dev Hand Off:</p>
+                    <p class="about-process__body">Design System documentation built of atomic design methodology; primitive &amp; tokens variables, components. This is then built and translated to storybook, again, via Figma&apos;s MCP &amp; codex and handed off to development teams.</p>
+                    <p class="about-process__body">Accessibility documentation, such as: read order, focus order, aria labels, colour contrast, line height, letter spacing etc... Clear and organised Figma files, responsive design documentation via auto-layout. What do we need to give development teams in order to build accurately &amp; efficiently?</p>
+                    <img class="about-process__media" src="./assets/handoff.gif" alt="Deliver process visual" />
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-07" aria-labelledby="process-tab-07" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">07 <span class="about-process__step-total">/ 08</span> — Design QA:</p>
+                    <p class="about-process__body">Before release, every interaction, component, transition, and responsive state is reviewed to ensure the product behaves as intended across devices and user flows.</p>
+                    <p class="about-process__body">Craftsmanship lives in the details. Consistency, accessibility, hierarchy, motion, and responsiveness all contribute to product trust, usability, and overall product quality.</p>
+                    <img class="about-process__media" src="./assets/qa.gif" alt="QA process visual" />
+                  </div>
+                </div>
+                <div class="about-process__panel" role="tabpanel" id="process-panel-08" aria-labelledby="process-tab-08" hidden>
+                  <div class="about-process__item">
+                    <p class="about-process__step">08 <span class="about-process__step-total">/ 08</span> — Iterate &amp; Repeat:</p>
+                    <p class="about-process__body">Monitor performance post launch, quantitative &amp; qualitative insights, metric analyses, user sentiment analysis, all aligned to initial KPIs. Where is the product working and where can we improve?</p>
+                    <img class="about-process__media" src="./assets/iterate.gif" alt="Iterate process visual" />
+                  </div>
+                </div>
               </div>
             </section>
-
             <section id="reviews" class="about-card about-reviews-card scroll-reveal" aria-label="Testimonials">
               <h2 class="about-reviews__title">Testimonials</h2>
               <div class="about-reviews__list">
@@ -127,86 +206,14 @@
               </div>
             </section>
 
-            <section id="process" class="about-card about-process-card scroll-reveal" aria-label="Process">
-              <h2 class="about-process__title">Process</h2>
-              <div class="about-process__tabs-wrap">
-                <button class="about-process__arrow" type="button" aria-label="Previous process step" data-process-arrow="prev">
-                  <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
-                    <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                  </svg>
-                </button>
-                <div class="about-process__tabs-scroll">
-                  <nav class="tabs about-process__tabs" role="tablist" aria-label="Process steps">
-                    <button class="nav-item active" type="button" role="tab" aria-selected="true" aria-controls="process-panel-01" id="process-tab-01" tabindex="0" data-process-tab="01">Investigate</button>
-                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-02" id="process-tab-02" tabindex="-1" data-process-tab="02">Diagnose</button>
-                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-03" id="process-tab-03" tabindex="-1" data-process-tab="03">Explore</button>
-                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-04" id="process-tab-04" tabindex="-1" data-process-tab="04">Validate</button>
-                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-05" id="process-tab-05" tabindex="-1" data-process-tab="05">Build</button>
-                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-06" id="process-tab-06" tabindex="-1" data-process-tab="06">Deliver</button>
-                    <button class="nav-item" type="button" role="tab" aria-selected="false" aria-controls="process-panel-07" id="process-tab-07" tabindex="-1" data-process-tab="07">Iterate</button>
-                  </nav>
-                </div>
-                <button class="about-process__arrow" type="button" aria-label="Next process step" data-process-arrow="next">
-                  <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
-                    <path fill="currentColor" d="m10 6-1.41 1.41L13.17 12l-4.58 4.59L10 18l6-6z"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="about-process__panels">
-                <div class="about-process__panel" role="tabpanel" id="process-panel-01" aria-labelledby="process-tab-01">
-                  <div class="about-process__item">
-                    <p class="about-process__step">01 <span class="about-process__step-total">/ 07</span> — Understand Current State:</p>
-                    <p class="about-process__body">User &amp; stakeholder interviews, audits, current state analysis, journey maps, product diagrams, user flows, user profiles, OOUX artifacts, object maps. Whatever is necessary to understand the current state.</p>
-                    <img class="about-process__media" src="./assets/investigation.gif" alt="Investigation process visual" />
-                  </div>
-                </div>
-                <div class="about-process__panel" role="tabpanel" id="process-panel-02" aria-labelledby="process-tab-02" hidden>
-                  <div class="about-process__item">
-                    <p class="about-process__step">02 <span class="about-process__step-total">/ 07</span> — Diagnosis of the Problem(s):</p>
-                    <p class="about-process__body">Current state analysis, documentation of user pain points, workflow and system inefficiencies, documentation of business goals &amp; defining KPIs. What are we solving for and how will we measure success?</p>
-                    <img class="about-process__media" src="./assets/diagnosis.gif" alt="Diagnosis process visual" />
-                  </div>
-                </div>
-                <div class="about-process__panel" role="tabpanel" id="process-panel-03" aria-labelledby="process-tab-03" hidden>
-                  <div class="about-process__item">
-                    <p class="about-process__step">03 <span class="about-process__step-total">/ 07</span> — Future State Exploration:</p>
-                    <p class="about-process__body">On site or virtual workshops, future state artifacts (journey maps, product diagrams, user flows, wireframes, initial concepts and ideas). Everyone should be involved in this process, dev, product, users, stakeholders. Everyone has good &amp; bad ideas.</p>
-                    <img class="about-process__media" src="./assets/explore.gif" alt="Explore process visual" />
-                  </div>
-                </div>
-                <div class="about-process__panel" role="tabpanel" id="process-panel-04" aria-labelledby="process-tab-04" hidden>
-                  <div class="about-process__item">
-                    <p class="about-process__step">04 <span class="about-process__step-total">/ 07</span> — Refine, Validate, &amp; Define MVP Scope:</p>
-                    <p class="about-process__body">Initial scoping of effort for promising ideas via a prioritisation matrix; business goals vs user needs vs project budget. How can we validate which solution best solves user needs, business goals &amp; fits within the budget &amp; scope?</p>
-                    <p class="about-process__body">User testing of initial concepts too validate assumptions before committing resources. User testing reports presented to stakeholders and refine the ideas based testing insights.</p>
-                    <img class="about-process__media" src="./assets/validate.gif" alt="Validate process visual" />
-                  </div>
-                </div>
-                <div class="about-process__panel" role="tabpanel" id="process-panel-05" aria-labelledby="process-tab-05" hidden>
-                  <div class="about-process__item">
-                    <p class="about-process__step">05 <span class="about-process__step-total">/ 07</span> — Build the Final Designs:</p>
-                    <p class="about-process__body">Final high fidelity designs with real data and copy. Building production like prototypes via Figma&apos;s MCP &amp; Codex to conduct accurate usability testing for further validation before committing to development.</p>
-                    <img class="about-process__media" src="./assets/build.gif" alt="Build process visual" />
-                  </div>
-                </div>
-                <div class="about-process__panel" role="tabpanel" id="process-panel-06" aria-labelledby="process-tab-06" hidden>
-                  <div class="about-process__item">
-                    <p class="about-process__step">06 <span class="about-process__step-total">/ 07</span> — Dev Hand Off:</p>
-                    <p class="about-process__body">Design System documentation built of atomic design methodology; primitive &amp; tokens variables, components. This is then built and translated to storybook, again, via Figma&apos;s MCP &amp; codex and handed off to development teams.</p>
-                    <p class="about-process__body">Accessibility documentation, such as: read order, focus order, aria labels, colour contrast, line height, letter spacing etc... Clear and organised Figma files, responsive design documentation via auto-layout. What do we need to give development teams in order to build accurately &amp; efficiently?</p>
-                    <img class="about-process__media" src="./assets/handoff.gif" alt="Deliver process visual" />
-                  </div>
-                </div>
-                <div class="about-process__panel" role="tabpanel" id="process-panel-07" aria-labelledby="process-tab-07" hidden>
-                  <div class="about-process__item">
-                    <p class="about-process__step">07 <span class="about-process__step-total">/ 07</span> — Iterate &amp; Repeat:</p>
-                    <p class="about-process__body">Monitor performance post launch, quantitative &amp; qualitative insights, metric analyses, user sentiment analysis, all aligned to initial KPIs. Where is the product working and where can we improve?</p>
-                    <img class="about-process__media" src="./assets/iterate.gif" alt="Iterate process visual" />
-                  </div>
-                </div>
+            <section class="about-card about-awards-card scroll-reveal" aria-label="Awards">
+              <h2 class="about-awards__title">Awards</h2>
+              <div class="about-awards__item">
+                <a class="about-awards__headline" href="https://www.behance.net/gallery/168404757/NestBank-Mobile-Banking-UXUI-Design" target="_blank" rel="noopener noreferrer" aria-label="Behance: NestBank — Mobile Banking UX/UI Design (opens in new tab)"><strong>Featured by Adobe, Behance — UI Ribbon Award</strong><svg class="about-awards__external" aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path fill="currentColor" d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z"/><path fill="currentColor" d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3z"/></svg></a>
+                <p class="about-awards__desc">NestBank (Mobile Banking, UX/UI) was selected by the Behance curatorial team and awarded a UI Ribbon, recognising excellence in digital interface design and visual system execution.</p>
+                <p class="about-awards__meta">20.1K views · 1.1K appreciations</p>
               </div>
             </section>
-            <div class="about-process-page-spacer" aria-hidden="true"></div>
           </div>
 
           <figure class="about-photo scroll-reveal" aria-hidden="true">
@@ -281,8 +288,6 @@
         if (processTabList) {
           const processTabs = Array.from(processTabList.querySelectorAll('.nav-item[role="tab"]'));
           const processPanels = Array.from(document.querySelectorAll('.about-process__panel[role="tabpanel"]'));
-          const processPanelsWrap = document.querySelector('.about-process__panels');
-          const processPageSpacer = document.querySelector('.about-process-page-spacer');
           const processPrevArrow = document.querySelector('.about-process__arrow[data-process-arrow="prev"]');
           const processNextArrow = document.querySelector('.about-process__arrow[data-process-arrow="next"]');
           const processTabsScroll = document.querySelector('.about-process__tabs-scroll');
@@ -323,58 +328,6 @@
             }
           };
 
-          const updateProcessPageSpacer = () => {
-            if (!(processPanelsWrap && processPanels.length && processPageSpacer)) return;
-            const isStackedMobileLayout = !!(window.matchMedia && window.matchMedia('(max-width: 450px)').matches);
-            const measurements = [];
-            processPanels.forEach((panel) => {
-              const wasHidden = panel.hidden;
-              const prevDisplay = panel.style.display;
-              const prevPosition = panel.style.position;
-              const prevVisibility = panel.style.visibility;
-              const prevPointerEvents = panel.style.pointerEvents;
-              const prevInset = panel.style.inset;
-              const prevWidth = panel.style.width;
-
-              panel.hidden = false;
-              panel.style.display = 'block';
-              panel.style.position = 'absolute';
-              panel.style.visibility = 'hidden';
-              panel.style.pointerEvents = 'none';
-              panel.style.inset = '0 auto auto 0';
-              panel.style.width = `${processPanelsWrap.clientWidth}px`;
-
-              measurements.push({
-                panel,
-                wasHidden,
-                prevDisplay,
-                prevPosition,
-                prevVisibility,
-                prevPointerEvents,
-                prevInset,
-                prevWidth,
-                height: Math.ceil(panel.getBoundingClientRect().height),
-              });
-            });
-
-            measurements.forEach(({ panel, wasHidden, prevDisplay, prevPosition, prevVisibility, prevPointerEvents, prevInset, prevWidth }) => {
-              panel.hidden = wasHidden;
-              panel.style.display = prevDisplay;
-              panel.style.position = prevPosition;
-              panel.style.visibility = prevVisibility;
-              panel.style.pointerEvents = prevPointerEvents;
-              panel.style.inset = prevInset;
-              panel.style.width = prevWidth;
-            });
-
-            const tallest = measurements.reduce((max, item) => Math.max(max, item.height || 0), 0);
-            const activePanel = processPanels.find((panel) => !panel.hidden) || processPanels[0];
-            const activeHeight = activePanel ? Math.ceil(activePanel.getBoundingClientRect().height) : 0;
-            const spacerHeight = isStackedMobileLayout ? 0 : Math.max(0, tallest - activeHeight);
-            processPanelsWrap.style.minHeight = '';
-            processPageSpacer.style.height = `${spacerHeight}px`;
-          };
-
           const setActiveProcessTab = (nextTab) => {
             if (!nextTab) return;
             const lockedScrollY = window.scrollY || window.pageYOffset || 0;
@@ -389,7 +342,6 @@
             processPanels.forEach((panel) => {
               panel.hidden = panel.id !== targetId;
             });
-            updateProcessPageSpacer();
             updateProcessArrows(activeIndex);
             centerProcessTab(nextTab);
             window.scrollTo({ top: lockedScrollY, behavior: 'auto' });
@@ -442,9 +394,6 @@
             window.addEventListener('load', updateProcessScrollFades, { once: true });
             updateProcessScrollFades();
           }
-          updateProcessPageSpacer();
-          window.addEventListener('resize', updateProcessPageSpacer);
-          window.addEventListener('load', updateProcessPageSpacer, { once: true });
         }
 
         const reviewItems = Array.from(document.querySelectorAll('.about-review-item'));
