@@ -59,6 +59,90 @@
     window.addEventListener('pageshow', (e) => { if (e && e.persisted) resetScroll(); });
   } catch (_) { /* ignore */ }
 
+  try {
+    const setupHomeHeroLinksScroller = () => {
+      const homePage = document.querySelector('.page[data-name="home page"]');
+      if (!homePage) return;
+
+      const linksWrap = homePage.querySelector('.home-hero__more-links-wrap');
+      const linksScroll = homePage.querySelector('.home-hero__more-links-scroll');
+      const linksTrack = homePage.querySelector('.home-hero__more-links');
+      const prevArrow = homePage.querySelector('.home-hero__more-links-arrow[data-home-hero-links-arrow="prev"]');
+      const nextArrow = homePage.querySelector('.home-hero__more-links-arrow[data-home-hero-links-arrow="next"]');
+      if (!(linksWrap && linksScroll && linksTrack && prevArrow && nextArrow)) return;
+
+      const linkItems = Array.from(linksTrack.querySelectorAll('.home-hero__link-line'));
+      if (!linkItems.length) return;
+
+      const updateStates = () => {
+        const maxScrollLeft = Math.max(0, linksScroll.scrollWidth - linksScroll.clientWidth);
+        const hasOverflow = maxScrollLeft > 1;
+        const canScrollLeft = linksScroll.scrollLeft > 1;
+        const canScrollRight = linksScroll.scrollLeft < (maxScrollLeft - 1);
+        linksWrap.classList.toggle('has-overflow', hasOverflow);
+        linksWrap.classList.toggle('can-scroll-left', hasOverflow && canScrollLeft);
+        linksWrap.classList.toggle('can-scroll-right', hasOverflow && canScrollRight);
+        prevArrow.disabled = !canScrollLeft;
+        nextArrow.disabled = !canScrollRight;
+      };
+
+      const centerItem = (item) => {
+        if (!item) return;
+        try {
+          const scrollRect = linksScroll.getBoundingClientRect();
+          const itemRect = item.getBoundingClientRect();
+          const itemCenter = (itemRect.left - scrollRect.left) + linksScroll.scrollLeft + (itemRect.width / 2);
+          const targetScrollLeft = Math.max(
+            0,
+            Math.min(
+              linksScroll.scrollWidth - linksScroll.clientWidth,
+              itemCenter - (linksScroll.clientWidth / 2)
+            )
+          );
+          linksScroll.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+        } catch (_) {
+          try { item.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' }); } catch (_) {}
+        }
+      };
+
+      const scrollToDirection = (direction) => {
+        const viewportLeft = linksScroll.scrollLeft;
+        const viewportRight = viewportLeft + linksScroll.clientWidth;
+        let target = null;
+
+        if (direction === 'next') {
+          target = linkItems.find((item) => (item.offsetLeft + item.offsetWidth) > (viewportRight + 1)) || linkItems[linkItems.length - 1];
+        } else {
+          const candidates = linkItems.filter((item) => item.offsetLeft < (viewportLeft - 1));
+          target = candidates[candidates.length - 1] || linkItems[0];
+        }
+
+        centerItem(target);
+      };
+
+      prevArrow.addEventListener('click', () => {
+        if (prevArrow.disabled) return;
+        scrollToDirection('prev');
+      });
+
+      nextArrow.addEventListener('click', () => {
+        if (nextArrow.disabled) return;
+        scrollToDirection('next');
+      });
+
+      linksScroll.addEventListener('scroll', updateStates, { passive: true });
+      window.addEventListener('resize', updateStates);
+      window.addEventListener('load', updateStates, { once: true });
+      updateStates();
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupHomeHeroLinksScroller, { once: true });
+    } else {
+      setupHomeHeroLinksScroller();
+    }
+  } catch (_) { /* ignore */ }
+
   // First-load markers: cookie + localStorage; REMOVE service worker and its caches
   try {
     // LocalStorage flag

@@ -15,7 +15,7 @@
     <!-- Material Symbols for MUI icons (lock) -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=181" />
+    <link rel="stylesheet" href="./styles.css?v=183" />
   </head>
   <body>
     <!-- Home: black route overlay used to swipe in before navigating to NestBank -->
@@ -97,13 +97,27 @@
           </div>
           <div class="home-hero__column home-hero__column--more home-intro-section-hidden">
             <p class="home-hero__label">Links</p>
-            <div class="home-hero__more-links">
-              <p class="home-hero__link-line"><a class="home-hero__link" href="./about.html"><span class="home-hero__link-text">Skills</span></a></p>
-              <p class="home-hero__link-line"><a class="home-hero__link" href="./about.html?scroll=reviews"><span class="home-hero__link-text">Reviews</span></a></p>
-              <p class="home-hero__link-line"><a class="home-hero__link" href="./about.html?scroll=process"><span class="home-hero__link-text">Process</span></a></p>
-              <p class="home-hero__link-line"><a class="home-hero__link" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer"><span class="home-hero__link-text">LinkedIn</span></a></p>
-              <p class="home-hero__link-line"><a class="home-hero__link" href="mailto:joey.greenwood1997@gmail.com"><span class="home-hero__link-text">Email</span></a></p>
-              <p class="home-hero__link-line"><a class="home-hero__link" href="#" data-home-game-start="true"><span class="home-hero__link-text">Fun</span></a></p>
+            <div class="home-hero__more-links-wrap">
+              <button class="home-hero__more-links-arrow" type="button" aria-label="Previous link" data-home-hero-links-arrow="prev">
+                <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                  <path fill="currentColor" d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>
+              </button>
+              <div class="home-hero__more-links-scroll">
+                <div class="home-hero__more-links">
+                  <p class="home-hero__link-line"><a class="home-hero__link" href="./about.html"><span class="home-hero__link-text">Skills</span></a></p>
+                  <p class="home-hero__link-line"><a class="home-hero__link" href="./about.html?scroll=reviews"><span class="home-hero__link-text">Reviews</span></a></p>
+                  <p class="home-hero__link-line"><a class="home-hero__link" href="./about.html?scroll=process"><span class="home-hero__link-text">Process</span></a></p>
+                  <p class="home-hero__link-line"><a class="home-hero__link" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer"><span class="home-hero__link-text">LinkedIn</span></a></p>
+                  <p class="home-hero__link-line"><a class="home-hero__link" href="mailto:joey.greenwood1997@gmail.com"><span class="home-hero__link-text">Email</span></a></p>
+                  <p class="home-hero__link-line"><a class="home-hero__link" href="#" data-home-game-start="true"><span class="home-hero__link-text">Fun</span></a></p>
+                </div>
+              </div>
+              <button class="home-hero__more-links-arrow" type="button" aria-label="Next link" data-home-hero-links-arrow="next">
+                <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+                  <path fill="currentColor" d="m10 6-1.41 1.41L13.17 12l-4.58 4.59L10 18l6-6z"/>
+                </svg>
+              </button>
             </div>
           </div>
         </section>
@@ -176,6 +190,6 @@
         </div>
       </footer>
     </div>
-    <script src="./main.js?v=231"></script>
+    <script src="./main.js?v=232"></script>
   </body>
 </html>
