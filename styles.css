@@ -1,4 +1,14 @@
 /* --- Case Study Intro Overlay (NestBank) --- */
+::selection {
+  background: #E06235;
+  color: #111111;
+}
+
+::-moz-selection {
+  background: #E06235;
+  color: #111111;
+}
+
 .intro-overlay {
   position: fixed;
   inset: 0;
@@ -42,6 +52,15 @@ body.toyota-deep-dive .page[data-name="case study page"] .nav-split {
   top: 0;
   z-index: 6;
 }
+
+.page[data-name="case study page"] .site-footer {
+  display: none;
+}
+
+body.toyota-deep-dive .page[data-name="case study page"] .site-footer {
+  display: flex;
+}
+
 /* Hide overview cards when deep-dive article is active */
 body.toyota-deep-dive .page[data-name="case study page"] #overview {
   display: none !important;
