@@ -61,6 +61,12 @@ body.toyota-deep-dive .page[data-name="case study page"] .site-footer {
   display: flex;
 }
 
+html.home-tile-intro-lock,
+body.home-tile-intro-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 /* Hide overview cards when deep-dive article is active */
 body.toyota-deep-dive .page[data-name="case study page"] #overview {
   display: none !important;
@@ -621,35 +627,40 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 
 .page[data-name="home page"] .home-hero {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  align-items: start;
-  gap: 64px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 460px);
+  grid-template-rows: auto 1fr auto;
+  align-items: stretch;
+  gap: 32px 64px;
   padding: 16px 0;
   min-height: 420px;
   margin: 0 16px var(--space-s);
-  background: #0a0a0a;
 }
 
 .page[data-name="home page"] .home-hero__headline-wrap {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 16px;
+  gap: 0;
   width: 100%;
   min-width: 0;
-  padding-top: 16px;
-  border-top: 1px solid #212121;
+  max-width: 360px;
+  padding-top: 0;
+  border-top: 0;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  align-self: start;
 }
 
 .page[data-name="home page"] .home-hero__headline {
   margin: 0;
   width: 100%;
   font-family: var(--font-family-manrope);
-  font-size: 27.5px;
-  line-height: 1.4;
-  font-weight: 400;
+  font-size: 32px;
+  line-height: 1;
+  font-weight: var(--font-weight-semiBold);
   color: #ffffff;
-  letter-spacing: 0;
+  letter-spacing: -0.08em;
   max-inline-size: none;
   text-wrap: pretty;
 }
@@ -667,8 +678,8 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #212121;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .page[data-name="home page"] .home-hero__label {
@@ -691,18 +702,18 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   color: #ffffff;
 }
 
-.page[data-name="home page"] .home-hero__column--about .home-hero__body {
-  font-size: 12px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.page[data-name="home page"] .home-hero__column--about {
-  gap: 20px;
-}
-
 .page[data-name="home page"] .home-hero__column--more .home-hero__link {
-  font-size: 12px;
+  font-size: 14px;
+}
+
+.page[data-name="home page"] .home-hero__column--more {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: start;
+  width: fit-content;
+  max-width: 100%;
+  align-items: flex-end;
 }
 
 .page[data-name="home page"] .home-hero__step-title {
@@ -750,8 +761,15 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 }
 
 .page[data-name="home page"] .home-hero__link-text {
-  text-decoration: underline;
-  text-underline-offset: 0.18em;
+  text-decoration: none;
+}
+
+.page[data-name="home page"] .home-hero__link-text::before {
+  content: "[";
+}
+
+.page[data-name="home page"] .home-hero__link-text::after {
+  content: "]";
 }
 
 .page[data-name="home page"] .home-hero__link-quote {
@@ -773,24 +791,32 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 
 .page[data-name="home page"] .home-hero__link:hover .home-hero__link-text,
 .page[data-name="home page"] .home-hero__link:focus-visible .home-hero__link-text {
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 .page[data-name="home page"] .home-hero__more-links {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  width: 100%;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .page[data-name="home page"] .home-hero__more-links-wrap {
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .page[data-name="home page"] .home-hero__more-links-scroll {
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   min-width: 0;
+}
+
+.page[data-name="home page"] .home-hero__link-line {
+  text-align: right;
 }
 
 .page[data-name="home page"] .home-hero__more-links-arrow {
@@ -815,11 +841,6 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   .page[data-name="home page"] .home-hero__link {
     font-size: 16px;
   }
-
-  .page[data-name="home page"] .home-hero__column--more .home-hero__link,
-  .page[data-name="home page"] .home-hero__column--about .home-hero__body {
-    font-size: 14px;
-  }
 }
 
 @media (min-width: 1801px) {
@@ -843,11 +864,6 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   .page[data-name="home page"] .home-hero__link {
     font-size: 16px;
   }
-
-  .page[data-name="home page"] .home-hero__column--more .home-hero__link,
-  .page[data-name="home page"] .home-hero__column--about .home-hero__body {
-    font-size: 14px;
-  }
 }
 
 @media (max-width: 1320px) {
@@ -865,42 +881,67 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 }
 
 @media (max-width: 900px) {
+  .page[data-name="home page"] .home-hero__link-text::before,
+  .page[data-name="home page"] .home-hero__link-text::after {
+    content: none;
+  }
+
   .page[data-name="home page"] .home-hero {
     grid-template-columns: 1fr;
-    gap: 64px;
-    padding: 16px 0 40px;
-    min-height: 360px;
+    grid-template-rows: auto;
+    gap: 48px;
+    padding: 32px 24px 56px;
+    min-height: 0;
+    height: auto;
+    align-content: start;
     margin-left: 0;
     margin-right: 0;
+    margin-bottom: 0;
+    justify-items: center;
+    position: sticky;
+    top: calc(var(--nav-card-height) + (2 * var(--space-s)) + 16px);
+    z-index: 0;
   }
 
   .page[data-name="home page"] .home-hero__headline-wrap {
     width: 100%;
     flex: 0 0 auto;
+    max-width: none;
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: stretch;
+    align-self: start;
+    align-items: center;
   }
 
   .page[data-name="home page"] .home-hero__headline {
-    font-size: clamp(20px, 5.25vw, 32px);
+    font-size: 24px;
     line-height: 1.6;
     max-inline-size: none;
+    text-align: center;
   }
 
   .page[data-name="home page"] .home-hero__column {
     width: 100%;
-  }
-
-  .page[data-name="home page"] .home-hero__body {
-    font-size: 14px;
+    align-items: center;
   }
 
   .page[data-name="home page"] .home-hero__column--more {
     gap: 24px;
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: stretch;
+    align-self: start;
+    width: 100%;
+    max-width: none;
+    align-items: center;
   }
 
   .page[data-name="home page"] .home-hero__more-links-wrap {
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     width: 100%;
   }
@@ -950,14 +991,28 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     width: max-content;
     min-width: 100%;
     padding: 2px 0 6px;
   }
 
+  .page[data-name="home page"] .home-hero__link-line {
+    text-align: center;
+  }
+
+  .page[data-name="home page"] .home-hero__more-links-wrap.has-overflow .home-hero__more-links {
+    justify-content: flex-end;
+    min-width: max-content;
+  }
+
+  .page[data-name="home page"] .home-hero__more-links-wrap.has-overflow .home-hero__link-line {
+    text-align: right;
+  }
+
   .page[data-name="home page"] .home-hero__more-links-arrow {
-    display: inline-flex;
+    display: none;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
@@ -971,6 +1026,10 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
     cursor: pointer;
     transition: opacity 160ms ease, color 160ms ease;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  .page[data-name="home page"] .home-hero__more-links-wrap.has-overflow .home-hero__more-links-arrow {
+    display: inline-flex;
   }
 
   .page[data-name="home page"] .home-hero__more-links-arrow svg {
@@ -1063,8 +1122,12 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #0a0a0a;
+  background-color: #0a0a0a;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1.1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
   cursor: default;
+  z-index: 1;
 }
 
 .page[data-name="home page"] .home-archive-stage__viewport.is-dragging {
@@ -1348,6 +1411,11 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 }
 
 @media (max-width: 600px) {
+  .page[data-name="home page"] .home-hero {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .page[data-name="home page"] .home-archive-stage__viewport {
     grid-template-columns: 1fr;
     gap: 40px;
@@ -1384,14 +1452,17 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   margin-top: 0 !important;
 }
 
-.page[data-name="home page"].home-recent-intro-prep .tile-grid .tile {
-  opacity: 0 !important;
-  transition: none !important;
-}
-
 .page[data-name="home page"].home-game-active .home-game-stage {
   display: block;
   margin-bottom: 32px;
+}
+
+@media (min-width: 901px) {
+  .page[data-name="home page"].home-game-active .home-game-stage {
+    position: sticky;
+    top: calc(var(--nav-card-height) + (2 * var(--space-s)) + 16px);
+    z-index: 0;
+  }
 }
 
 .page[data-name="home page"] .home-game-stage__inner {
@@ -2671,10 +2742,22 @@ p { margin: 0; }
   max-width: calc(100vw - 32px);
   margin-left: calc(50% - 50vw + 16px);
   margin-right: calc(50% - 50vw + 16px);
+  padding: 12px 16px;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  background: rgba(0, 0, 0, 0.38);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border-radius: 16px;
+  background-clip: padding-box;
+}
+
+.page[data-name="about page"] .site-footer {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 .site-footer__text {
@@ -3002,6 +3085,25 @@ p { margin: 0; }
 /* Ensure the home page establishes a definite height so children using height:100% can size correctly */
 .page[data-name="home page"] {
   height: 100dvh;
+  position: relative;
+  isolation: isolate;
+}
+
+.page[data-name="home page"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.22) 1px, transparent 1.1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
+  opacity: 0.32;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page[data-name="home page"] > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* Fullscreen background sequence */
@@ -3726,6 +3828,25 @@ p { margin: 0; }
 /* --- About Page (right-side card) --- */
 .page[data-name="about page"] {
   --about-radius: 24px; /* single source of truth for rounding on card & photo */
+  position: relative;
+  isolation: isolate;
+}
+
+.page[data-name="about page"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.22) 1px, transparent 1.1px);
+  background-size: 20px 20px;
+  background-position: 0 0;
+  opacity: 0.32;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page[data-name="about page"] > * {
+  position: relative;
+  z-index: 1;
 }
 .page[data-name="about page"] #reviews {
   scroll-margin-top: calc(var(--nav-card-height) + (2 * var(--space-s)) + 16px);
@@ -4196,6 +4317,14 @@ p { margin: 0; }
   -webkit-appearance: none;
 }
 
+@media (min-width: 601px) {
+  .page[data-name="about page"] .about-process__tabs .nav-item {
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+  }
+}
+
 @media (max-width: 600px) {
   .page[data-name="about page"] .about-process__tabs .nav-item {
     padding: 10px;
@@ -4526,6 +4655,7 @@ p { margin: 0; }
 .page[data-name="home page"] .main {
   align-items: stretch;
   justify-content: flex-start; /* stretch is invalid for justify-content; start fills with flex children */
+  padding-bottom: 0;
 }
 
 /* Home: ensure exactly 16px gap between nav and tiles */
@@ -4918,12 +5048,14 @@ p { margin: 0; }
 .page[data-name="home page"] .tile-grid .tile.selected > video,
 .page[data-name="home page"] .tile-grid .tile.selected.tap-pressed::before,
 .page[data-name="home page"] .tile-grid .tile.selected.tap-pressed > video {
+  border-radius: var(--tile-media-radius, 16px) !important;
   box-shadow: inset 0 0 0 0 rgba(255, 255, 255, 0) !important;
 }
 
 .page[data-name="home page"] .tile-grid .tile:hover::after,
 .page[data-name="home page"] .tile-grid .tile:focus-visible::after,
 .page[data-name="home page"] .tile-grid .tile:active::after {
+  border-radius: 0 !important;
   opacity: 1;
 }
 
@@ -5977,6 +6109,10 @@ p { margin: 0; }
   .page[data-name="home page"] .tile-grid .tile.filtered-out {
     display: none !important;
   }
+
+  .page[data-name="home page"] .tile-grid .tile:nth-child(3n) {
+    border-right: 0;
+  }
 }
 
 @media (min-width: 2000px) {
@@ -6006,11 +6142,41 @@ p { margin: 0; }
 
 /* Home case-study grid: full-bleed to viewport edges */
 .page[data-name="home page"] .main .tile-grid {
-  width: calc(100vw - 32px) !important;
-  max-width: calc(100vw - 32px) !important;
-  margin-left: calc(50% - 50vw + 16px) !important;
-  margin-right: calc(50% - 50vw + 16px) !important;
-  gap: 16px !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  gap: 0 !important;
+  border-top: 1px solid #212121;
+  border-left: 0;
+  position: relative;
+  z-index: 1;
+  background: #0a0a0a;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition: transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 420ms ease;
+}
+
+@keyframes homeTileGridLiftIn {
+  from {
+    transform: translate3d(0, 100vh, 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.page[data-name="home page"].home-tile-intro-active .main .tile-grid {
+  animation: homeTileGridLiftIn 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: var(--home-tile-intro-delay, 0ms);
+}
+
+@media (min-width: 901px) {
+  .page[data-name="home page"] .home-hero {
+    position: sticky;
+    top: calc(var(--nav-card-height) + (2 * var(--space-s)) + 16px);
+  }
 }
 
 @media (min-width: 1051px) and (hover: hover) and (pointer: fine) {
@@ -6021,8 +6187,16 @@ p { margin: 0; }
 }
 
 .page[data-name="home page"] .tile-grid .tile {
+  --tile-radius: 0px;
+  --tile-media-radius: 16px;
+  --introY: 0px;
+  --introOpacity: 1;
   margin-left: 0 !important;
   margin-right: 0 !important;
+  border-top: 0;
+  border-left: 0;
+  border-right: 1px solid #212121;
+  border-bottom: 1px solid #212121;
 }
 
 @media (min-width: 2151px) {
@@ -6038,8 +6212,8 @@ p { margin: 0; }
 @media (min-width: 601px) and (max-width: 1050px) {
   /* Provide horizontal padding on the main container only */
   .page[data-name="home page"] .main {
-    padding-left: var(--space-s);
-    padding-right: var(--space-s);
+    padding-left: 0;
+    padding-right: 0;
   }
   .page[data-name="home page"] .main .tile-grid {
     display: grid !important; /* override previous flex/carousel */
@@ -6067,6 +6241,10 @@ p { margin: 0; }
     height: auto !important;
     flex: initial !important; /* neutralize flex-basis behaviors */
   }
+
+  .page[data-name="home page"] .tile-grid .tile:nth-child(2n) {
+    border-right: 0;
+  }
 }
 
 /* Small screens (<=600px): use a single-column square grid on home page */
@@ -6080,14 +6258,14 @@ p { margin: 0; }
   .page[data-name="home page"] .main .tile-grid {
     display: grid !important; /* override previous flex column */
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 0;
     justify-items: stretch;
     height: auto !important;
     overflow: visible !important;
-    width: calc(100vw - 32px) !important;
-    max-width: calc(100vw - 32px) !important;
-    margin-left: calc(50% - 50vw + 16px) !important;
-    margin-right: calc(50% - 50vw + 16px) !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
   }
   .page[data-name="home page"].home-archive-active .main .tile-grid {
     display: none !important;
@@ -6100,10 +6278,24 @@ p { margin: 0; }
     aspect-ratio: 1 / 1;
     height: auto !important;
     flex: initial !important; /* neutralize flex-basis animations */
+    border-right: 0;
   }
   /* Ensure fully hidden when filtered, no vertical gaps */
   .page[data-name="home page"] .tile-grid .tile.filtered-out {
     display: none !important;
+  }
+}
+
+@media (max-width: 450px) {
+  .page[data-name="home page"] .home-hero {
+    padding-top: 8px;
+    padding-bottom: 56px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .page[data-name="home page"] .home-hero__headline {
+    font-size: 20px;
   }
 }
 

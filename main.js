@@ -146,17 +146,25 @@
 
       const linkItems = Array.from(linksTrack.querySelectorAll('.home-hero__link-line'));
       if (!linkItems.length) return;
+      let overflowWasActive = false;
 
-      const updateStates = () => {
-        const maxScrollLeft = Math.max(0, linksScroll.scrollWidth - linksScroll.clientWidth);
-        const hasOverflow = maxScrollLeft > 1;
-        const canScrollLeft = linksScroll.scrollLeft > 1;
-        const canScrollRight = linksScroll.scrollLeft < (maxScrollLeft - 1);
+        const updateStates = () => {
+          const maxScrollLeft = Math.max(0, linksScroll.scrollWidth - linksScroll.clientWidth);
+          const hasOverflow = maxScrollLeft > 1;
+          if (hasOverflow && !overflowWasActive) {
+          try { linksScroll.scrollLeft = 0; } catch (_) { /* ignore initial overflow alignment errors */ }
+          } else if (!hasOverflow && overflowWasActive) {
+          try { linksScroll.scrollLeft = 0; } catch (_) { /* ignore overflow reset errors */ }
+          }
+        const currentScrollLeft = linksScroll.scrollLeft;
+        const canScrollLeft = currentScrollLeft > 1;
+        const canScrollRight = currentScrollLeft < (maxScrollLeft - 1);
         linksWrap.classList.toggle('has-overflow', hasOverflow);
         linksWrap.classList.toggle('can-scroll-left', hasOverflow && canScrollLeft);
         linksWrap.classList.toggle('can-scroll-right', hasOverflow && canScrollRight);
         prevArrow.disabled = !canScrollLeft;
         nextArrow.disabled = !canScrollRight;
+        overflowWasActive = hasOverflow;
       };
 
       const centerItem = (item) => {
@@ -2658,64 +2666,76 @@
           });
         } catch (_) {}
 
-        // Intro animation: slide tiles in from the left with a small stagger
+        // Intro animation: lift the whole tile grid in as one section
         let tileIntroRunId = 0;
         let tileIntroKickoffTimer = 0;
+        let tileIntroCleanupTimer = 0;
+        let hasRunInitialHomeTileIntro = false;
         const tileIntroPendingTimers = new Set();
-        const TILE_INTRO_STAGGER_MS = 95;
-        const replayHomeTileIntro = (startDelayMs = 0) => {
+        const TILE_GRID_INTRO_MS = 520;
+        const replayHomeTileIntro = (startDelayMs = 0, options = {}) => {
           try {
             const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             const footer = document.querySelector('.site-footer');
             const homePageRoot = document.querySelector('.page[data-name="home page"]');
             const kickoffDelay = Math.max(0, Number(startDelayMs) || 0);
+            const shouldLockScroll = !prefersReduced && !!options.lockScroll;
+            const setScrollLock = (locked) => {
+              try {
+                document.documentElement.classList.toggle('home-tile-intro-lock', !!locked);
+                document.body.classList.toggle('home-tile-intro-lock', !!locked);
+              } catch (_) { /* ignore scroll lock errors */ }
+            };
+            const clearTileIntroState = () => {
+              try {
+                if (tileGrid) {
+                  tileGrid.classList.remove('intro-hidden', 'intro-visible');
+                  tileGrid.style.removeProperty('--home-tile-intro-delay');
+                }
+                if (homePageRoot) homePageRoot.classList.remove('home-tile-intro-active');
+                setScrollLock(false);
+              } catch (_) { /* ignore tile intro cleanup errors */ }
+            };
             tileIntroRunId += 1;
             const runId = tileIntroRunId;
             if (tileIntroKickoffTimer) {
               try { window.clearTimeout(tileIntroKickoffTimer); } catch (_) { /* ignore */ }
               tileIntroKickoffTimer = 0;
             }
+            if (tileIntroCleanupTimer) {
+              try { window.clearTimeout(tileIntroCleanupTimer); } catch (_) { /* ignore */ }
+              tileIntroCleanupTimer = 0;
+            }
             tileIntroPendingTimers.forEach((timerId) => {
               try { window.clearTimeout(timerId); } catch (_) { /* ignore */ }
             });
             tileIntroPendingTimers.clear();
-            try { if (homePageRoot) homePageRoot.classList.add('home-recent-intro-prep'); } catch (_) { /* ignore */ }
-
             if (!prefersReduced) {
-              const orderedTilesForReset = sortByCssOrder(tiles);
-              orderedTilesForReset.forEach((tile) => {
-                tile.__introRevealed = false;
-                tile.classList.remove('intro-visible');
-                tile.classList.add('intro-hidden');
-              });
+              if (tileGrid) {
+                tileGrid.classList.remove('intro-hidden', 'intro-visible');
+                tileGrid.style.setProperty('--home-tile-intro-delay', `${kickoffDelay}ms`);
+                if (homePageRoot) homePageRoot.classList.remove('home-tile-intro-active');
+                if (shouldLockScroll) {
+                  setScrollLock(true);
+                  try { window.scrollTo(0, 0); } catch (_) { /* ignore scroll reset errors */ }
+                }
+                void tileGrid.offsetWidth;
+                if (homePageRoot) homePageRoot.classList.add('home-tile-intro-active');
+              }
+              tileIntroCleanupTimer = window.setTimeout(() => {
+                tileIntroCleanupTimer = 0;
+                if (runId !== tileIntroRunId) return;
+                clearTileIntroState();
+              }, kickoffDelay + TILE_GRID_INTRO_MS + 120);
             }
 
             const startIntro = () => {
             if (runId !== tileIntroRunId) return;
-            try { if (homePageRoot) homePageRoot.classList.remove('home-recent-intro-prep'); } catch (_) { /* ignore */ }
             if (footer) {
               footer.classList.remove('scroll-reveal-visible', 'scroll-reveal-hidden');
               footer.classList.add(prefersReduced ? 'scroll-reveal-visible' : 'scroll-reveal-hidden');
             }
             if (!prefersReduced) {
-              const orderedTiles = sortByCssOrder(tiles);
-              let revealIndex = 0;
-              const revealTile = (tile) => {
-                if (!tile || tile.__introRevealed) return;
-                tile.__introRevealed = true;
-                const delay = revealIndex * TILE_INTRO_STAGGER_MS;
-                revealIndex += 1;
-                const revealTimerId = window.setTimeout(() => {
-                  tileIntroPendingTimers.delete(revealTimerId);
-                  if (runId !== tileIntroRunId) return;
-                  try {
-                    tile.classList.remove('intro-hidden');
-                    tile.classList.add('intro-visible');
-                  } catch (_) { /* ignore tile intro reveal errors */ }
-                }, delay);
-                tileIntroPendingTimers.add(revealTimerId);
-              };
-              orderedTiles.forEach((tile) => revealTile(tile));
               if (footer) {
                 const footerRevealTimerId = window.setTimeout(() => {
                   tileIntroPendingTimers.delete(footerRevealTimerId);
@@ -2724,17 +2744,18 @@
                     footer.classList.remove('scroll-reveal-hidden');
                     footer.classList.add('scroll-reveal-visible');
                   } catch (_) { /* ignore footer intro errors */ }
-                }, Math.max(0, (orderedTiles.length - 1) * TILE_INTRO_STAGGER_MS));
+                }, kickoffDelay + TILE_GRID_INTRO_MS);
                 tileIntroPendingTimers.add(footerRevealTimerId);
               }
             } else {
+              clearTileIntroState();
               if (footer) {
                 footer.classList.remove('scroll-reveal-hidden');
                 footer.classList.add('scroll-reveal-visible');
               }
             }
             };
-            if (kickoffDelay > 0) {
+            if (kickoffDelay > 0 && !prefersReduced) {
               tileIntroKickoffTimer = window.setTimeout(() => {
                 tileIntroKickoffTimer = 0;
                 startIntro();
@@ -2755,7 +2776,8 @@
             return HERO_BASE_DELAY + (Math.max(0, homeHeroSections.length - 1) * HERO_STEP) + HERO_TRANSITION_MS;
           } catch (_) { return 0; }
         };
-        replayHomeTileIntro(getHomeHeroIntroDelayForTiles());
+        replayHomeTileIntro(getHomeHeroIntroDelayForTiles(), { lockScroll: !hasRunInitialHomeTileIntro });
+        hasRunInitialHomeTileIntro = true;
         try { window.__homeReplayTileIntro = replayHomeTileIntro; } catch (_) { /* ignore */ }
         // Lazy-init the NestBank video and attach to the NestBank tile (by data-project)
         function ensureNestbankVideo() {
