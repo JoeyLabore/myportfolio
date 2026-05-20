@@ -762,6 +762,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 
 .page[data-name="home page"] .home-hero__link-text {
   text-decoration: none;
+  text-transform: lowercase;
 }
 
 .page[data-name="home page"] .home-hero__link-text::before {
@@ -890,7 +891,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
     grid-template-columns: 1fr;
     grid-template-rows: auto;
     gap: 48px;
-    padding: 32px 24px 56px;
+    padding: 32px 24px 160px;
     min-height: 0;
     height: auto;
     align-content: start;
@@ -1066,6 +1067,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 
   .page[data-name="home page"] .home-hero__column--more .home-hero__link-text {
     text-decoration: none;
+    text-transform: none;
   }
 
   .page[data-name="home page"] .home-hero__column--more .home-hero__link:hover,
@@ -1474,7 +1476,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   padding: 24px 28px;
   border-radius: var(--tile-radius);
   overflow: hidden;
-  background: #0A0A0A;
+  background: transparent;
   cursor: default;
   user-select: none;
   -webkit-user-select: none;
@@ -1533,7 +1535,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 }
 
 .page[data-name="home page"] .home-game-stage__inner::after {
-  content: "";
+  content: none;
   position: absolute;
   inset: 0;
   background-image:
@@ -2099,10 +2101,14 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   }
 }
 
-/* XL screens: switch to 4 columns at >=1596px */
+/* XL screens: expand the featured grid to 4 columns on larger desktops */
 @media (min-width: 1596px) {
   .page[data-name="home page"] .home-game-stage__inner {
     min-height: 640px;
+  }
+
+  .page[data-name="home page"] .main .tile-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .page[data-name="home page"] .home-game-hint {
@@ -2120,10 +2126,6 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   .page[data-name="home page"] .home-game-hint__play {
     padding: 18px 36px;
     font-size: 20px;
-  }
-
-  .page[data-name="home page"] .main .tile-grid {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -2281,7 +2283,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
     left: 0;
     right: 0;
     top: var(--space-s);
-    z-index: 5;
+    z-index: 12;
     pointer-events: none;
     padding-left: var(--space-s);
     padding-right: var(--space-s);
@@ -2304,7 +2306,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
     position: fixed !important;
     top: max(env(safe-area-inset-top), var(--space-s));
     right: var(--space-s);
-    z-index: 6; /* above tabs */
+    z-index: 13; /* above tags and the rest of the home nav */
     height: var(--nav-card-height);
     padding: 12px; /* match card inner padding */
     align-items: stretch;
@@ -2711,7 +2713,7 @@ body {
   font-weight: var(--font-weight-regular);
   line-height: var(--line-height-base);
   overflow-y: auto; /* allow vertical page scrolling */
-  overflow-x: auto;  /* allow horizontal scroll when cards exceed width */
+  overflow-x: hidden;  /* keep page-level side scroll off; inner scrollers handle horizontal movement */
 }
 
 html.home-archive-root-active,
@@ -2755,6 +2757,12 @@ p { margin: 0; }
 }
 
 .page[data-name="about page"] .site-footer {
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.page[data-name="home page"] .site-footer {
   background: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
@@ -3200,7 +3208,7 @@ p { margin: 0; }
     left: 0;
     right: 0;
     top: var(--space-s); /* 16px from viewport top */
-    z-index: 5;
+    z-index: 12;
     pointer-events: none; /* let individual cards handle interactions */
     padding-left: var(--space-s);  /* 16px from left edge */
     padding-right: var(--space-s); /* 16px from right edge */
@@ -4703,6 +4711,10 @@ p { margin: 0; }
   --tile-hover-color: #2A2A2A;
   --tile-outline-color: #ffffff;
   --tile-media-size: clamp(130px, 72%, 320px);
+  --column-base-y: 0px;
+  --column-offset-y: 0px;
+  --column-scroll-y: 0px;
+  --column-intro-y: 0px;
   --media-tilt-x: 0deg;
   --media-tilt-y: 0deg;
   --tile-media-shift-x: 0px;
@@ -4743,7 +4755,7 @@ p { margin: 0; }
   --introOpacity: 0;      /* start invisible */
   opacity: var(--introOpacity);
   transform: translateX(var(--slideX)) translateY(var(--introY));
-  translate: 0 0;
+  translate: 0 calc(var(--column-base-y) + var(--column-offset-y) + var(--column-scroll-y) + var(--column-intro-y));
   border: 1px solid #212121;
 }
 
@@ -5067,6 +5079,22 @@ p { margin: 0; }
   display: none !important;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .page[data-name="home page"] .tile-grid .tile:hover,
+  .page[data-name="home page"] .tile-grid .tile:focus-visible {
+    background-color: #151515;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile:hover::before,
+  .page[data-name="home page"] .tile-grid .tile:focus-visible::before,
+  .page[data-name="home page"] .tile-grid .tile:hover > video,
+  .page[data-name="home page"] .tile-grid .tile:focus-visible > video {
+    box-shadow: inset 0 0 0 0 rgba(255, 255, 255, 0) !important;
+    --tile-media-shift-x: -6px;
+    --tile-media-shift-y: -6px;
+  }
+}
+
 .tile-grid .tile .tile-hover-overlay__desc {
   font-family: var(--font-family-manrope);
   font-size: 18px;
@@ -5297,6 +5325,61 @@ p { margin: 0; }
   width: 16px;
   height: 16px;
   display: block;
+}
+
+.home-falling-tag-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.home-falling-tag {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  color: #ffffff;
+  white-space: nowrap;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  cursor: grab;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  transition: opacity 180ms ease;
+}
+
+.home-falling-tag:active,
+.home-falling-tag.is-dragging {
+  cursor: grabbing;
+}
+
+.home-falling-tag-layer--inactive .home-falling-tag {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.home-falling-tag--hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .tile-grid .tile .tile-tag--locked {
@@ -6106,12 +6189,65 @@ p { margin: 0; }
 
 /* Large screens: when filtering, fully remove hidden tiles from the grid to avoid gaps */
 @media (min-width: 1051px) {
+  .page[data-name="home page"] .main .tile-grid {
+    --home-column-scroll-1: 0px;
+    --home-column-scroll-2: 0px;
+    --home-column-scroll-3: 0px;
+  }
+
   .page[data-name="home page"] .tile-grid .tile.filtered-out {
     display: none !important;
   }
 
+  /* Keep the featured layout reading as 3 visual columns with 2 cards each. */
+  .page[data-name="home page"] .tile-grid .tile:nth-child(3n + 1) {
+    --column-offset-y: 64px;
+    --column-scroll-y: var(--home-column-scroll-1);
+  }
+
+  .page[data-name="home page"] .tile-grid .tile:nth-child(3n + 2) {
+    --column-offset-y: 32px;
+    --column-scroll-y: var(--home-column-scroll-2);
+  }
+
   .page[data-name="home page"] .tile-grid .tile:nth-child(3n) {
-    border-right: 0;
+    --column-scroll-y: var(--home-column-scroll-3);
+  }
+
+  .page[data-name="home page"] .main .tile-grid {
+    padding-bottom: 8px;
+  }
+}
+
+@media (min-width: 1596px) {
+  .page[data-name="home page"] .main .tile-grid {
+    --home-column-scroll-4: 0px;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile {
+    --column-offset-y: 0px;
+    --column-scroll-y: 0px;
+    --home-tile-stroke-left: 1px;
+    --home-tile-stroke-right: 1px;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile:nth-child(4n + 1) {
+    --column-offset-y: 96px;
+    --column-scroll-y: var(--home-column-scroll-1);
+  }
+
+  .page[data-name="home page"] .tile-grid .tile:nth-child(4n + 2) {
+    --column-offset-y: 64px;
+    --column-scroll-y: var(--home-column-scroll-2);
+  }
+
+  .page[data-name="home page"] .tile-grid .tile:nth-child(4n + 3) {
+    --column-offset-y: 32px;
+    --column-scroll-y: var(--home-column-scroll-3);
+  }
+
+  .page[data-name="home page"] .tile-grid .tile:nth-child(4n) {
+    --column-scroll-y: var(--home-column-scroll-4);
   }
 }
 
@@ -6147,35 +6283,23 @@ p { margin: 0; }
   margin-left: calc(50% - 50vw) !important;
   margin-right: calc(50% - 50vw) !important;
   gap: 0 !important;
-  border-top: 1px solid #212121;
+  border-top: 0;
   border-left: 0;
   position: relative;
   z-index: 1;
-  background: #0a0a0a;
+  background: transparent;
   opacity: 1;
   transform: translate3d(0, 0, 0);
-  transition: transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 420ms ease;
-}
-
-@keyframes homeTileGridLiftIn {
-  from {
-    transform: translate3d(0, 100vh, 0);
-  }
-
-  to {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-.page[data-name="home page"].home-tile-intro-active .main .tile-grid {
-  animation: homeTileGridLiftIn 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  animation-delay: var(--home-tile-intro-delay, 0ms);
 }
 
 @media (min-width: 901px) {
   .page[data-name="home page"] .home-hero {
     position: sticky;
     top: calc(var(--nav-card-height) + (2 * var(--space-s)) + 16px);
+  }
+
+  .page[data-name="home page"] .tile-grid .tile {
+    --column-base-y: -56px;
   }
 }
 
@@ -6191,12 +6315,46 @@ p { margin: 0; }
   --tile-media-radius: 16px;
   --introY: 0px;
   --introOpacity: 1;
+  --home-tile-stroke-top: 1px;
+  --home-tile-stroke-right: 1px;
+  --home-tile-stroke-bottom: 1px;
+  --home-tile-stroke-left: 1px;
+  background: #0a0a0a;
   margin-left: 0 !important;
   margin-right: 0 !important;
-  border-top: 0;
-  border-left: 0;
-  border-right: 1px solid #212121;
-  border-bottom: 1px solid #212121;
+  border: 0;
+}
+
+.page[data-name="home page"] .tile-grid .tile.home-tile-intro-card {
+  --home-tile-column-delay: 0ms;
+  transition-property: translate;
+  transition-duration: 420ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--home-tile-column-delay, 0ms);
+  will-change: translate;
+  contain: paint;
+}
+
+.page[data-name="home page"] .tile-grid .tile.home-tile-intro-card.intro-hidden {
+  --introY: 0px;
+  --introOpacity: 1;
+  --column-intro-y: 100svh;
+}
+
+html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
+  --introY: 0px;
+  --introOpacity: 1;
+  --column-intro-y: 100svh;
+}
+
+.page[data-name="home page"] .tile-grid .tile::after {
+  inset: -0.5px;
+  border-radius: calc(var(--tile-radius) + 0.5px);
+  border-style: solid;
+  border-color: #212121;
+  border-width: var(--home-tile-stroke-top) var(--home-tile-stroke-right) var(--home-tile-stroke-bottom) var(--home-tile-stroke-left);
+  opacity: 1;
+  z-index: 4;
 }
 
 @media (min-width: 2151px) {
@@ -6242,8 +6400,12 @@ p { margin: 0; }
     flex: initial !important; /* neutralize flex-basis behaviors */
   }
 
-  .page[data-name="home page"] .tile-grid .tile:nth-child(2n) {
-    border-right: 0;
+  .page[data-name="home page"] .tile-grid .tile:nth-child(2n + 1) {
+    --column-offset-y: 40px;
+  }
+
+  .page[data-name="home page"] .main .tile-grid {
+    padding-bottom: 40px;
   }
 }
 
@@ -6271,6 +6433,9 @@ p { margin: 0; }
     display: none !important;
   }
   .page[data-name="home page"] .tile-grid .tile {
+    --column-offset-y: 0px;
+    --home-tile-stroke-left: 1px;
+    --home-tile-stroke-right: 1px;
     margin: 0 !important;
     width: 100%;
     min-width: 0;
@@ -6278,7 +6443,6 @@ p { margin: 0; }
     aspect-ratio: 1 / 1;
     height: auto !important;
     flex: initial !important; /* neutralize flex-basis animations */
-    border-right: 0;
   }
   /* Ensure fully hidden when filtered, no vertical gaps */
   .page[data-name="home page"] .tile-grid .tile.filtered-out {
@@ -6289,7 +6453,7 @@ p { margin: 0; }
 @media (max-width: 450px) {
   .page[data-name="home page"] .home-hero {
     padding-top: 8px;
-    padding-bottom: 56px;
+    padding-bottom: 160px;
     padding-left: 0;
     padding-right: 0;
   }

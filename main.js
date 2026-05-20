@@ -1146,6 +1146,7 @@
           const gameOverTalkLink = document.querySelector('.home-game-over__cta--secondary');
           const pauseHintEl = document.querySelector('.home-game-pause-hint');
           const pauseEl = document.querySelector('.home-game-pause');
+          const homeHero = document.querySelector('.page[data-name="home page"] .home-hero');
           const asteroidLayer = document.querySelector('.home-game-asteroid-layer');
           const rocketWrap = document.querySelector('.home-game-rocket-wrap');
           const rocket = document.querySelector('.home-game-rocket');
@@ -1244,7 +1245,9 @@
             try { return window.matchMedia && window.matchMedia('(max-width: 1050px)').matches; } catch (_) { return false; }
           };
           const GAME_OVER_BUTTON_ACTION_DELAY = 200;
+          const HOME_HERO_REPLAY_LAYOUT_LOCK_MS = 1800;
           const getButtonActionDelay = () => isButtonTouchBreakpoint() ? 250 : 0;
+          let homeHeroReplayUnlockTimer = 0;
           const GAME_SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
           const scrambleGameText = (el, finalText, duration = 480) => {
             if (!el) return;
@@ -1355,6 +1358,7 @@
             if (hasStartedGame) return;
             resetGameButtonStates();
             try { if (homePageRoot) homePageRoot.classList.add('home-game-active'); } catch (_) {}
+            try { if (typeof window.__setHomeFallingTagsActive === 'function') window.__setHomeFallingTagsActive(false); } catch (_) {}
             try {
               rocketWrap.classList.remove('is-relaunching');
               void rocketWrap.offsetWidth;
@@ -1596,6 +1600,36 @@
             return 0;
           };
           try { window.__homeReplayHeroIntro = replayHomeHeroIntro; } catch (_) {}
+          const lockHomeHeroLayoutForReplay = () => {
+            if (!homeHero) return;
+            if (homeHeroReplayUnlockTimer) {
+              try { window.clearTimeout(homeHeroReplayUnlockTimer); } catch (_) { /* ignore */ }
+              homeHeroReplayUnlockTimer = 0;
+            }
+            try {
+              const measuredHeight = Math.ceil(homeHero.getBoundingClientRect().height || 0);
+              if (measuredHeight > 0) {
+                homeHero.style.height = `${measuredHeight}px`;
+                homeHero.style.minHeight = `${measuredHeight}px`;
+              }
+            } catch (_) { /* ignore hero layout lock errors */ }
+            homeHeroReplayUnlockTimer = window.setTimeout(() => {
+              homeHeroReplayUnlockTimer = 0;
+              try {
+                homeHero.style.height = '';
+                homeHero.style.minHeight = '';
+              } catch (_) { /* ignore hero layout unlock errors */ }
+            }, HOME_HERO_REPLAY_LAYOUT_LOCK_MS);
+          };
+          const replayHomeContentIntro = () => {
+            lockHomeHeroLayoutForReplay();
+            const heroDelay = replayHomeHeroIntro();
+            try {
+              if (typeof window.__homeReplayFallingTags === 'function') {
+                window.__homeReplayFallingTags(heroDelay + 320);
+              }
+            } catch (_) { /* ignore falling tag replay errors */ }
+          };
           const exitGameToHero = () => {
             resetGameButtonStates();
             isGameOver = false;
@@ -1634,7 +1668,8 @@
             applyRocketOffset();
             syncRocketFrame(true);
             try { if (homePageRoot) homePageRoot.classList.remove('home-game-active'); } catch (_) {}
-            replayHomeHeroIntro();
+            try { if (typeof window.__setHomeFallingTagsActive === 'function') window.__setHomeFallingTagsActive(true); } catch (_) {}
+            replayHomeContentIntro();
           };
           const isColliding = (a, b) => {
             return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
@@ -2328,6 +2363,54 @@
         } catch (_) { /* ignore tag injection errors */ }
 
         try {
+          const DESKTOP_COLUMN_STAGGER_QUERY = '(min-width: 1051px)';
+          let columnScrollRaf = 0;
+          const clamp01 = (value) => Math.max(0, Math.min(1, value));
+          const stagedProgress = (progress, start, span) => clamp01((progress - start) / Math.max(span, 0.0001));
+          const COLUMN_SCROLL_DISTANCE = 320;
+          const COLUMN_SWAP_SHIFT = 64;
+
+          const updateHomeColumnScroll = () => {
+            columnScrollRaf = 0;
+            try {
+              if (!(window.matchMedia && window.matchMedia(DESKTOP_COLUMN_STAGGER_QUERY).matches) || !tileGrid) {
+                if (tileGrid) {
+                  tileGrid.style.setProperty('--home-column-scroll-1', '0px');
+                  tileGrid.style.setProperty('--home-column-scroll-2', '0px');
+                  tileGrid.style.setProperty('--home-column-scroll-3', '0px');
+                }
+                return;
+              }
+
+              const rect = tileGrid.getBoundingClientRect();
+              const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+              if (viewportHeight <= 0) return;
+              const scrollY = window.scrollY || window.pageYOffset || 0;
+              const gridTopOnPage = rect.top + scrollY;
+
+              const startScrollY = Math.max(0, gridTopOnPage - (viewportHeight * 0.86));
+              const overallProgress = clamp01((scrollY - startScrollY) / COLUMN_SCROLL_DISTANCE);
+              const columnOneProgress = stagedProgress(overallProgress, 0.00, 0.42);
+              const columnThreeProgress = stagedProgress(overallProgress, 0.28, 0.42);
+
+              tileGrid.style.setProperty('--home-column-scroll-1', `${Math.round(columnOneProgress * -COLUMN_SWAP_SHIFT)}px`);
+              tileGrid.style.setProperty('--home-column-scroll-2', '0px');
+              tileGrid.style.setProperty('--home-column-scroll-3', `${Math.round(columnThreeProgress * COLUMN_SWAP_SHIFT)}px`);
+            } catch (_) { /* ignore home column scroll errors */ }
+          };
+
+          const requestHomeColumnScroll = () => {
+            if (columnScrollRaf) return;
+            columnScrollRaf = window.requestAnimationFrame(updateHomeColumnScroll);
+          };
+
+          window.addEventListener('scroll', requestHomeColumnScroll, { passive: true });
+          window.addEventListener('resize', requestHomeColumnScroll, { passive: true });
+          window.addEventListener('orientationchange', requestHomeColumnScroll, { passive: true });
+          requestAnimationFrame(updateHomeColumnScroll);
+        } catch (_) { /* ignore home column stagger scroll errors */ }
+
+        try {
           const categoryLabel = (cat) => {
             const c = String(cat || '').toLowerCase();
             if (c === 'ux') return 'Product';
@@ -2673,13 +2756,25 @@
         let hasRunInitialHomeTileIntro = false;
         const tileIntroPendingTimers = new Set();
         const TILE_GRID_INTRO_MS = 520;
+        const TILE_COLUMN_STAGGER_MS = 120;
+        const getHomeTileIntroColumnCount = () => {
+          try {
+            if (window.matchMedia && window.matchMedia('(min-width: 1051px)').matches) return 3;
+            if (window.matchMedia && window.matchMedia('(min-width: 601px)').matches) return 2;
+          } catch (_) { /* ignore media query errors */ }
+          return 1;
+        };
         const replayHomeTileIntro = (startDelayMs = 0, options = {}) => {
           try {
             const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             const footer = document.querySelector('.site-footer');
             const homePageRoot = document.querySelector('.page[data-name="home page"]');
+            const docEl = document.documentElement;
             const kickoffDelay = Math.max(0, Number(startDelayMs) || 0);
             const shouldLockScroll = !prefersReduced && !!options.lockScroll;
+            const introTiles = Array.isArray(tiles) ? tiles.filter((tile) => tile && !tile.classList.contains('filtered-out')) : [];
+            const introColumnCount = Math.max(1, getHomeTileIntroColumnCount());
+            const introStaggerSpan = Math.max(0, introColumnCount - 1) * TILE_COLUMN_STAGGER_MS;
             const setScrollLock = (locked) => {
               try {
                 document.documentElement.classList.toggle('home-tile-intro-lock', !!locked);
@@ -2690,9 +2785,15 @@
               try {
                 if (tileGrid) {
                   tileGrid.classList.remove('intro-hidden', 'intro-visible');
-                  tileGrid.style.removeProperty('--home-tile-intro-delay');
                 }
+                introTiles.forEach((tile) => {
+                  try {
+                    tile.classList.remove('home-tile-intro-card', 'intro-hidden', 'intro-visible');
+                    tile.style.removeProperty('--home-tile-column-delay');
+                  } catch (_) { /* ignore per-tile cleanup errors */ }
+                });
                 if (homePageRoot) homePageRoot.classList.remove('home-tile-intro-active');
+                if (docEl) docEl.classList.remove('home-tile-intro-preload');
                 setScrollLock(false);
               } catch (_) { /* ignore tile intro cleanup errors */ }
             };
@@ -2711,49 +2812,54 @@
             });
             tileIntroPendingTimers.clear();
             if (!prefersReduced) {
-              if (tileGrid) {
-                tileGrid.classList.remove('intro-hidden', 'intro-visible');
-                tileGrid.style.setProperty('--home-tile-intro-delay', `${kickoffDelay}ms`);
-                if (homePageRoot) homePageRoot.classList.remove('home-tile-intro-active');
-                if (shouldLockScroll) {
-                  setScrollLock(true);
-                  try { window.scrollTo(0, 0); } catch (_) { /* ignore scroll reset errors */ }
-                }
-                void tileGrid.offsetWidth;
-                if (homePageRoot) homePageRoot.classList.add('home-tile-intro-active');
+              introTiles.forEach((tile, tileIndex) => {
+                try {
+                  tile.classList.add('home-tile-intro-card');
+                  tile.classList.remove('intro-hidden', 'intro-visible');
+                  tile.style.setProperty('--home-tile-column-delay', `${(tileIndex % introColumnCount) * TILE_COLUMN_STAGGER_MS}ms`);
+                } catch (_) { /* ignore per-tile intro setup errors */ }
+              });
+              if (homePageRoot) homePageRoot.classList.remove('home-tile-intro-active');
+              if (docEl) docEl.classList.add('home-tile-intro-preload');
+              if (shouldLockScroll) {
+                setScrollLock(true);
+                try { window.scrollTo(0, 0); } catch (_) { /* ignore scroll reset errors */ }
               }
+              if (tileGrid) void tileGrid.offsetWidth;
               tileIntroCleanupTimer = window.setTimeout(() => {
                 tileIntroCleanupTimer = 0;
                 if (runId !== tileIntroRunId) return;
                 clearTileIntroState();
-              }, kickoffDelay + TILE_GRID_INTRO_MS + 120);
+              }, kickoffDelay + introStaggerSpan + TILE_GRID_INTRO_MS + 120);
             }
 
             const startIntro = () => {
-            if (runId !== tileIntroRunId) return;
-            if (footer) {
-              footer.classList.remove('scroll-reveal-visible', 'scroll-reveal-hidden');
-              footer.classList.add(prefersReduced ? 'scroll-reveal-visible' : 'scroll-reveal-hidden');
-            }
-            if (!prefersReduced) {
+              if (runId !== tileIntroRunId) return;
               if (footer) {
-                const footerRevealTimerId = window.setTimeout(() => {
-                  tileIntroPendingTimers.delete(footerRevealTimerId);
-                  if (runId !== tileIntroRunId) return;
-                  try {
-                    footer.classList.remove('scroll-reveal-hidden');
-                    footer.classList.add('scroll-reveal-visible');
-                  } catch (_) { /* ignore footer intro errors */ }
-                }, kickoffDelay + TILE_GRID_INTRO_MS);
-                tileIntroPendingTimers.add(footerRevealTimerId);
+                footer.classList.remove('scroll-reveal-visible', 'scroll-reveal-hidden');
+                footer.classList.add(prefersReduced ? 'scroll-reveal-visible' : 'scroll-reveal-hidden');
               }
-            } else {
-              clearTileIntroState();
-              if (footer) {
-                footer.classList.remove('scroll-reveal-hidden');
-                footer.classList.add('scroll-reveal-visible');
+              if (!prefersReduced) {
+                if (homePageRoot) homePageRoot.classList.add('home-tile-intro-active');
+                if (docEl) docEl.classList.remove('home-tile-intro-preload');
+                if (footer) {
+                  const footerRevealTimerId = window.setTimeout(() => {
+                    tileIntroPendingTimers.delete(footerRevealTimerId);
+                    if (runId !== tileIntroRunId) return;
+                    try {
+                      footer.classList.remove('scroll-reveal-hidden');
+                      footer.classList.add('scroll-reveal-visible');
+                    } catch (_) { /* ignore footer intro errors */ }
+                  }, introStaggerSpan + TILE_GRID_INTRO_MS);
+                  tileIntroPendingTimers.add(footerRevealTimerId);
+                }
+              } else {
+                clearTileIntroState();
+                if (footer) {
+                  footer.classList.remove('scroll-reveal-hidden');
+                  footer.classList.add('scroll-reveal-visible');
+                }
               }
-            }
             };
             if (kickoffDelay > 0 && !prefersReduced) {
               tileIntroKickoffTimer = window.setTimeout(() => {
@@ -2776,7 +2882,364 @@
             return HERO_BASE_DELAY + (Math.max(0, homeHeroSections.length - 1) * HERO_STEP) + HERO_TRANSITION_MS;
           } catch (_) { return 0; }
         };
+        const getInitialHomeFallingTagsDelay = () => {
+          try {
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReduced) return 0;
+            const introColumnCount = Math.max(1, getHomeTileIntroColumnCount());
+            const introStaggerSpan = Math.max(0, introColumnCount - 1) * TILE_COLUMN_STAGGER_MS;
+            return getHomeHeroIntroDelayForTiles() + introStaggerSpan + TILE_GRID_INTRO_MS + 280;
+          } catch (_) {
+            return getHomeHeroIntroDelayForTiles() + TILE_GRID_INTRO_MS + 320;
+          }
+        };
+
+        const setupHomeFallingTags = (startDelayMs = 0) => {
+          try {
+            const homePageRoot = document.querySelector('.page[data-name="home page"]');
+            const chips = Array.from(document.querySelectorAll('[data-home-falling-tag]'));
+            const chipLayer = document.querySelector('.home-falling-tag-layer');
+            const tileGrid = document.querySelector('.page[data-name="home page"] .tile-grid');
+            if (!(homePageRoot && chips.length)) return;
+
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const kickoffDelay = Math.max(0, Number(startDelayMs) || 0);
+
+            const getViewport = () => ({
+              width: window.innerWidth || document.documentElement.clientWidth || 0,
+              height: window.innerHeight || document.documentElement.clientHeight || 0,
+            });
+
+            const getFloorYAtX = (sampleX, sampleHalfW = 0) => {
+              const viewport = getViewport();
+              if (!tileGrid) return viewport.height;
+              try {
+                if (homePageRoot.classList.contains('home-archive-active') || homePageRoot.classList.contains('home-game-active')) {
+                  return viewport.height;
+                }
+                const tiles = Array.from(tileGrid.querySelectorAll('.tile'))
+                  .filter((tile) => tile && !tile.classList.contains('filtered-out'));
+                if (!tiles.length) return viewport.height;
+
+                const probeLeft = sampleX - sampleHalfW;
+                const probeRight = sampleX + sampleHalfW;
+                const overlaps = [];
+                const fallbacks = [];
+
+                tiles.forEach((tile) => {
+                  try {
+                    const rect = tile.getBoundingClientRect();
+                    if (!rect || rect.width <= 0 || rect.height <= 0) return;
+
+                    const overlapsProbe = rect.right >= probeLeft && rect.left <= probeRight;
+                    if (overlapsProbe) {
+                      overlaps.push(rect);
+                      return;
+                    }
+
+                    const distanceToRange = sampleX < rect.left
+                      ? rect.left - sampleX
+                      : sampleX > rect.right
+                        ? sampleX - rect.right
+                        : 0;
+                    fallbacks.push({ rect, distance: distanceToRange });
+                  } catch (_) { /* ignore per-tile floor sampling errors */ }
+                });
+
+                if (overlaps.length) {
+                  return Math.max(
+                    0,
+                    Math.min(
+                      viewport.height,
+                      Math.min(...overlaps.map((rect) => rect.top))
+                    )
+                  );
+                }
+
+                if (fallbacks.length) {
+                  fallbacks.sort((a, b) => a.distance - b.distance || a.rect.top - b.rect.top);
+                  return Math.max(0, Math.min(viewport.height, fallbacks[0].rect.top));
+                }
+
+                return viewport.height;
+              } catch (_) {
+                return viewport.height;
+              }
+            };
+
+            const startPhysicsFns = [];
+            const replayChipFns = [];
+
+            const setTagsActive = (isActive) => {
+              if (!chipLayer) return;
+              chipLayer.classList.toggle('home-falling-tag-layer--inactive', !isActive);
+            };
+
+            chips.forEach((chip, index) => {
+              let animationFrameId = 0;
+              let revealFrameId = 0;
+              let startTickFrameId = 0;
+              let startTimerId = 0;
+              let hasStarted = false;
+              let resizeTimerId = 0;
+              let isDragging = false;
+              let lastFrameTs = 0;
+              let lastPointerTs = 0;
+              let dragOffsetX = 0;
+              let dragOffsetY = 0;
+              let x = 0;
+              let y = 0;
+              let vx = 0;
+              let vy = 0;
+              let angle = 0;
+              let angularVelocity = 0;
+
+              const chipBounds = () => {
+                const rect = chip.getBoundingClientRect();
+                return {
+                  width: Math.max(56, Math.ceil(rect.width || 84)),
+                  height: Math.max(28, Math.ceil(rect.height || 34)),
+                };
+              };
+
+              const updateChip = () => {
+                chip.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) rotate(${angle}rad)`;
+              };
+
+              const stepPhysics = (dtMs) => {
+                const frameScale = Math.min(2.5, Math.max(0.75, dtMs / 16.6667));
+                const gravity = prefersReduced ? 0.18 : 0.42;
+                const airDrag = 0.992;
+                const angularDrag = 0.992;
+                const bounce = 0.62;
+                const wallBounce = 0.72;
+                const viewport = getViewport();
+                const { width: chipWidth, height: chipHeight } = chipBounds();
+                const halfW = chipWidth / 2;
+                const halfH = chipHeight / 2;
+                const floorY = getFloorYAtX(x, halfW);
+
+                vy += gravity * frameScale;
+                x += vx * frameScale;
+                y += vy * frameScale;
+                angle += angularVelocity * frameScale;
+
+                vx *= Math.pow(airDrag, frameScale);
+                vy *= Math.pow(airDrag, frameScale);
+                angularVelocity *= Math.pow(angularDrag, frameScale);
+
+                if (x - halfW <= 0) {
+                  x = halfW;
+                  vx = Math.abs(vx) * wallBounce;
+                } else if (x + halfW >= viewport.width) {
+                  x = viewport.width - halfW;
+                  vx = -Math.abs(vx) * wallBounce;
+                }
+
+                if (y + halfH >= floorY) {
+                  y = floorY - halfH;
+                  vy = -Math.abs(vy) * bounce;
+                  vx *= 0.98;
+                  angularVelocity *= 0.98;
+                  if (Math.abs(vy) < 0.28) vy = 0;
+                  if (Math.abs(vx) < 0.03) vx = 0;
+                } else if (y - halfH <= 0) {
+                  y = halfH;
+                  vy = Math.abs(vy) * 0.24;
+                }
+              };
+
+              const tick = (timestamp) => {
+                if (!lastFrameTs) lastFrameTs = timestamp;
+                const dtMs = Math.min(34, Math.max(8, timestamp - lastFrameTs));
+                lastFrameTs = timestamp;
+                if (!isDragging) stepPhysics(dtMs);
+                updateChip();
+                animationFrameId = window.requestAnimationFrame((nextTs) => tick(nextTs));
+              };
+
+              const getPoint = (event) => {
+                if (event.touches && event.touches[0]) {
+                  return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+                }
+                return { x: event.clientX, y: event.clientY };
+              };
+
+              const onPointerMove = (event) => {
+                if (!isDragging) return;
+                const point = getPoint(event);
+                const now = performance.now();
+                const dt = Math.max(16, now - (lastPointerTs || now));
+                const nextX = point.x - dragOffsetX;
+                const nextY = point.y - dragOffsetY;
+                vx = (nextX - x) / dt * 16.6667;
+                vy = (nextY - y) / dt * 16.6667;
+                x = nextX;
+                y = nextY;
+                angularVelocity = 0;
+                lastPointerTs = now;
+                updateChip();
+                if (event.cancelable) event.preventDefault();
+              };
+
+              const endDrag = () => {
+                isDragging = false;
+                chip.classList.remove('is-dragging');
+                window.removeEventListener('pointermove', onPointerMove);
+                window.removeEventListener('pointerup', endDrag);
+                window.removeEventListener('pointercancel', endDrag);
+              };
+
+              const onPointerDown = (event) => {
+                if (!hasStarted) return;
+                const point = getPoint(event);
+                isDragging = true;
+                dragOffsetX = point.x - x;
+                dragOffsetY = point.y - y;
+                vx = 0;
+                vy = 0;
+                angularVelocity = 0;
+                lastPointerTs = performance.now();
+                chip.classList.add('is-dragging');
+                try {
+                  if (event.pointerId != null && chip.setPointerCapture) chip.setPointerCapture(event.pointerId);
+                } catch (_) {}
+                if (event.cancelable) event.preventDefault();
+                window.addEventListener('pointermove', onPointerMove, { passive: false });
+                window.addEventListener('pointerup', endDrag);
+                window.addEventListener('pointercancel', endDrag);
+              };
+
+              const startPhysics = () => {
+                if (hasStarted) return;
+                hasStarted = true;
+                const viewport = getViewport();
+                const { height: chipHeight } = chipBounds();
+                const safeSpan = Math.max(0.18, Math.min(0.82, (index + 1) / (chips.length + 1)));
+                const spawnBaseX = viewport.width * safeSpan;
+                const spawnJitter = ((index % 2 === 0 ? -1 : 1) * Math.min(28, viewport.width * 0.03));
+                x = Math.round(spawnBaseX + spawnJitter);
+                y = -Math.max(160 + (index * 28), chipHeight * 6);
+                vx = ((index - ((chips.length - 1) / 2)) * 0.18) + ((Math.random() - 0.5) * 0.9);
+                vy = 0;
+                angle = (Math.random() - 0.5) * 0.18;
+                angularVelocity = (Math.random() - 0.5) * 0.01;
+                lastFrameTs = 0;
+                updateChip();
+                if (revealFrameId) {
+                  try { window.cancelAnimationFrame(revealFrameId); } catch (_) {}
+                  revealFrameId = 0;
+                }
+                if (startTickFrameId) {
+                  try { window.cancelAnimationFrame(startTickFrameId); } catch (_) {}
+                  startTickFrameId = 0;
+                }
+                revealFrameId = window.requestAnimationFrame(() => {
+                  revealFrameId = 0;
+                  chip.classList.remove('home-falling-tag--hidden');
+                  startTickFrameId = window.requestAnimationFrame((ts) => {
+                    startTickFrameId = 0;
+                    tick(ts);
+                  });
+                });
+              };
+
+              const stopPhysics = () => {
+                if (animationFrameId) {
+                  try { window.cancelAnimationFrame(animationFrameId); } catch (_) {}
+                  animationFrameId = 0;
+                }
+                if (revealFrameId) {
+                  try { window.cancelAnimationFrame(revealFrameId); } catch (_) {}
+                  revealFrameId = 0;
+                }
+                if (startTickFrameId) {
+                  try { window.cancelAnimationFrame(startTickFrameId); } catch (_) {}
+                  startTickFrameId = 0;
+                }
+              };
+
+              const clearQueuedStart = () => {
+                if (!startTimerId) return;
+                try { window.clearTimeout(startTimerId); } catch (_) {}
+                startTimerId = 0;
+              };
+
+              const handleResize = () => {
+                if (resizeTimerId) {
+                  try { window.clearTimeout(resizeTimerId); } catch (_) {}
+                }
+                resizeTimerId = window.setTimeout(() => {
+                  resizeTimerId = 0;
+                  const viewport = getViewport();
+                  const { width: chipWidth, height: chipHeight } = chipBounds();
+                  const halfW = chipWidth / 2;
+                  const halfH = chipHeight / 2;
+                  const fallbackX = viewport.width * Math.max(0.18, Math.min(0.82, (index + 1) / (chips.length + 1)));
+                  const floorY = getFloorYAtX(x || fallbackX, halfW);
+                  x = Math.max(halfW, Math.min(viewport.width - halfW, x || fallbackX));
+                  y = Math.max(halfH, Math.min(floorY - halfH, y || (chipHeight * 2)));
+                  updateChip();
+                }, 60);
+              };
+
+              chip.addEventListener('pointerdown', onPointerDown);
+              window.addEventListener('resize', handleResize, { passive: true });
+              window.addEventListener('orientationchange', handleResize, { passive: true });
+              window.addEventListener('scroll', handleResize, { passive: true });
+
+              const queueStart = (baseDelayMs = kickoffDelay) => {
+                clearQueuedStart();
+                startTimerId = window.setTimeout(() => {
+                  startTimerId = 0;
+                  startPhysics();
+                }, Math.max(0, Number(baseDelayMs) || 0) + (index * 160));
+              };
+
+              const resetChip = () => {
+                clearQueuedStart();
+                stopPhysics();
+                endDrag();
+                hasStarted = false;
+                lastFrameTs = 0;
+                lastPointerTs = 0;
+                dragOffsetX = 0;
+                dragOffsetY = 0;
+                x = 0;
+                y = 0;
+                vx = 0;
+                vy = 0;
+                angle = 0;
+                angularVelocity = 0;
+                chip.classList.remove('is-dragging');
+                chip.classList.add('home-falling-tag--hidden');
+                chip.style.transform = 'translate(-50%, -50%) translate3d(0, -200vh, 0)';
+              };
+
+              resetChip();
+
+              if (document.readyState === 'complete') queueStart();
+              else window.addEventListener('load', () => queueStart(), { once: true });
+
+              startPhysicsFns.push(startPhysics);
+              replayChipFns.push((baseDelayMs = 0) => {
+                resetChip();
+                queueStart(baseDelayMs);
+              });
+            });
+
+            setTagsActive(true);
+            try { window.__homeFallingTagsStart = () => startPhysicsFns.forEach((fn) => fn()); } catch (_) {}
+            try { window.__homeReplayFallingTags = (startDelayMs = 0) => {
+              setTagsActive(true);
+              replayChipFns.forEach((fn) => fn(startDelayMs));
+            }; } catch (_) {}
+            try { window.__setHomeFallingTagsActive = setTagsActive; } catch (_) {}
+          } catch (_) { /* ignore falling tag setup errors */ }
+        };
+
         replayHomeTileIntro(getHomeHeroIntroDelayForTiles(), { lockScroll: !hasRunInitialHomeTileIntro });
+        setupHomeFallingTags(getInitialHomeFallingTagsDelay());
         hasRunInitialHomeTileIntro = true;
         try { window.__homeReplayTileIntro = replayHomeTileIntro; } catch (_) { /* ignore */ }
         // Lazy-init the NestBank video and attach to the NestBank tile (by data-project)
@@ -4200,6 +4663,7 @@
               if (typeof window.__homePauseTileVideos === 'function') window.__homePauseTileVideos();
             } catch (_) { /* ignore hidden tile video pause failures */ }
             homePage.classList.remove('home-game-active');
+            try { if (typeof window.__setHomeFallingTagsActive === 'function') window.__setHomeFallingTagsActive(true); } catch (_) {}
             homePage.classList.remove('home-archive-content-visible');
             const startArchiveImageReveal = () => {
               homePage.classList.remove('home-archive-intro-running');
@@ -4499,6 +4963,7 @@
                 if (homePage) {
                   homePage.classList.add('home-archive-active');
                   homePage.classList.remove('home-game-active');
+                  try { if (typeof window.__setHomeFallingTagsActive === 'function') window.__setHomeFallingTagsActive(true); } catch (_) {}
                 }
               }
               close();
