@@ -14,7 +14,7 @@
     <!-- Material Symbols for MUI Done icon -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=294" />
+    <link rel="stylesheet" href="./styles.css?v=295" />
   </head>
   <body class="about-page" style="background-color:#0A0A0A;">
     <div class="page" data-name="about page">
@@ -254,27 +254,67 @@
           }
         };
 
-        const scrollToSection = () => {
+        const scrollToSection = (behavior = 'smooth') => {
           const targetId = getScrollTargetId();
-          if (!targetId) return;
+          if (!targetId) return null;
           const targetSection = document.getElementById(targetId);
-          if (!targetSection) return;
+          if (!targetSection) return null;
           const navSplit = document.querySelector('.page[data-name="about page"] .nav-split');
           const navHeight = navSplit ? Math.ceil(navSplit.getBoundingClientRect().height) : 0;
           const topOffset = navHeight + 16;
           const targetTop = Math.max(0, window.scrollY + targetSection.getBoundingClientRect().top - topOffset);
-          const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-          window.scrollTo({ top: targetTop, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+          window.scrollTo({ top: targetTop, behavior });
+          return { targetSection, topOffset };
+        };
+
+        const isSectionAligned = (targetSection, topOffset) => {
+          if (!targetSection) return true;
+          const rect = targetSection.getBoundingClientRect();
+          const maxScrollY = Math.max(
+            0,
+            (document.documentElement.scrollHeight || 0) - window.innerHeight
+          );
+          const isNearBottom = (window.scrollY || window.pageYOffset || 0) >= (maxScrollY - 4);
+          if (isNearBottom && rect.top <= topOffset) return true;
+          return Math.abs(rect.top - topOffset) <= 8;
         };
 
         const runInitialSectionScroll = () => {
+          const targetId = getScrollTargetId();
+          if (!targetId) return;
+          let attempts = 0;
+          const maxAttempts = 8;
+
+          const attemptScroll = () => {
+            const result = scrollToSection('auto');
+            if (!result) return;
+            window.requestAnimationFrame(() => {
+              if (isSectionAligned(result.targetSection, result.topOffset)) return;
+              if (attempts >= maxAttempts) return;
+              attempts += 1;
+              window.setTimeout(attemptScroll, attempts <= 2 ? 120 : 260);
+            });
+          };
+
           window.requestAnimationFrame(() => {
-            window.requestAnimationFrame(scrollToSection);
+            window.requestAnimationFrame(attemptScroll);
           });
         };
         if (document.readyState === 'complete') runInitialSectionScroll();
         else window.addEventListener('load', runInitialSectionScroll, { once: true });
-        window.addEventListener('hashchange', scrollToSection);
+        window.addEventListener('pageshow', runInitialSectionScroll);
+        window.addEventListener('orientationchange', () => {
+          window.setTimeout(runInitialSectionScroll, 160);
+        });
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => {
+            window.setTimeout(runInitialSectionScroll, 0);
+          }).catch(() => {});
+        }
+        window.addEventListener('hashchange', () => {
+          const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          scrollToSection(prefersReducedMotion ? 'auto' : 'smooth');
+        });
 
         const processTabList = document.querySelector('.about-process__tabs[role="tablist"]');
         if (processTabList) {

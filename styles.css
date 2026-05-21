@@ -6035,6 +6035,27 @@ p { margin: 0; }
   .paragraph-containers { flex-direction: row; }
   .text-container { max-width: none; align-self: stretch; }
   .main { align-items: stretch; }
+
+  .page[data-name="home page"] .home-hero > *.home-intro-section-hidden,
+  .page[data-name="home page"] .home-hero > *.home-intro-section-visible {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+
+  .page[data-name="home page"] .site-footer.scroll-reveal-hidden,
+  .page[data-name="home page"] .site-footer.scroll-reveal-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.home-tile-intro-card.intro-hidden,
+  .page[data-name="home page"] .tile-grid .tile.home-tile-intro-card.intro-visible,
+  html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
+    --column-intro-y: 0px;
+    --introOpacity: 1;
+  }
 }
 
 /* Keep nav content readable on the glass panel */
