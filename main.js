@@ -2923,11 +2923,20 @@
             const chipStates = [];
             let sharedAnimationFrameId = 0;
             let sharedLastFrameTs = 0;
+            let stackSpawnCenterX = 0;
 
             const getViewport = () => ({
               width: window.innerWidth || document.documentElement.clientWidth || 0,
               height: window.innerHeight || document.documentElement.clientHeight || 0,
             });
+
+            const getStackSpawnCenterX = () => {
+              const viewport = getViewport();
+              if (!viewport.width) return stackSpawnCenterX || 0;
+              const nextCenter = viewport.width * 0.52;
+              stackSpawnCenterX = Math.max(viewport.width * 0.24, Math.min(viewport.width * 0.76, nextCenter));
+              return stackSpawnCenterX;
+            };
 
             const getFloorYAtX = (sampleX, sampleHalfW = 0) => {
               const viewport = getViewport();
@@ -3010,44 +3019,171 @@
               state.extentY = (Math.abs(sin) * state.halfW) + (Math.abs(cos) * state.halfH);
             };
 
+            const normalizeAngle = (angle) => {
+              const fullTurn = Math.PI * 2;
+              let next = angle % fullTurn;
+              if (next > Math.PI) next -= fullTurn;
+              if (next < -Math.PI) next += fullTurn;
+              return next;
+            };
+
             const getProjectionRadius = (state, axisX, axisY) => (
               (state.halfW * Math.abs((axisX * state.axisXx) + (axisY * state.axisXy))) +
               (state.halfH * Math.abs((axisX * state.axisYx) + (axisY * state.axisYy)))
             );
 
+            const getClosestPointsOnSegments = (
+              a0x, a0y, a1x, a1y,
+              b0x, b0y, b1x, b1y
+            ) => {
+              const ux = a1x - a0x;
+              const uy = a1y - a0y;
+              const vx = b1x - b0x;
+              const vy = b1y - b0y;
+              const wx = a0x - b0x;
+              const wy = a0y - b0y;
+              const a = (ux * ux) + (uy * uy);
+              const b = (ux * vx) + (uy * vy);
+              const c = (vx * vx) + (vy * vy);
+              const d = (ux * wx) + (uy * wy);
+              const e = (vx * wx) + (vy * wy);
+              const epsilon = 0.000001;
+              let sN = 0;
+              let sD = (a * c) - (b * b);
+              let tN = 0;
+              let tD = sD;
+
+              if (sD < epsilon) {
+                sN = 0;
+                sD = 1;
+                tN = e;
+                tD = c || 1;
+              } else {
+                sN = (b * e) - (c * d);
+                tN = (a * e) - (b * d);
+
+                if (sN < 0) {
+                  sN = 0;
+                  tN = e;
+                  tD = c || 1;
+                } else if (sN > sD) {
+                  sN = sD;
+                  tN = e + b;
+                  tD = c || 1;
+                }
+              }
+
+              if (tN < 0) {
+                tN = 0;
+                if (-d < 0) {
+                  sN = 0;
+                } else if (-d > a) {
+                  sN = sD;
+                } else {
+                  sN = -d;
+                  sD = a || 1;
+                }
+              } else if (tN > tD) {
+                tN = tD;
+                if ((-d + b) < 0) {
+                  sN = 0;
+                } else if ((-d + b) > a) {
+                  sN = sD;
+                } else {
+                  sN = -d + b;
+                  sD = a || 1;
+                }
+              }
+
+              const s = Math.abs(sN) < epsilon ? 0 : (sN / (sD || 1));
+              const t = Math.abs(tN) < epsilon ? 0 : (tN / (tD || 1));
+
+              return {
+                ax: a0x + (s * ux),
+                ay: a0y + (s * uy),
+                bx: b0x + (t * vx),
+                by: b0y + (t * vy),
+              };
+            };
+
+            const dampSmallChipMotion = (state, multiplier = 0.82) => {
+              if (!state) return;
+              state.vx *= multiplier;
+              state.vy *= multiplier;
+              state.angularVelocity *= Math.max(0.7, multiplier - 0.08);
+              if (Math.abs(state.vx) < 0.045) state.vx = 0;
+              if (Math.abs(state.vy) < 0.045) state.vy = 0;
+              if (Math.abs(state.angularVelocity) < 0.0025) state.angularVelocity = 0;
+            };
+
+            const dampStackingContact = (state, nx, ny, tangentX, tangentY) => {
+              if (!state) return;
+              const normalVelocity = (state.vx * nx) + (state.vy * ny);
+              const tangentVelocity = (state.vx * tangentX) + (state.vy * tangentY);
+              state.vx = (tangentVelocity * tangentX) + (normalVelocity * nx * 0.08);
+              state.vy = (tangentVelocity * tangentY) + (normalVelocity * ny * 0.08);
+              state.vx *= 0.74;
+              state.vy *= 0.74;
+              state.angularVelocity *= 0.56;
+              if (Math.abs(state.vx) < 0.08) state.vx = 0;
+              if (Math.abs(state.vy) < 0.08) state.vy = 0;
+              if (Math.abs(state.angularVelocity) < 0.002) state.angularVelocity = 0;
+            };
+
             const getChipCollision = (a, b) => {
               refreshChipGeometry(a);
               refreshChipGeometry(b);
 
-              const deltaX = b.x - a.x;
-              const deltaY = b.y - a.y;
-              const axes = [
-                { x: a.axisXx, y: a.axisXy },
-                { x: a.axisYx, y: a.axisYy },
-                { x: b.axisXx, y: b.axisXy },
-                { x: b.axisYx, y: b.axisYy },
-              ];
+              const broadDeltaX = b.x - a.x;
+              const broadDeltaY = b.y - a.y;
+              const broadDistanceX = Math.abs(broadDeltaX);
+              const broadDistanceY = Math.abs(broadDeltaY);
+              if (broadDistanceX > (a.extentX + b.extentX) || broadDistanceY > (a.extentY + b.extentY)) {
+                return null;
+              }
 
-              let minOverlap = Number.POSITIVE_INFINITY;
-              let normalX = 0;
-              let normalY = 0;
+              const radiusA = a.halfH;
+              const radiusB = b.halfH;
+              const halfSegmentA = Math.max(0, a.halfW - radiusA);
+              const halfSegmentB = Math.max(0, b.halfW - radiusB);
 
-              for (let axisIndex = 0; axisIndex < axes.length; axisIndex += 1) {
-                const axis = axes[axisIndex];
-                const distance = (deltaX * axis.x) + (deltaY * axis.y);
-                const radiusA = getProjectionRadius(a, axis.x, axis.y);
-                const radiusB = getProjectionRadius(b, axis.x, axis.y);
-                const overlap = (radiusA + radiusB) - Math.abs(distance);
-                if (overlap <= 0) return null;
-                if (overlap < minOverlap) {
-                  minOverlap = overlap;
-                  const direction = distance < 0 ? -1 : 1;
-                  normalX = axis.x * direction;
-                  normalY = axis.y * direction;
+              const a0x = a.x - (a.axisXx * halfSegmentA);
+              const a0y = a.y - (a.axisXy * halfSegmentA);
+              const a1x = a.x + (a.axisXx * halfSegmentA);
+              const a1y = a.y + (a.axisXy * halfSegmentA);
+              const b0x = b.x - (b.axisXx * halfSegmentB);
+              const b0y = b.y - (b.axisXy * halfSegmentB);
+              const b1x = b.x + (b.axisXx * halfSegmentB);
+              const b1y = b.y + (b.axisXy * halfSegmentB);
+
+              const closest = getClosestPointsOnSegments(
+                a0x, a0y, a1x, a1y,
+                b0x, b0y, b1x, b1y
+              );
+
+              let normalX = closest.bx - closest.ax;
+              let normalY = closest.by - closest.ay;
+              let distance = Math.hypot(normalX, normalY);
+              const radiusSum = radiusA + radiusB;
+              const overlap = radiusSum - distance;
+
+              if (overlap <= 0) return null;
+
+              if (distance <= 0.0001) {
+                normalX = broadDeltaX;
+                normalY = broadDeltaY;
+                distance = Math.hypot(normalX, normalY);
+                if (distance <= 0.0001) {
+                  normalX = a.axisYx;
+                  normalY = a.axisYy;
+                  distance = 1;
                 }
               }
 
-              return { overlap: minOverlap, normalX, normalY };
+              normalX /= distance;
+              normalY /= distance;
+
+              return { overlap, normalX, normalY };
             };
 
             const updateChip = (state) => {
@@ -3086,30 +3222,37 @@
               if (!state || !state.hasStarted || state.isDragging) return;
               const frameScale = Math.min(2.5, Math.max(0.75, dtMs / 16.6667));
               const gravity = prefersReduced ? 0.18 : 0.42;
-              const airDrag = 0.992;
-              const angularDrag = 0.992;
-              const bounce = 0.62;
+              const airDrag = state.airDrag || 0.992;
+              const angularDrag = state.angularDrag || 0.992;
+              const bounce = state.bounce || 0.62;
               const wallBounce = 0.72;
               const viewport = getViewport();
+              const gravityScale = state.gravityScale || 1;
 
-              state.vy += gravity * frameScale;
+              state.vy += gravity * gravityScale * frameScale;
               state.x += state.vx * frameScale;
               state.y += state.vy * frameScale;
-              state.angle += state.angularVelocity * frameScale;
+              state.angle = normalizeAngle(state.angle + (state.angularVelocity * frameScale));
 
               state.vx *= Math.pow(airDrag, frameScale);
               state.vy *= Math.pow(airDrag, frameScale);
               state.angularVelocity *= Math.pow(angularDrag, frameScale);
+              state.angularVelocity += (-state.angle) * (prefersReduced ? 0.001 : 0.0016) * frameScale;
 
               refreshChipGeometry(state);
               const floorY = getFloorYAtX(state.x, state.extentX);
 
               if (floorY <= 0) {
+                state.floorGap = 0;
+                state.isNearFloor = true;
                 state.y = floorY - state.extentY;
                 state.vy = Math.min(state.vy, -0.6);
                 state.vx *= 0.98;
                 return;
               }
+
+              state.floorGap = Math.max(0, floorY - (state.y + state.extentY));
+              state.isNearFloor = state.floorGap <= Math.max(8, state.halfH * 0.38);
 
               if (state.x - state.extentX <= 0) {
                 state.x = state.extentX;
@@ -3130,6 +3273,12 @@
                 state.y = state.extentY;
                 state.vy = Math.abs(state.vy) * 0.24;
               }
+
+              if (state.y + state.extentY >= floorY - 2) {
+                const settleMultiplier = Math.max(0.58, 1 - ((prefersReduced ? 0.12 : 0.18) * frameScale));
+                state.angle = normalizeAngle(state.angle) * settleMultiplier;
+                state.angularVelocity *= Math.pow(prefersReduced ? 0.74 : 0.62, frameScale);
+              }
             };
 
             const resolveChipCollisions = () => {
@@ -3146,8 +3295,8 @@
                     const collision = getChipCollision(a, b);
                     if (!collision) continue;
 
-                    const invMassA = a.isDragging ? 0 : 1;
-                    const invMassB = b.isDragging ? 0 : 1;
+                    const invMassA = a.isDragging ? 0 : (a.inverseMass || 1);
+                    const invMassB = b.isDragging ? 0 : (b.inverseMass || 1);
                     const totalInvMass = invMassA + invMassB;
                     if (!totalInvMass) continue;
 
@@ -3160,8 +3309,29 @@
                     if (invMassB) b.y += ny * correction * (invMassB / totalInvMass);
 
                     const relativeVelocity = ((b.vx - a.vx) * nx) + ((b.vy - a.vy) * ny);
+                    const isDraggedPair = a.isDragging || b.isDragging;
+                    const isGentleContact = Math.abs(relativeVelocity) < (isDraggedPair ? 1.1 : 0.42);
+                    const isStackingContact = Math.abs(ny) > 0.62;
+                    const bothAirborneDescending = (
+                      !a.isNearFloor &&
+                      !b.isNearFloor &&
+                      a.vy > 0.12 &&
+                      b.vy > 0.12
+                    );
+                    const useRestingStackAssist = (
+                      isStackingContact &&
+                      !bothAirborneDescending &&
+                      (
+                        a.isNearFloor ||
+                        b.isNearFloor ||
+                        Math.abs(a.vy) < 0.18 ||
+                        Math.abs(b.vy) < 0.18
+                      )
+                    );
                     if (relativeVelocity < 0) {
-                      const restitution = prefersReduced ? 0.42 : 0.68;
+                      const restitution = isGentleContact
+                        ? (useRestingStackAssist ? 0 : (isStackingContact ? 0.05 : 0.02))
+                        : (isDraggedPair ? 0.06 : (prefersReduced ? 0.12 : 0.18));
                       const impulse = (-(1 + restitution) * relativeVelocity) / totalInvMass;
                       if (invMassA) {
                         a.vx -= impulse * invMassA * nx;
@@ -3175,7 +3345,13 @@
                       const tangentX = -ny;
                       const tangentY = nx;
                       const tangentialVelocity = ((b.vx - a.vx) * tangentX) + ((b.vy - a.vy) * tangentY);
-                      const frictionImpulse = Math.max(-0.12, Math.min(0.12, tangentialVelocity * 0.08));
+                      const frictionImpulse = Math.max(
+                        useRestingStackAssist ? -0.26 : (isStackingContact ? -0.08 : (isGentleContact ? -0.18 : -0.08)),
+                        Math.min(
+                          useRestingStackAssist ? 0.26 : (isStackingContact ? 0.08 : (isGentleContact ? 0.18 : 0.08)),
+                          tangentialVelocity * (useRestingStackAssist ? 0.24 : (isStackingContact ? 0.05 : (isGentleContact ? 0.16 : 0.06)))
+                        )
+                      );
                       if (invMassA) {
                         a.vx += frictionImpulse * tangentX;
                         a.vy += frictionImpulse * tangentY;
@@ -3188,18 +3364,35 @@
                       const spinDirection = tangentialVelocity === 0
                         ? (nx !== 0 ? Math.sign(nx) : Math.sign(ny) || 1)
                         : Math.sign(tangentialVelocity);
-                      const spinKick = Math.min(0.02, Math.abs(impulse) * 0.0025);
+                      const spinKick = isGentleContact
+                        ? 0
+                        : Math.min(0.01, Math.abs(impulse) * 0.0015);
                       if (invMassA) a.angularVelocity -= spinKick * spinDirection;
                       if (invMassB) b.angularVelocity += spinKick * spinDirection;
-                    } else {
-                      const driftKick = prefersReduced ? 0.04 : 0.08;
-                      if (invMassA) {
-                        a.vx -= nx * driftKick;
-                        a.vy -= ny * driftKick;
+
+                      if (isGentleContact) {
+                        if (useRestingStackAssist) {
+                          if (invMassA) dampStackingContact(a, nx, ny, tangentX, tangentY);
+                          if (invMassB) dampStackingContact(b, nx, ny, tangentX, tangentY);
+                        } else {
+                          if (invMassA) dampSmallChipMotion(a, isDraggedPair ? 0.68 : 0.76);
+                          if (invMassB) dampSmallChipMotion(b, isDraggedPair ? 0.68 : 0.76);
+                        }
                       }
-                      if (invMassB) {
-                        b.vx += nx * driftKick;
-                        b.vy += ny * driftKick;
+                    } else {
+                      if (collision.overlap > 1.4 && !isDraggedPair) {
+                        const driftKick = prefersReduced ? 0.01 : 0.018;
+                        if (invMassA) {
+                          a.vx -= nx * driftKick;
+                          a.vy -= ny * driftKick;
+                        }
+                        if (invMassB) {
+                          b.vx += nx * driftKick;
+                          b.vy += ny * driftKick;
+                        }
+                      } else {
+                        if (invMassA) dampSmallChipMotion(a, 0.74);
+                        if (invMassB) dampSmallChipMotion(b, 0.74);
                       }
                     }
                   }
@@ -3273,7 +3466,25 @@
                 height: 34,
                 halfW: 42,
                 halfH: 17,
+                mass: 1,
+                inverseMass: 1,
+                gravityScale: 1,
+                airDrag: 0.992,
+                angularDrag: 0.992,
+                bounce: 0.62,
+                floorGap: Number.POSITIVE_INFINITY,
+                isNearFloor: false,
               };
+              const configuredMass = Number(chip.dataset.weight);
+              const chipMass = Number.isFinite(configuredMass)
+                ? Math.max(0.72, Math.min(1.5, configuredMass))
+                : 1;
+              state.mass = chipMass;
+              state.inverseMass = 1 / chipMass;
+              state.gravityScale = 1;
+              state.airDrag = Math.max(0.991, Math.min(0.993, 0.992 + ((chipMass - 1) * 0.002)));
+              state.angularDrag = Math.max(0.988, Math.min(0.993, 0.991 + ((chipMass - 1) * 0.004)));
+              state.bounce = Math.max(0.5, Math.min(0.66, 0.6 - ((chipMass - 1) * 0.14)));
               chipStates.push(state);
 
               const getPoint = (event) => {
@@ -3336,15 +3547,14 @@
                 state.hasStarted = true;
                 const viewport = getViewport();
                 refreshChipGeometry(state);
-                const safeSpan = Math.max(0.18, Math.min(0.82, (index + 1) / (chips.length + 1)));
-                const spawnBaseX = viewport.width * safeSpan;
-                const spawnJitter = ((index % 2 === 0 ? -1 : 1) * Math.min(28, viewport.width * 0.03));
+                const spawnBaseX = getStackSpawnCenterX() || (viewport.width * 0.52);
+                const spawnJitter = ((index % 2 === 0 ? -1 : 1) * Math.min(10, viewport.width * 0.012));
                 state.x = Math.round(spawnBaseX + spawnJitter);
                 state.y = -Math.max(160 + (index * 28), state.height * 6);
-                state.vx = ((index - ((chips.length - 1) / 2)) * 0.18) + ((Math.random() - 0.5) * 0.9);
+                state.vx = ((index % 2 === 0 ? -1 : 1) * 0.03) + ((Math.random() - 0.5) * 0.08);
                 state.vy = 0;
-                state.angle = (Math.random() - 0.5) * 0.18;
-                state.angularVelocity = (Math.random() - 0.5) * 0.01;
+                state.angle = ((index % 2 === 0 ? -1 : 1) * 0.045) + ((Math.random() - 0.5) * 0.03);
+                state.angularVelocity = (Math.random() - 0.5) * 0.004;
                 updateChip(state);
                 if (state.revealFrameId) {
                   try { window.cancelAnimationFrame(state.revealFrameId); } catch (_) {}
@@ -3406,7 +3616,7 @@
                 state.startTimerId = window.setTimeout(() => {
                   state.startTimerId = 0;
                   startPhysics();
-                }, Math.max(0, Number(baseDelayMs) || 0) + (index * 160));
+                }, Math.max(0, Number(baseDelayMs) || 0) + (index * 260));
               };
 
               const resetChip = () => {
@@ -3423,6 +3633,8 @@
                 state.vy = 0;
                 state.angle = 0;
                 state.angularVelocity = 0;
+                state.floorGap = Number.POSITIVE_INFINITY;
+                state.isNearFloor = false;
                 chip.classList.remove('is-dragging');
                 chip.classList.add('home-falling-tag--hidden');
                 chip.style.transform = 'translate(-50%, -50%) translate3d(0, -200vh, 0)';
@@ -5131,11 +5343,13 @@
             try { overlay.setAttribute('aria-hidden', 'false'); } catch (_) {}
             // Prevent background scroll while open
             try { document.body.style.overflow = 'hidden'; } catch (_) {}
+            try { if (typeof window.__setHomeFallingTagsActive === 'function') window.__setHomeFallingTagsActive(false); } catch (_) {}
           };
           const close = () => {
             overlay.classList.remove('open');
             try { overlay.setAttribute('aria-hidden', 'true'); } catch (_) {}
             try { document.body.style.overflow = ''; } catch (_) {}
+            try { if (typeof window.__setHomeFallingTagsActive === 'function') window.__setHomeFallingTagsActive(true); } catch (_) {}
           };
 
           menuCard.addEventListener('click', (e) => {

@@ -5342,7 +5342,7 @@ p { margin: 0; }
   align-items: center;
   justify-content: center;
   min-height: 51px;
-  padding: 13.5px 21px;
+  padding: 12px 21px 15px;
   border-radius: 999px;
   font-family: "Manrope", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   font-size: 18px;
@@ -5355,6 +5355,7 @@ p { margin: 0; }
   backdrop-filter: blur(12px) saturate(140%);
   color: #ffffff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  text-align: center;
   white-space: nowrap;
   pointer-events: auto;
   user-select: none;
@@ -5363,6 +5364,7 @@ p { margin: 0; }
   cursor: grab;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
   transform: translate(-50%, -50%);
+  transform-origin: 50% 50%;
   will-change: transform;
   transition: opacity 180ms ease;
 }
@@ -5385,9 +5387,9 @@ p { margin: 0; }
 
 @media (max-width: 900px) {
   .home-falling-tag {
-    min-height: 38.25px;
-    padding: 10.125px 15.75px;
-    font-size: 13.5px;
+    min-height: 44px;
+    padding: 10.35px 18.1px 12.95px;
+    font-size: 15.5px;
   }
 }
 
@@ -6420,12 +6422,25 @@ html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
 
 /* Small screens (<=600px): use a single-column square grid on home page */
 @media (max-width: 600px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+
   .page[data-name="home page"] .main {
     /* Remove top padding on small screens */
     padding-top: 0 !important;
+    padding-left: 0;
+    padding-right: 0;
     /* Set top margin to 112px on small screens */
     margin-top: 112px !important;
   }
+
+  .page[data-name="home page"] .home-hero {
+    padding-left: var(--space-s);
+    padding-right: var(--space-s);
+  }
+
   .page[data-name="home page"] .main .tile-grid {
     display: grid !important; /* override previous flex column */
     grid-template-columns: 1fr;
@@ -6433,10 +6448,10 @@ html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
     justify-items: stretch;
     height: auto !important;
     overflow: visible !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    margin-left: calc(50% - 50vw) !important;
-    margin-right: calc(50% - 50vw) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
   .page[data-name="home page"].home-archive-active .main .tile-grid {
     display: none !important;
@@ -6457,14 +6472,23 @@ html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
   .page[data-name="home page"] .tile-grid .tile.filtered-out {
     display: none !important;
   }
+
+  .page[data-name="home page"] .site-footer,
+  .page[data-name="about page"] .site-footer,
+  .page[data-name="case study page"] .site-footer {
+    width: auto;
+    max-width: none;
+    margin-left: 16px;
+    margin-right: 16px;
+  }
 }
 
 @media (max-width: 450px) {
   .page[data-name="home page"] .home-hero {
     padding-top: 8px;
-    padding-bottom: 220px;
-    padding-left: 0;
-    padding-right: 0;
+    padding-bottom: 180px;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .page[data-name="home page"] .home-hero__headline {
