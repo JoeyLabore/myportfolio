@@ -624,6 +624,9 @@
           root.addEventListener('focusin', triggerReplay);
           root.addEventListener('mouseleave', stopReplay);
           root.addEventListener('focusout', stopReplay);
+          root.addEventListener('pointerdown', stopReplay, { passive: true });
+          root.addEventListener('touchstart', stopReplay, { passive: true });
+          root.addEventListener('mousedown', stopReplay);
         });
 
         return true;

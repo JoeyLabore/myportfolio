@@ -734,6 +734,10 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   max-width: 100%;
 }
 
+.page[data-name="home page"] .home-hero__column .home-hero__link .text-reveal-scramble {
+  pointer-events: none;
+}
+
 .page[data-name="home page"] .home-hero__link {
   margin: 0;
   width: fit-content;
