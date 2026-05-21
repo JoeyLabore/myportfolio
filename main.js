@@ -3195,6 +3195,7 @@
             let resizeTimerId = 0;
             let activeDragState = null;
             let currentVisibleTileRects = [];
+            const TILE_SUPPORT_VISUAL_GAP = 2;
 
             const setTagsActive = (isActive) => {
               chipLayer.classList.toggle('home-falling-tag-layer--inactive', !isActive);
@@ -3276,6 +3277,23 @@
               return supportY;
             };
 
+            const getTileSupportYForState = (state, centerX = null) => {
+              const x = centerX == null
+                ? (state && state.body ? state.body.position.x : 0)
+                : centerX;
+              const halfW = Math.max(18, (state && state.width ? state.width / 2 : 42) - 8);
+              let supportY = null;
+
+              currentVisibleTileRects.forEach((rect) => {
+                if (!rect) return;
+                const overlapsX = rect.right >= (x - halfW) && rect.left <= (x + halfW);
+                if (!overlapsX) return;
+                supportY = supportY == null ? rect.top : Math.min(supportY, rect.top);
+              });
+
+              return supportY;
+            };
+
             const clampStateAboveSupport = (state, centerX = null, centerY = null) => {
               if (!(state && state.body)) return;
               const x = centerX == null ? state.body.position.x : centerX;
@@ -3297,6 +3315,24 @@
               chipStates.forEach((state) => {
                 if (!(state && state.body && state.isVisible)) return;
                 clampStateAboveSupport(state);
+              });
+            };
+
+            const applyTileSupportVisualLift = () => {
+              chipStates.forEach((state) => {
+                if (!(state && state.body && state.isVisible)) return;
+                const tileSupportY = getTileSupportYForState(state);
+                if (!Number.isFinite(tileSupportY)) return;
+                const halfH = Math.max(14, state.height / 2);
+                const desiredMaxY = tileSupportY - halfH - TILE_SUPPORT_VISUAL_GAP;
+                const currentY = state.body.position.y;
+                if (currentY <= desiredMaxY) return;
+                if ((currentY - desiredMaxY) > 10) return;
+                Sleeping.set(state.body, false);
+                Body.setPosition(state.body, { x: state.body.position.x, y: desiredMaxY });
+                if (state.body.velocity.y > 0) {
+                  Body.setVelocity(state.body, { x: state.body.velocity.x, y: 0 });
+                }
               });
             };
 
@@ -3555,6 +3591,7 @@
                 Body.setAngularVelocity(body, 0);
                 clampStateAboveSupport(state, pinnedX, pinnedY);
               }
+              applyTileSupportVisualLift();
               syncAllChipElements();
               rafId = window.requestAnimationFrame(step);
             };
