@@ -4290,6 +4290,11 @@ p { margin: 0; }
 
 .page[data-name="about page"] .about-process__tabs-wrap::before,
 .page[data-name="about page"] .about-process__tabs-wrap::after {
+  content: none;
+}
+
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-wrap::before,
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-wrap::after {
   content: "";
   position: absolute;
   top: 0;
@@ -4301,31 +4306,55 @@ p { margin: 0; }
   z-index: 3;
 }
 
-.page[data-name="about page"] .about-process__tabs-wrap::before {
-  left: 0;
-  background: linear-gradient(to right, #0a0a0a 0%, rgba(10, 10, 10, 0) 100%);
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-wrap::before {
+  left: calc(var(--about-process-arrow-width) + var(--about-process-tabs-gap));
+  background: linear-gradient(to right, rgba(10, 10, 10, 0.38) 0%, rgba(10, 10, 10, 0) 100%);
 }
 
-.page[data-name="about page"] .about-process__tabs-wrap::after {
-  right: 0;
-  background: linear-gradient(to left, #0a0a0a 0%, rgba(10, 10, 10, 0) 100%);
-}
-
-.page[data-name="about page"] .about-process__tabs-wrap.can-scroll-left::before {
-  opacity: 1;
-}
-
-.page[data-name="about page"] .about-process__tabs-wrap.can-scroll-right::after {
-  opacity: 1;
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-wrap::after {
+  right: calc(var(--about-process-arrow-width) + var(--about-process-tabs-gap));
+  background: linear-gradient(to left, rgba(10, 10, 10, 0.38) 0%, rgba(10, 10, 10, 0) 100%);
 }
 
 .page[data-name="about page"] .about-process__tabs-scroll {
+  --about-process-fade-size: 40px;
   position: relative;
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+}
+
+.page[data-name="about page"] .about-process__tabs-wrap.can-scroll-left .about-process__tabs-scroll {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--about-process-fade-size), #000 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--about-process-fade-size), #000 100%);
+}
+
+.page[data-name="about page"] .about-process__tabs-wrap.can-scroll-right .about-process__tabs-scroll {
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--about-process-fade-size)), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - var(--about-process-fade-size)), transparent 100%);
+}
+
+.page[data-name="about page"] .about-process__tabs-wrap.can-scroll-left.can-scroll-right .about-process__tabs-scroll {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--about-process-fade-size), #000 calc(100% - var(--about-process-fade-size)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--about-process-fade-size), #000 calc(100% - var(--about-process-fade-size)), transparent 100%);
+}
+
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-scroll,
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-wrap.can-scroll-left .about-process__tabs-scroll,
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-wrap.can-scroll-right .about-process__tabs-scroll,
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-wrap.can-scroll-left.can-scroll-right .about-process__tabs-scroll {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-wrap.can-scroll-left::before {
+  opacity: 1;
+}
+
+.page[data-name="about page"].about-process-safari-fallback .about-process__tabs-wrap.can-scroll-right::after {
+  opacity: 1;
 }
 
 .page[data-name="about page"] .about-process__tabs-scroll::-webkit-scrollbar {

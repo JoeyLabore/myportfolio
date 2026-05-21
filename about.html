@@ -14,7 +14,7 @@
     <!-- Material Symbols for MUI Done icon -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=314" />
+    <link rel="stylesheet" href="./styles.css?v=325" />
   </head>
   <body class="about-page" style="background-color:#0A0A0A;">
     <div class="page" data-name="about page">
@@ -240,6 +240,19 @@
     </div>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
+        const aboutPageRoot = document.querySelector('.page[data-name="about page"]');
+        const isSafariBrowser = (() => {
+          try {
+            const ua = String(window.navigator.userAgent || '');
+            return /Safari\//.test(ua) && !/(Chrome|CriOS|EdgiOS|FxiOS|OPiOS|OPT\/|Firefox|Android)/.test(ua);
+          } catch (_) {
+            return false;
+          }
+        })();
+        if (aboutPageRoot && isSafariBrowser) {
+          aboutPageRoot.classList.add('about-process-safari-fallback');
+        }
+
         const getScrollTargetId = () => {
           try {
             const hash = String(window.location.hash || '').toLowerCase();
@@ -554,6 +567,6 @@
         } catch (_) {}
       });
     </script>
-    <script src="./main.js?v=26"></script>
+    <script src="./main.js?v=28"></script>
   </body>
 </html>
