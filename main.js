@@ -5487,11 +5487,13 @@
           const menuCard = document.querySelector('.nav-right.nav-menu a.nav-item');
           const overlay = document.querySelector('.mobile-menu-overlay');
           if (!menuCard || !overlay) return;
+          const homePage = document.querySelector('.page[data-name="home page"]');
           const panel = overlay.querySelector('.mobile-menu-panel');
           const mobileTabLinks = Array.from(overlay.querySelectorAll('[data-mobile-tab]'));
 
           const open = () => {
             overlay.classList.add('open');
+            try { homePage && homePage.classList.add('mobile-menu-open'); } catch (_) {}
             try { overlay.setAttribute('aria-hidden', 'false'); } catch (_) {}
             // Prevent background scroll while open
             try { document.body.style.overflow = 'hidden'; } catch (_) {}
@@ -5499,6 +5501,7 @@
           };
           const close = () => {
             overlay.classList.remove('open');
+            try { homePage && homePage.classList.remove('mobile-menu-open'); } catch (_) {}
             try { overlay.setAttribute('aria-hidden', 'true'); } catch (_) {}
             try { document.body.style.overflow = ''; } catch (_) {}
             try { if (typeof window.__setHomeFallingTagsActive === 'function') window.__setHomeFallingTagsActive(true); } catch (_) {}

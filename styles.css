@@ -59,6 +59,9 @@ body.toyota-deep-dive .page[data-name="case study page"] .nav-split {
 
 body.toyota-deep-dive .page[data-name="case study page"] .site-footer {
   display: flex;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 html.home-tile-intro-lock,
@@ -2741,6 +2744,8 @@ p { margin: 0; }
 
 
 .site-footer {
+  position: relative;
+  z-index: 0;
   padding: 0 16px 0 0;
   display: flex;
   flex-direction: column;
@@ -2761,23 +2766,8 @@ p { margin: 0; }
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: rgba(0, 0, 0, 0.38);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  backdrop-filter: blur(12px) saturate(140%);
   border-radius: 16px;
   background-clip: padding-box;
-}
-
-.page[data-name="about page"] .site-footer {
-  background: transparent;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
-
-.page[data-name="home page"] .site-footer {
-  background: transparent;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
 }
 
 .site-footer__text {
@@ -2878,8 +2868,12 @@ p { margin: 0; }
   .page[data-name="home page"] .site-footer,
   .page[data-name="about page"] .site-footer,
   .page[data-name="case study page"] .site-footer {
-    padding-left: 0;
-    padding-right: 0;
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+    margin-left: calc(50% - 50vw + 16px);
+    margin-right: calc(50% - 50vw + 16px);
+    padding-left: 16px;
+    padding-right: 16px;
     padding-bottom: 16px;
     padding-bottom: max(16px, env(safe-area-inset-bottom));
     flex-direction: column;
@@ -2943,9 +2937,9 @@ p { margin: 0; }
 }
 
 @media (max-width: 900px) {
-  .page[data-name="home page"] .site-footer.scroll-reveal-visible,
-  .page[data-name="about page"] .site-footer.scroll-reveal-visible,
-  .page[data-name="case study page"] .site-footer.scroll-reveal-visible {
+  .page[data-name="home page"] .site-footer,
+  .page[data-name="about page"] .site-footer,
+  .page[data-name="case study page"] .site-footer {
     padding-bottom: 40px;
     padding-bottom: max(40px, env(safe-area-inset-bottom));
   }
@@ -3137,6 +3131,10 @@ p { margin: 0; }
 .page[data-name="home page"] > * {
   position: relative;
   z-index: 1;
+}
+
+.page[data-name="home page"].mobile-menu-open > .main {
+  z-index: 200;
 }
 
 /* Fullscreen background sequence */
@@ -3349,7 +3347,7 @@ p { margin: 0; }
 .mobile-menu-overlay {
   position: fixed;
   inset: 0;
-  z-index: 60; /* above nav + toast */
+  z-index: 100; /* above nav, footer, and toast */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3363,6 +3361,8 @@ p { margin: 0; }
   pointer-events: auto;
 }
 .mobile-menu-panel {
+  position: relative;
+  z-index: 101;
   width: calc(100% - 2 * var(--space-s));
   max-width: 360px;
   margin: var(--space-s);
@@ -6552,14 +6552,6 @@ html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
     display: none !important;
   }
 
-  .page[data-name="home page"] .site-footer,
-  .page[data-name="about page"] .site-footer,
-  .page[data-name="case study page"] .site-footer {
-    width: auto;
-    max-width: none;
-    margin-left: 16px;
-    margin-right: 16px;
-  }
 }
 
 @media (max-width: 450px) {
