@@ -2910,759 +2910,513 @@
 
         const setupHomeFallingTags = (startDelayMs = 0) => {
           try {
+            if (typeof window === 'undefined') return;
+            const MatterLib = window.Matter;
             const homePageRoot = document.querySelector('.page[data-name="home page"]');
             const chips = Array.from(document.querySelectorAll('[data-home-falling-tag]'));
             const chipLayer = document.querySelector('.home-falling-tag-layer');
             const tileGrid = document.querySelector('.page[data-name="home page"] .tile-grid');
-            if (!(homePageRoot && chips.length)) return;
+            if (!(MatterLib && homePageRoot && chipLayer && tileGrid && chips.length)) return;
+
+            try {
+              if (typeof window.__destroyHomeFallingTags === 'function') {
+                window.__destroyHomeFallingTags();
+              }
+            } catch (_) { /* ignore previous instance teardown errors */ }
+
+            const {
+              Engine,
+              Runner,
+              Composite,
+              Bodies,
+              Body,
+              Sleeping,
+            } = MatterLib;
 
             const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             const kickoffDelay = Math.max(0, Number(startDelayMs) || 0);
-            const startPhysicsFns = [];
-            const replayChipFns = [];
+            const engine = Engine.create({ enableSleeping: true });
+            engine.gravity.x = 0;
+            engine.gravity.y = prefersReduced ? 0.72 : 0.96;
+            engine.positionIterations = 10;
+            engine.velocityIterations = 8;
+            engine.constraintIterations = 4;
+            const runner = Runner.create();
             const chipStates = [];
-            let sharedAnimationFrameId = 0;
-            let sharedLastFrameTs = 0;
-            let stackSpawnCenterX = 0;
+            const staticBodies = [];
+            let rafId = 0;
+            let teardownCalled = false;
+            let lastSurfaceSignature = '';
+            let lastSpawnCenterX = 0;
+            let resizeTimerId = 0;
+            let activeDragState = null;
+            let currentVisibleTileRects = [];
+
+            const setTagsActive = (isActive) => {
+              chipLayer.classList.toggle('home-falling-tag-layer--inactive', !isActive);
+            };
 
             const getViewport = () => ({
               width: window.innerWidth || document.documentElement.clientWidth || 0,
               height: window.innerHeight || document.documentElement.clientHeight || 0,
             });
 
-            const getStackSpawnCenterX = () => {
+            const getSpawnCenterX = () => {
               const viewport = getViewport();
-              if (!viewport.width) return stackSpawnCenterX || 0;
+              if (!viewport.width) return lastSpawnCenterX || 0;
               const nextCenter = viewport.width * 0.52;
-              stackSpawnCenterX = Math.max(viewport.width * 0.24, Math.min(viewport.width * 0.76, nextCenter));
-              return stackSpawnCenterX;
+              lastSpawnCenterX = Math.max(viewport.width * 0.24, Math.min(viewport.width * 0.76, nextCenter));
+              return lastSpawnCenterX;
             };
 
-            const getFloorYAtX = (sampleX, sampleHalfW = 0) => {
+            const getVisibleTileRects = () => {
               const viewport = getViewport();
-              if (!tileGrid) return viewport.height;
-              try {
-                if (homePageRoot.classList.contains('home-archive-active') || homePageRoot.classList.contains('home-game-active')) {
-                  return viewport.height;
+              if (
+                homePageRoot.classList.contains('home-archive-active') ||
+                homePageRoot.classList.contains('home-game-active')
+              ) {
+                return [];
+              }
+              return Array.from(tileGrid.querySelectorAll('.tile'))
+                .filter((tile) => tile && !tile.classList.contains('filtered-out'))
+                .map((tile) => tile.getBoundingClientRect())
+                .map((rect) => {
+                  if (!(rect && rect.width > 0 && rect.height > 0)) return null;
+                  const left = Math.max(0, rect.left);
+                  const right = Math.min(viewport.width, rect.right);
+                  const top = Math.max(0, rect.top);
+                  const bottom = Math.min(viewport.height, rect.bottom);
+                  const width = right - left;
+                  const height = bottom - top;
+                  if (width <= 0 || height <= 0) return null;
+                  return {
+                    left,
+                    top,
+                    width,
+                    height,
+                  };
+                })
+                .filter(Boolean);
+            };
+
+            const getSurfaceSignature = (rects) => rects
+              .map((rect) => [
+                Math.round(rect.left),
+                Math.round(rect.top),
+                Math.round(rect.width),
+                Math.round(rect.height),
+              ].join(':'))
+              .join('|');
+
+            const clearStaticBodies = () => {
+              if (!staticBodies.length) return;
+              Composite.remove(engine.world, staticBodies);
+              staticBodies.length = 0;
+            };
+
+            const getSupportYForState = (state, centerX = null) => {
+              const viewport = getViewport();
+              const x = centerX == null
+                ? (state && state.body ? state.body.position.x : 0)
+                : centerX;
+              const halfW = Math.max(18, (state && state.width ? state.width / 2 : 42) - 8);
+              let supportY = viewport.height;
+
+              currentVisibleTileRects.forEach((rect) => {
+                if (!rect) return;
+                const overlapsX = rect.right >= (x - halfW) && rect.left <= (x + halfW);
+                if (!overlapsX) return;
+                supportY = Math.min(supportY, rect.top);
+              });
+
+              return supportY;
+            };
+
+            const clampStateAboveSupport = (state, centerX = null, centerY = null) => {
+              if (!(state && state.body)) return;
+              const x = centerX == null ? state.body.position.x : centerX;
+              const y = centerY == null ? state.body.position.y : centerY;
+              const supportY = getSupportYForState(state, x);
+              const halfH = Math.max(14, state.height / 2);
+              const maxY = supportY - halfH;
+              if (y > maxY) {
+                Sleeping.set(state.body, false);
+                Body.setPosition(state.body, { x, y: maxY });
+                if (state.body.velocity.y > 0) {
+                  Body.setVelocity(state.body, { x: state.body.velocity.x, y: 0 });
                 }
-                const tiles = Array.from(tileGrid.querySelectorAll('.tile'))
-                  .filter((tile) => tile && !tile.classList.contains('filtered-out'));
-                if (!tiles.length) return viewport.height;
-
-                const probeLeft = sampleX - sampleHalfW;
-                const probeRight = sampleX + sampleHalfW;
-                const overlaps = [];
-                const fallbacks = [];
-
-                tiles.forEach((tile) => {
-                  try {
-                    const rect = tile.getBoundingClientRect();
-                    if (!rect || rect.width <= 0 || rect.height <= 0) return;
-
-                    const overlapsProbe = rect.right >= probeLeft && rect.left <= probeRight;
-                    if (overlapsProbe) {
-                      overlaps.push(rect);
-                      return;
-                    }
-
-                    const distanceToRange = sampleX < rect.left
-                      ? rect.left - sampleX
-                      : sampleX > rect.right
-                        ? sampleX - rect.right
-                        : 0;
-                    fallbacks.push({ rect, distance: distanceToRange });
-                  } catch (_) { /* ignore per-tile floor sampling errors */ }
-                });
-
-                if (overlaps.length) {
-                  return Math.min(
-                    viewport.height,
-                    Math.min(...overlaps.map((rect) => rect.top))
-                  );
-                }
-
-                if (fallbacks.length) {
-                  fallbacks.sort((a, b) => a.distance - b.distance || a.rect.top - b.rect.top);
-                  return Math.min(viewport.height, fallbacks[0].rect.top);
-                }
-
-                return viewport.height;
-              } catch (_) {
-                return viewport.height;
+                Body.setAngularVelocity(state.body, 0);
               }
             };
 
-            const setTagsActive = (isActive) => {
-              if (!chipLayer) return;
-              chipLayer.classList.toggle('home-falling-tag-layer--inactive', !isActive);
+            const clampAllStatesAboveSupport = () => {
+              chipStates.forEach((state) => {
+                if (!(state && state.body && state.isVisible)) return;
+                clampStateAboveSupport(state);
+              });
             };
 
-            const refreshChipMetrics = (state) => {
-              if (!state || !state.chip) return;
-              const rect = state.chip.getBoundingClientRect();
-              state.width = Math.max(56, Math.ceil(state.chip.offsetWidth || rect.width || 84));
-              state.height = Math.max(28, Math.ceil(state.chip.offsetHeight || rect.height || 34));
-              state.halfW = state.width / 2;
-              state.halfH = state.height / 2;
+            const rebuildStaticBodies = () => {
+              const viewport = getViewport();
+              const rects = getVisibleTileRects();
+              currentVisibleTileRects = rects.map((rect) => ({
+                left: rect.left,
+                right: rect.left + rect.width,
+                top: rect.top,
+                bottom: rect.top + rect.height,
+                width: rect.width,
+                height: rect.height,
+              }));
+              const nextSignature = `${viewport.width}x${viewport.height}|${getSurfaceSignature(rects)}`;
+              if (nextSignature === lastSurfaceSignature) return;
+              lastSurfaceSignature = nextSignature;
+
+              clearStaticBodies();
+
+              const boundaryOptions = {
+                isStatic: true,
+                friction: 0.95,
+                frictionStatic: 1.2,
+                restitution: 0,
+                render: { visible: false },
+              };
+
+              staticBodies.push(
+                Bodies.rectangle(viewport.width / 2, viewport.height + 40, viewport.width + 240, 80, boundaryOptions),
+                Bodies.rectangle(-40, viewport.height / 2, 80, viewport.height + 240, boundaryOptions),
+                Bodies.rectangle(viewport.width + 40, viewport.height / 2, 80, viewport.height + 240, boundaryOptions),
+                Bodies.rectangle(viewport.width / 2, -900, viewport.width + 240, 120, boundaryOptions)
+              );
+
+              rects.forEach((rect) => {
+                staticBodies.push(
+                  Bodies.rectangle(
+                    rect.left + (rect.width / 2),
+                    rect.top + (rect.height / 2),
+                    rect.width,
+                    rect.height,
+                    boundaryOptions
+                  )
+                );
+              });
+
+              Composite.add(engine.world, staticBodies);
+              wakeAllChips();
+              clampAllStatesAboveSupport();
             };
 
-            const refreshChipGeometry = (state) => {
-              if (!state) return;
-              refreshChipMetrics(state);
-              const cos = Math.cos(state.angle || 0);
-              const sin = Math.sin(state.angle || 0);
-              state.axisXx = cos;
-              state.axisXy = sin;
-              state.axisYx = -sin;
-              state.axisYy = cos;
-              state.extentX = (Math.abs(cos) * state.halfW) + (Math.abs(sin) * state.halfH);
-              state.extentY = (Math.abs(sin) * state.halfW) + (Math.abs(cos) * state.halfH);
+            const getChipMetrics = (chip) => {
+              const rect = chip.getBoundingClientRect();
+              return {
+                width: Math.max(56, Math.ceil(chip.offsetWidth || rect.width || 84)),
+                height: Math.max(28, Math.ceil(chip.offsetHeight || rect.height || 34)),
+              };
             };
 
-            const normalizeAngle = (angle) => {
-              const fullTurn = Math.PI * 2;
-              let next = angle % fullTurn;
-              if (next > Math.PI) next -= fullTurn;
-              if (next < -Math.PI) next += fullTurn;
-              return next;
+            const createCapsuleBody = (x, y, width, height, massValue = 1) => {
+              const radius = Math.max(8, height / 2);
+              const centerWidth = Math.max(10, width - (radius * 2));
+              const common = {
+                restitution: 0.02,
+                friction: 0.92,
+                frictionStatic: 1.3,
+                frictionAir: prefersReduced ? 0.02 : 0.016,
+                slop: 0.01,
+                density: 0.0012 * massValue,
+                render: { visible: false },
+              };
+
+              const body = Body.create({
+                parts: [
+                  Bodies.rectangle(x, y, centerWidth, height, common),
+                  Bodies.circle(x - (centerWidth / 2), y, radius, common),
+                  Bodies.circle(x + (centerWidth / 2), y, radius, common),
+                ],
+                restitution: common.restitution,
+                friction: common.friction,
+                frictionStatic: common.frictionStatic,
+                frictionAir: common.frictionAir,
+                sleepThreshold: 18,
+                slop: common.slop,
+                render: { visible: false },
+              });
+
+              return body;
             };
 
-            const getProjectionRadius = (state, axisX, axisY) => (
-              (state.halfW * Math.abs((axisX * state.axisXx) + (axisY * state.axisXy))) +
-              (state.halfH * Math.abs((axisX * state.axisYx) + (axisY * state.axisYy)))
-            );
+            const syncChipElement = (state) => {
+              if (!(state && state.body && state.chip)) return;
+              const { x, y } = state.body.position;
+              state.chip.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) rotate(${state.body.angle}rad)`;
+            };
 
-            const getClosestPointsOnSegments = (
-              a0x, a0y, a1x, a1y,
-              b0x, b0y, b1x, b1y
-            ) => {
-              const ux = a1x - a0x;
-              const uy = a1y - a0y;
-              const vx = b1x - b0x;
-              const vy = b1y - b0y;
-              const wx = a0x - b0x;
-              const wy = a0y - b0y;
-              const a = (ux * ux) + (uy * uy);
-              const b = (ux * vx) + (uy * vy);
-              const c = (vx * vx) + (vy * vy);
-              const d = (ux * wx) + (uy * wy);
-              const e = (vx * wx) + (vy * wy);
-              const epsilon = 0.000001;
-              let sN = 0;
-              let sD = (a * c) - (b * b);
-              let tN = 0;
-              let tD = sD;
+            const syncAllChipElements = () => {
+              chipStates.forEach((state) => {
+                if (!state || !state.body || !state.isVisible) return;
+                syncChipElement(state);
+              });
+            };
 
-              if (sD < epsilon) {
-                sN = 0;
-                sD = 1;
-                tN = e;
-                tD = c || 1;
-              } else {
-                sN = (b * e) - (c * d);
-                tN = (a * e) - (b * d);
+            const wakeAllChips = () => {
+              chipStates.forEach((state) => {
+                if (state && state.body) Sleeping.set(state.body, false);
+              });
+            };
 
-                if (sN < 0) {
-                  sN = 0;
-                  tN = e;
-                  tD = c || 1;
-                } else if (sN > sD) {
-                  sN = sD;
-                  tN = e + b;
-                  tD = c || 1;
-                }
-              }
-
-              if (tN < 0) {
-                tN = 0;
-                if (-d < 0) {
-                  sN = 0;
-                } else if (-d > a) {
-                  sN = sD;
-                } else {
-                  sN = -d;
-                  sD = a || 1;
-                }
-              } else if (tN > tD) {
-                tN = tD;
-                if ((-d + b) < 0) {
-                  sN = 0;
-                } else if ((-d + b) > a) {
-                  sN = sD;
-                } else {
-                  sN = -d + b;
-                  sD = a || 1;
-                }
-              }
-
-              const s = Math.abs(sN) < epsilon ? 0 : (sN / (sD || 1));
-              const t = Math.abs(tN) < epsilon ? 0 : (tN / (tD || 1));
+            chipStates.push(...chips.map((chip, index) => {
+              const metrics = getChipMetrics(chip);
+              const configuredMass = Number(chip.dataset.weight);
+              const mass = Number.isFinite(configuredMass)
+                ? Math.max(0.8, Math.min(1.5, configuredMass))
+                : 1;
 
               return {
-                ax: a0x + (s * ux),
-                ay: a0y + (s * uy),
-                bx: b0x + (t * vx),
-                by: b0y + (t * vy),
-              };
-            };
-
-            const dampSmallChipMotion = (state, multiplier = 0.82) => {
-              if (!state) return;
-              state.vx *= multiplier;
-              state.vy *= multiplier;
-              state.angularVelocity *= Math.max(0.7, multiplier - 0.08);
-              if (Math.abs(state.vx) < 0.045) state.vx = 0;
-              if (Math.abs(state.vy) < 0.045) state.vy = 0;
-              if (Math.abs(state.angularVelocity) < 0.0025) state.angularVelocity = 0;
-            };
-
-            const dampStackingContact = (state, nx, ny, tangentX, tangentY) => {
-              if (!state) return;
-              const normalVelocity = (state.vx * nx) + (state.vy * ny);
-              const tangentVelocity = (state.vx * tangentX) + (state.vy * tangentY);
-              state.vx = (tangentVelocity * tangentX) + (normalVelocity * nx * 0.08);
-              state.vy = (tangentVelocity * tangentY) + (normalVelocity * ny * 0.08);
-              state.vx *= 0.74;
-              state.vy *= 0.74;
-              state.angularVelocity *= 0.56;
-              if (Math.abs(state.vx) < 0.08) state.vx = 0;
-              if (Math.abs(state.vy) < 0.08) state.vy = 0;
-              if (Math.abs(state.angularVelocity) < 0.002) state.angularVelocity = 0;
-            };
-
-            const getChipCollision = (a, b) => {
-              refreshChipGeometry(a);
-              refreshChipGeometry(b);
-
-              const broadDeltaX = b.x - a.x;
-              const broadDeltaY = b.y - a.y;
-              const broadDistanceX = Math.abs(broadDeltaX);
-              const broadDistanceY = Math.abs(broadDeltaY);
-              if (broadDistanceX > (a.extentX + b.extentX) || broadDistanceY > (a.extentY + b.extentY)) {
-                return null;
-              }
-
-              const radiusA = a.halfH;
-              const radiusB = b.halfH;
-              const halfSegmentA = Math.max(0, a.halfW - radiusA);
-              const halfSegmentB = Math.max(0, b.halfW - radiusB);
-
-              const a0x = a.x - (a.axisXx * halfSegmentA);
-              const a0y = a.y - (a.axisXy * halfSegmentA);
-              const a1x = a.x + (a.axisXx * halfSegmentA);
-              const a1y = a.y + (a.axisXy * halfSegmentA);
-              const b0x = b.x - (b.axisXx * halfSegmentB);
-              const b0y = b.y - (b.axisXy * halfSegmentB);
-              const b1x = b.x + (b.axisXx * halfSegmentB);
-              const b1y = b.y + (b.axisXy * halfSegmentB);
-
-              const closest = getClosestPointsOnSegments(
-                a0x, a0y, a1x, a1y,
-                b0x, b0y, b1x, b1y
-              );
-
-              let normalX = closest.bx - closest.ax;
-              let normalY = closest.by - closest.ay;
-              let distance = Math.hypot(normalX, normalY);
-              const radiusSum = radiusA + radiusB;
-              const overlap = radiusSum - distance;
-
-              if (overlap <= 0) return null;
-
-              if (distance <= 0.0001) {
-                normalX = broadDeltaX;
-                normalY = broadDeltaY;
-                distance = Math.hypot(normalX, normalY);
-                if (distance <= 0.0001) {
-                  normalX = a.axisYx;
-                  normalY = a.axisYy;
-                  distance = 1;
-                }
-              }
-
-              normalX /= distance;
-              normalY /= distance;
-
-              return { overlap, normalX, normalY };
-            };
-
-            const updateChip = (state) => {
-              if (!state) return;
-              state.chip.style.transform = `translate(-50%, -50%) translate3d(${state.x}px, ${state.y}px, 0) rotate(${state.angle}rad)`;
-            };
-
-            const clampChipToViewport = (state) => {
-              if (!state || !state.hasStarted) return;
-              refreshChipGeometry(state);
-              const viewport = getViewport();
-              const floorY = getFloorYAtX(state.x, state.extentX);
-              state.x = Math.max(state.extentX, Math.min(viewport.width - state.extentX, state.x));
-              const maxY = floorY - state.extentY;
-              const isFollowingOffscreenFloor = floorY <= (state.extentY * 2);
-              const isFallingInFromAbove = !state.isDragging && state.y < state.extentY && state.vy >= 0;
-              const allowOffscreenTop = (
-                isFollowingOffscreenFloor ||
-                isFallingInFromAbove
-              );
-              if (allowOffscreenTop) {
-                state.y = Math.min(maxY, state.y);
-                if (isFollowingOffscreenFloor && state.vy > 0) state.vy = 0;
-              } else {
-                state.y = Math.max(state.extentY, Math.min(maxY, state.y));
-              }
-              if (state.x <= state.extentX && state.vx < 0) state.vx = 0;
-              if (state.x >= viewport.width - state.extentX && state.vx > 0) state.vx = 0;
-              if (!allowOffscreenTop) {
-                if (state.y <= state.extentY && state.vy < 0) state.vy = 0;
-                if (state.y >= floorY - state.extentY && state.vy > 0) state.vy = 0;
-              }
-            };
-
-            const stepChipPhysics = (state, dtMs) => {
-              if (!state || !state.hasStarted || state.isDragging) return;
-              const frameScale = Math.min(2.5, Math.max(0.75, dtMs / 16.6667));
-              const gravity = prefersReduced ? 0.18 : 0.42;
-              const airDrag = state.airDrag || 0.992;
-              const angularDrag = state.angularDrag || 0.992;
-              const bounce = state.bounce || 0.62;
-              const wallBounce = 0.72;
-              const viewport = getViewport();
-              const gravityScale = state.gravityScale || 1;
-
-              state.vy += gravity * gravityScale * frameScale;
-              state.x += state.vx * frameScale;
-              state.y += state.vy * frameScale;
-              state.angle = normalizeAngle(state.angle + (state.angularVelocity * frameScale));
-
-              state.vx *= Math.pow(airDrag, frameScale);
-              state.vy *= Math.pow(airDrag, frameScale);
-              state.angularVelocity *= Math.pow(angularDrag, frameScale);
-              state.angularVelocity += (-state.angle) * (prefersReduced ? 0.001 : 0.0016) * frameScale;
-
-              refreshChipGeometry(state);
-              const floorY = getFloorYAtX(state.x, state.extentX);
-
-              if (floorY <= 0) {
-                state.floorGap = 0;
-                state.isNearFloor = true;
-                state.y = floorY - state.extentY;
-                state.vy = Math.min(state.vy, -0.6);
-                state.vx *= 0.98;
-                return;
-              }
-
-              state.floorGap = Math.max(0, floorY - (state.y + state.extentY));
-              state.isNearFloor = state.floorGap <= Math.max(8, state.halfH * 0.38);
-
-              if (state.x - state.extentX <= 0) {
-                state.x = state.extentX;
-                state.vx = Math.abs(state.vx) * wallBounce;
-              } else if (state.x + state.extentX >= viewport.width) {
-                state.x = viewport.width - state.extentX;
-                state.vx = -Math.abs(state.vx) * wallBounce;
-              }
-
-              if (state.y + state.extentY >= floorY) {
-                state.y = floorY - state.extentY;
-                state.vy = -Math.abs(state.vy) * bounce;
-                state.vx *= 0.98;
-                state.angularVelocity *= 0.98;
-                if (Math.abs(state.vy) < 0.28) state.vy = 0;
-                if (Math.abs(state.vx) < 0.03) state.vx = 0;
-              } else if (state.y - state.extentY <= 0 && state.vy < 0) {
-                state.y = state.extentY;
-                state.vy = Math.abs(state.vy) * 0.24;
-              }
-
-              if (state.y + state.extentY >= floorY - 2) {
-                const settleMultiplier = Math.max(0.58, 1 - ((prefersReduced ? 0.12 : 0.18) * frameScale));
-                state.angle = normalizeAngle(state.angle) * settleMultiplier;
-                state.angularVelocity *= Math.pow(prefersReduced ? 0.74 : 0.62, frameScale);
-              }
-            };
-
-            const resolveChipCollisions = () => {
-              const activeStates = chipStates.filter((state) => state && state.hasStarted);
-              if (activeStates.length < 2) return;
-
-              activeStates.forEach((state) => refreshChipGeometry(state));
-
-              for (let pass = 0; pass < 2; pass += 1) {
-                for (let i = 0; i < activeStates.length - 1; i += 1) {
-                  for (let j = i + 1; j < activeStates.length; j += 1) {
-                    const a = activeStates[i];
-                    const b = activeStates[j];
-                    const collision = getChipCollision(a, b);
-                    if (!collision) continue;
-
-                    const invMassA = a.isDragging ? 0 : (a.inverseMass || 1);
-                    const invMassB = b.isDragging ? 0 : (b.inverseMass || 1);
-                    const totalInvMass = invMassA + invMassB;
-                    if (!totalInvMass) continue;
-
-                    const nx = collision.normalX;
-                    const ny = collision.normalY;
-                    const correction = collision.overlap + 0.15;
-                    if (invMassA) a.x -= nx * correction * (invMassA / totalInvMass);
-                    if (invMassA) a.y -= ny * correction * (invMassA / totalInvMass);
-                    if (invMassB) b.x += nx * correction * (invMassB / totalInvMass);
-                    if (invMassB) b.y += ny * correction * (invMassB / totalInvMass);
-
-                    const relativeVelocity = ((b.vx - a.vx) * nx) + ((b.vy - a.vy) * ny);
-                    const isDraggedPair = a.isDragging || b.isDragging;
-                    const isGentleContact = Math.abs(relativeVelocity) < (isDraggedPair ? 1.1 : 0.42);
-                    const isStackingContact = Math.abs(ny) > 0.62;
-                    const bothAirborneDescending = (
-                      !a.isNearFloor &&
-                      !b.isNearFloor &&
-                      a.vy > 0.12 &&
-                      b.vy > 0.12
-                    );
-                    const useRestingStackAssist = (
-                      isStackingContact &&
-                      !bothAirborneDescending &&
-                      (
-                        a.isNearFloor ||
-                        b.isNearFloor ||
-                        Math.abs(a.vy) < 0.18 ||
-                        Math.abs(b.vy) < 0.18
-                      )
-                    );
-                    if (relativeVelocity < 0) {
-                      const restitution = isGentleContact
-                        ? (useRestingStackAssist ? 0 : (isStackingContact ? 0.05 : 0.02))
-                        : (isDraggedPair ? 0.06 : (prefersReduced ? 0.12 : 0.18));
-                      const impulse = (-(1 + restitution) * relativeVelocity) / totalInvMass;
-                      if (invMassA) {
-                        a.vx -= impulse * invMassA * nx;
-                        a.vy -= impulse * invMassA * ny;
-                      }
-                      if (invMassB) {
-                        b.vx += impulse * invMassB * nx;
-                        b.vy += impulse * invMassB * ny;
-                      }
-
-                      const tangentX = -ny;
-                      const tangentY = nx;
-                      const tangentialVelocity = ((b.vx - a.vx) * tangentX) + ((b.vy - a.vy) * tangentY);
-                      const frictionImpulse = Math.max(
-                        useRestingStackAssist ? -0.26 : (isStackingContact ? -0.08 : (isGentleContact ? -0.18 : -0.08)),
-                        Math.min(
-                          useRestingStackAssist ? 0.26 : (isStackingContact ? 0.08 : (isGentleContact ? 0.18 : 0.08)),
-                          tangentialVelocity * (useRestingStackAssist ? 0.24 : (isStackingContact ? 0.05 : (isGentleContact ? 0.16 : 0.06)))
-                        )
-                      );
-                      if (invMassA) {
-                        a.vx += frictionImpulse * tangentX;
-                        a.vy += frictionImpulse * tangentY;
-                      }
-                      if (invMassB) {
-                        b.vx -= frictionImpulse * tangentX;
-                        b.vy -= frictionImpulse * tangentY;
-                      }
-
-                      const spinDirection = tangentialVelocity === 0
-                        ? (nx !== 0 ? Math.sign(nx) : Math.sign(ny) || 1)
-                        : Math.sign(tangentialVelocity);
-                      const spinKick = isGentleContact
-                        ? 0
-                        : Math.min(0.01, Math.abs(impulse) * 0.0015);
-                      if (invMassA) a.angularVelocity -= spinKick * spinDirection;
-                      if (invMassB) b.angularVelocity += spinKick * spinDirection;
-
-                      if (isGentleContact) {
-                        if (useRestingStackAssist) {
-                          if (invMassA) dampStackingContact(a, nx, ny, tangentX, tangentY);
-                          if (invMassB) dampStackingContact(b, nx, ny, tangentX, tangentY);
-                        } else {
-                          if (invMassA) dampSmallChipMotion(a, isDraggedPair ? 0.68 : 0.76);
-                          if (invMassB) dampSmallChipMotion(b, isDraggedPair ? 0.68 : 0.76);
-                        }
-                      }
-                    } else {
-                      if (collision.overlap > 1.4 && !isDraggedPair) {
-                        const driftKick = prefersReduced ? 0.01 : 0.018;
-                        if (invMassA) {
-                          a.vx -= nx * driftKick;
-                          a.vy -= ny * driftKick;
-                        }
-                        if (invMassB) {
-                          b.vx += nx * driftKick;
-                          b.vy += ny * driftKick;
-                        }
-                      } else {
-                        if (invMassA) dampSmallChipMotion(a, 0.74);
-                        if (invMassB) dampSmallChipMotion(b, 0.74);
-                      }
-                    }
-                  }
-                }
-              }
-
-              activeStates.forEach((state) => clampChipToViewport(state));
-            };
-
-            const hasActiveChip = () => chipStates.some((state) => state && state.hasStarted);
-
-            const sharedTick = (timestamp) => {
-              if (!hasActiveChip()) {
-                sharedAnimationFrameId = 0;
-                sharedLastFrameTs = 0;
-                return;
-              }
-
-              if (!sharedLastFrameTs) sharedLastFrameTs = timestamp;
-              const dtMs = Math.min(34, Math.max(8, timestamp - sharedLastFrameTs));
-              sharedLastFrameTs = timestamp;
-
-              chipStates.forEach((state) => {
-                if (!state || !state.hasStarted) return;
-                stepChipPhysics(state, dtMs);
-              });
-
-              resolveChipCollisions();
-
-              chipStates.forEach((state) => {
-                if (!state || !state.hasStarted) return;
-                updateChip(state);
-              });
-
-              sharedAnimationFrameId = window.requestAnimationFrame(sharedTick);
-            };
-
-            const ensureSharedTick = () => {
-              if (sharedAnimationFrameId || !hasActiveChip()) return;
-              sharedLastFrameTs = 0;
-              sharedAnimationFrameId = window.requestAnimationFrame(sharedTick);
-            };
-
-            const stopSharedTickIfIdle = () => {
-              if (hasActiveChip() || !sharedAnimationFrameId) return;
-              try { window.cancelAnimationFrame(sharedAnimationFrameId); } catch (_) {}
-              sharedAnimationFrameId = 0;
-              sharedLastFrameTs = 0;
-            };
-
-            chips.forEach((chip, index) => {
-              const state = {
                 chip,
                 index,
-                revealFrameId: 0,
+                width: metrics.width,
+                height: metrics.height,
+                mass,
+                body: null,
+                isVisible: false,
                 startTimerId: 0,
-                resizeTimerId: 0,
-                viewportSyncFrameId: 0,
-                hasStarted: false,
-                isDragging: false,
-                lastPointerTs: 0,
-                dragOffsetX: 0,
-                dragOffsetY: 0,
-                x: 0,
+              };
+            }));
+
+            const startChip = (state) => {
+              if (!(state && !state.body)) return;
+              const viewport = getViewport();
+              const spawnX = getSpawnCenterX() + ((state.index % 2 === 0 ? -1 : 1) * Math.min(12, viewport.width * 0.014));
+              const spawnY = -Math.max(180 + (state.index * 34), state.height * 6);
+              const body = createCapsuleBody(spawnX, spawnY, state.width, state.height, state.mass);
+
+              Body.setVelocity(body, {
+                x: ((state.index % 2 === 0 ? -1 : 1) * 0.12) + ((Math.random() - 0.5) * 0.2),
                 y: 0,
-                vx: 0,
-                vy: 0,
-                angle: 0,
-                angularVelocity: 0,
-                width: 84,
-                height: 34,
-                halfW: 42,
-                halfH: 17,
-                mass: 1,
-                inverseMass: 1,
-                gravityScale: 1,
-                airDrag: 0.992,
-                angularDrag: 0.992,
-                bounce: 0.62,
-                floorGap: Number.POSITIVE_INFINITY,
-                isNearFloor: false,
-              };
-              const configuredMass = Number(chip.dataset.weight);
-              const chipMass = Number.isFinite(configuredMass)
-                ? Math.max(0.72, Math.min(1.5, configuredMass))
-                : 1;
-              state.mass = chipMass;
-              state.inverseMass = 1 / chipMass;
-              state.gravityScale = 1;
-              state.airDrag = Math.max(0.991, Math.min(0.993, 0.992 + ((chipMass - 1) * 0.002)));
-              state.angularDrag = Math.max(0.988, Math.min(0.993, 0.991 + ((chipMass - 1) * 0.004)));
-              state.bounce = Math.max(0.5, Math.min(0.66, 0.6 - ((chipMass - 1) * 0.14)));
-              chipStates.push(state);
+              });
+              Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.01);
 
-              const getPoint = (event) => {
-                if (event.touches && event.touches[0]) {
-                  return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+              state.body = body;
+              state.isVisible = true;
+              Composite.add(engine.world, body);
+              state.chip.classList.remove('home-falling-tag--hidden');
+              syncChipElement(state);
+              wakeAllChips();
+            };
+
+            const queueStarts = (baseDelayMs = kickoffDelay) => {
+              chipStates.forEach((state) => {
+                if (!state) return;
+                if (state.startTimerId) {
+                  window.clearTimeout(state.startTimerId);
+                  state.startTimerId = 0;
                 }
-                return { x: event.clientX, y: event.clientY };
-              };
-
-              const onPointerMove = (event) => {
-                if (!state.isDragging) return;
-                const point = getPoint(event);
-                const now = performance.now();
-                const dt = Math.max(16, now - (state.lastPointerTs || now));
-                const nextX = point.x - state.dragOffsetX;
-                const nextY = point.y - state.dragOffsetY;
-                state.vx = ((nextX - state.x) / dt) * 16.6667;
-                state.vy = ((nextY - state.y) / dt) * 16.6667;
-                state.x = nextX;
-                state.y = nextY;
-                state.angularVelocity = 0;
-                state.lastPointerTs = now;
-                clampChipToViewport(state);
-                updateChip(state);
-                ensureSharedTick();
-                if (event.cancelable) event.preventDefault();
-              };
-
-              const endDrag = () => {
-                state.isDragging = false;
-                chip.classList.remove('is-dragging');
-                window.removeEventListener('pointermove', onPointerMove);
-                window.removeEventListener('pointerup', endDrag);
-                window.removeEventListener('pointercancel', endDrag);
-              };
-
-              const onPointerDown = (event) => {
-                if (!state.hasStarted) return;
-                const point = getPoint(event);
-                state.isDragging = true;
-                state.dragOffsetX = point.x - state.x;
-                state.dragOffsetY = point.y - state.y;
-                state.vx = 0;
-                state.vy = 0;
-                state.angularVelocity = 0;
-                state.lastPointerTs = performance.now();
-                chip.classList.add('is-dragging');
-                try {
-                  if (event.pointerId != null && chip.setPointerCapture) chip.setPointerCapture(event.pointerId);
-                } catch (_) {}
-                ensureSharedTick();
-                if (event.cancelable) event.preventDefault();
-                window.addEventListener('pointermove', onPointerMove, { passive: false });
-                window.addEventListener('pointerup', endDrag);
-                window.addEventListener('pointercancel', endDrag);
-              };
-
-              const startPhysics = () => {
-                if (state.hasStarted) return;
-                state.hasStarted = true;
-                const viewport = getViewport();
-                refreshChipGeometry(state);
-                const spawnBaseX = getStackSpawnCenterX() || (viewport.width * 0.52);
-                const spawnJitter = ((index % 2 === 0 ? -1 : 1) * Math.min(10, viewport.width * 0.012));
-                state.x = Math.round(spawnBaseX + spawnJitter);
-                state.y = -Math.max(160 + (index * 28), state.height * 6);
-                state.vx = ((index % 2 === 0 ? -1 : 1) * 0.03) + ((Math.random() - 0.5) * 0.08);
-                state.vy = 0;
-                state.angle = ((index % 2 === 0 ? -1 : 1) * 0.045) + ((Math.random() - 0.5) * 0.03);
-                state.angularVelocity = (Math.random() - 0.5) * 0.004;
-                updateChip(state);
-                if (state.revealFrameId) {
-                  try { window.cancelAnimationFrame(state.revealFrameId); } catch (_) {}
-                  state.revealFrameId = 0;
-                }
-                state.revealFrameId = window.requestAnimationFrame(() => {
-                  state.revealFrameId = 0;
-                  chip.classList.remove('home-falling-tag--hidden');
-                  ensureSharedTick();
-                });
-              };
-
-              const stopPhysics = () => {
-                if (state.revealFrameId) {
-                  try { window.cancelAnimationFrame(state.revealFrameId); } catch (_) {}
-                  state.revealFrameId = 0;
-                }
-                if (state.viewportSyncFrameId) {
-                  try { window.cancelAnimationFrame(state.viewportSyncFrameId); } catch (_) {}
-                  state.viewportSyncFrameId = 0;
-                }
-              };
-
-              const clearQueuedStart = () => {
-                if (!state.startTimerId) return;
-                try { window.clearTimeout(state.startTimerId); } catch (_) {}
-                state.startTimerId = 0;
-              };
-
-              const handleResize = () => {
-                if (state.resizeTimerId) {
-                  try { window.clearTimeout(state.resizeTimerId); } catch (_) {}
-                }
-                state.resizeTimerId = window.setTimeout(() => {
-                  state.resizeTimerId = 0;
-                  if (!state.hasStarted) return;
-                  clampChipToViewport(state);
-                  updateChip(state);
-                }, 60);
-              };
-
-              const handleScroll = () => {
-                if (state.viewportSyncFrameId) return;
-                state.viewportSyncFrameId = window.requestAnimationFrame(() => {
-                  state.viewportSyncFrameId = 0;
-                  if (!state.hasStarted) return;
-                  clampChipToViewport(state);
-                  updateChip(state);
-                });
-              };
-
-              chip.addEventListener('pointerdown', onPointerDown);
-              window.addEventListener('resize', handleResize, { passive: true });
-              window.addEventListener('orientationchange', handleResize, { passive: true });
-              window.addEventListener('scroll', handleScroll, { passive: true });
-
-              const queueStart = (baseDelayMs = kickoffDelay) => {
-                clearQueuedStart();
                 state.startTimerId = window.setTimeout(() => {
                   state.startTimerId = 0;
-                  startPhysics();
-                }, Math.max(0, Number(baseDelayMs) || 0) + (index * 260));
-              };
-
-              const resetChip = () => {
-                clearQueuedStart();
-                stopPhysics();
-                endDrag();
-                state.hasStarted = false;
-                state.lastPointerTs = 0;
-                state.dragOffsetX = 0;
-                state.dragOffsetY = 0;
-                state.x = 0;
-                state.y = 0;
-                state.vx = 0;
-                state.vy = 0;
-                state.angle = 0;
-                state.angularVelocity = 0;
-                state.floorGap = Number.POSITIVE_INFINITY;
-                state.isNearFloor = false;
-                chip.classList.remove('is-dragging');
-                chip.classList.add('home-falling-tag--hidden');
-                chip.style.transform = 'translate(-50%, -50%) translate3d(0, -200vh, 0)';
-                stopSharedTickIfIdle();
-              };
-
-              resetChip();
-
-              if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => queueStart(), { once: true });
-              } else {
-                queueStart();
-              }
-
-              startPhysicsFns.push(startPhysics);
-              replayChipFns.push((baseDelayMs = 0) => {
-                resetChip();
-                queueStart(baseDelayMs);
+                  startChip(state);
+                }, Math.max(0, Number(baseDelayMs) || 0) + (state.index * 240));
               });
-            });
+            };
 
+            const resetChips = () => {
+              chipStates.forEach((state) => {
+                if (!state) return;
+                if (state.startTimerId) {
+                  try { window.clearTimeout(state.startTimerId); } catch (_) {}
+                  state.startTimerId = 0;
+                }
+                if (state.body) {
+                  try { Composite.remove(engine.world, state.body); } catch (_) {}
+                  state.body = null;
+                }
+                state.isVisible = false;
+                state.chip.classList.remove('is-dragging');
+                state.chip.classList.add('home-falling-tag--hidden');
+                state.chip.style.transform = 'translate(-50%, -50%) translate3d(0, -200vh, 0)';
+              });
+            };
+
+            const getPoint = (event) => {
+              if (event.touches && event.touches[0]) {
+                return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+              }
+              return { x: event.clientX, y: event.clientY };
+            };
+
+            const endActiveDrag = () => {
+              if (!(activeDragState && activeDragState.state)) {
+                activeDragState = null;
+                return;
+              }
+              try {
+                const state = activeDragState.state;
+                if (state && state.body) {
+                  const releaseVelocity = activeDragState.releaseVelocity || { x: 0, y: 0 };
+                  const clampedVelocity = {
+                    x: Math.max(-18, Math.min(18, releaseVelocity.x || 0)),
+                    y: Math.max(-18, Math.min(18, releaseVelocity.y || 0)),
+                  };
+                  Sleeping.set(state.body, false);
+                  Body.setVelocity(state.body, clampedVelocity);
+                  Body.setAngularVelocity(
+                    state.body,
+                    Math.max(-0.08, Math.min(0.08, clampedVelocity.x * 0.0035))
+                  );
+                }
+                state.chip.classList.remove('is-dragging');
+              } catch (_) {}
+              activeDragState = null;
+            };
+
+            const handlePointerMove = (event) => {
+              if (!(activeDragState && activeDragState.state && activeDragState.state.body)) return;
+              const point = getPoint(event);
+              const state = activeDragState.state;
+              const body = state.body;
+              const now = performance.now();
+              const dt = Math.max(16, now - (activeDragState.lastTs || now));
+              const nextX = point.x - activeDragState.offsetX;
+              const nextY = point.y - activeDragState.offsetY;
+              const nextVelocity = {
+                x: ((nextX - body.position.x) / dt) * 16.6667,
+                y: ((nextY - body.position.y) / dt) * 16.6667,
+              };
+
+              Sleeping.set(body, false);
+              Body.setPosition(body, { x: nextX, y: nextY });
+              Body.setVelocity(body, nextVelocity);
+              Body.setAngularVelocity(body, 0);
+              clampStateAboveSupport(state, nextX, nextY);
+              activeDragState.pointX = point.x;
+              activeDragState.pointY = point.y;
+              activeDragState.lastTs = now;
+              activeDragState.releaseVelocity = nextVelocity;
+              if (event.cancelable) event.preventDefault();
+            };
+
+            const handlePointerEnd = () => {
+              endActiveDrag();
+            };
+
+            const step = () => {
+              if (teardownCalled) return;
+              rebuildStaticBodies();
+              if (activeDragState && activeDragState.state && activeDragState.state.body) {
+                const state = activeDragState.state;
+                const body = state.body;
+                const pinnedX = activeDragState.pointX - activeDragState.offsetX;
+                const pinnedY = activeDragState.pointY - activeDragState.offsetY;
+                Sleeping.set(body, false);
+                Body.setPosition(body, { x: pinnedX, y: pinnedY });
+                Body.setVelocity(body, { x: 0, y: 0 });
+                Body.setAngularVelocity(body, 0);
+                clampStateAboveSupport(state, pinnedX, pinnedY);
+              }
+              syncAllChipElements();
+              rafId = window.requestAnimationFrame(step);
+            };
+
+            const scheduleRebuild = () => {
+              if (resizeTimerId) {
+                try { window.clearTimeout(resizeTimerId); } catch (_) {}
+              }
+              resizeTimerId = window.setTimeout(() => {
+                resizeTimerId = 0;
+                rebuildStaticBodies();
+                wakeAllChips();
+              }, 60);
+            };
+
+            const clearDraggingClasses = () => {
+              chipStates.forEach((state) => {
+                if (state && state.chip) state.chip.classList.remove('is-dragging');
+              });
+            };
+
+            const teardown = () => {
+              if (teardownCalled) return;
+              teardownCalled = true;
+              try { setTagsActive(false); } catch (_) {}
+              try { if (rafId) window.cancelAnimationFrame(rafId); } catch (_) {}
+              rafId = 0;
+              chipStates.forEach((state) => {
+                if (state && state.startTimerId) {
+                  try { window.clearTimeout(state.startTimerId); } catch (_) {}
+                }
+              });
+              if (resizeTimerId) {
+                try { window.clearTimeout(resizeTimerId); } catch (_) {}
+                resizeTimerId = 0;
+              }
+              try { window.removeEventListener('resize', scheduleRebuild); } catch (_) {}
+              try { window.removeEventListener('orientationchange', scheduleRebuild); } catch (_) {}
+              try { window.removeEventListener('scroll', scheduleRebuild); } catch (_) {}
+              try { window.removeEventListener('pointermove', handlePointerMove); } catch (_) {}
+              try { window.removeEventListener('pointerup', handlePointerEnd); } catch (_) {}
+              try { window.removeEventListener('pointercancel', handlePointerEnd); } catch (_) {}
+              chipStates.forEach((state) => {
+                if (state && state.onPointerDown) {
+                  try { state.chip.removeEventListener('pointerdown', state.onPointerDown); } catch (_) {}
+                }
+              });
+              try { endActiveDrag(); } catch (_) {}
+              try { clearDraggingClasses(); } catch (_) {}
+              try { resetChips(); } catch (_) {}
+              try { Runner.stop(runner); } catch (_) {}
+              try { Engine.clear(engine); } catch (_) {}
+              try { Composite.clear(engine.world, false); } catch (_) {}
+            };
+
+            window.__destroyHomeFallingTags = teardown;
+            window.__homeFallingTagsStart = () => {
+              chipStates.forEach((state) => {
+                if (!(state && !state.body)) return;
+                if (state.startTimerId) {
+                  try { window.clearTimeout(state.startTimerId); } catch (_) {}
+                  state.startTimerId = 0;
+                }
+                startChip(state);
+              });
+            };
+            window.__homeReplayFallingTags = (delayMs = 0) => {
+              try { teardown(); } catch (_) {}
+              window.requestAnimationFrame(() => setupHomeFallingTags(delayMs));
+            };
+            window.__setHomeFallingTagsActive = setTagsActive;
+
+            resetChips();
+            rebuildStaticBodies();
             setTagsActive(true);
-            try { window.__homeFallingTagsStart = () => startPhysicsFns.forEach((fn) => fn()); } catch (_) {}
-            try { window.__homeReplayFallingTags = (startDelayMs = 0) => {
-              setTagsActive(true);
-              replayChipFns.forEach((fn) => fn(startDelayMs));
-            }; } catch (_) {}
-            try { window.__setHomeFallingTagsActive = setTagsActive; } catch (_) {}
+            Runner.run(runner, engine);
+            queueStarts();
+            window.addEventListener('resize', scheduleRebuild, { passive: true });
+            window.addEventListener('orientationchange', scheduleRebuild, { passive: true });
+            window.addEventListener('scroll', scheduleRebuild, { passive: true });
+            window.addEventListener('pointermove', handlePointerMove, { passive: false });
+            window.addEventListener('pointerup', handlePointerEnd);
+            window.addEventListener('pointercancel', handlePointerEnd);
+            chipStates.forEach((state) => {
+              state.onPointerDown = (event) => {
+                if (!(state && state.body)) return;
+                const point = getPoint(event);
+                activeDragState = {
+                  state,
+                  offsetX: point.x - state.body.position.x,
+                  offsetY: point.y - state.body.position.y,
+                  pointX: point.x,
+                  pointY: point.y,
+                  lastTs: performance.now(),
+                  releaseVelocity: { x: 0, y: 0 },
+                };
+                Sleeping.set(state.body, false);
+                Body.setVelocity(state.body, { x: 0, y: 0 });
+                Body.setAngularVelocity(state.body, 0);
+                clearDraggingClasses();
+                state.chip.classList.add('is-dragging');
+                if (event.cancelable) event.preventDefault();
+              };
+              state.chip.addEventListener('pointerdown', state.onPointerDown);
+            });
+            rafId = window.requestAnimationFrame(step);
           } catch (_) { /* ignore falling tag setup errors */ }
         };
 
