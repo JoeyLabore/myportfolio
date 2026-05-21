@@ -100,7 +100,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-toc {
   z-index: 4;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   width: 210px;
   padding: 8px 0 0;
 }
@@ -164,7 +164,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-section--pro
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-section--intro {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-section--content {
   display: flex;
@@ -463,7 +463,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article__tit
 
   body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article__eyebrow {
     font-size: 12px;
-    gap: 16px;
+    gap: 12px;
   }
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-article__paragraph {
@@ -928,7 +928,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   }
 
   .page[data-name="home page"] .home-hero__column--more {
-    gap: 24px;
+    gap: 16px;
     grid-column: auto;
     grid-row: auto;
     justify-self: stretch;
@@ -1639,7 +1639,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 32px;
+  gap: 24px;
   width: max-content;
   max-width: min(820px, calc(100vw - 48px));
   padding: 0;
@@ -2868,11 +2868,12 @@ p { margin: 0; }
   .page[data-name="case study page"] .site-footer {
     padding-left: 0;
     padding-right: 0;
-    padding-bottom: 32px;
+    padding-bottom: 16px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0;
+    gap: 12px;
   }
 
   .page[data-name="home page"] .site-footer__text,
@@ -2926,6 +2927,15 @@ p { margin: 0; }
   .page[data-name="about page"] .site-footer__icon .material-symbols-outlined,
   .page[data-name="case study page"] .site-footer__icon .material-symbols-outlined {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  .page[data-name="home page"] .site-footer.scroll-reveal-visible,
+  .page[data-name="about page"] .site-footer.scroll-reveal-visible,
+  .page[data-name="case study page"] .site-footer.scroll-reveal-visible {
+    padding-bottom: 40px;
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
   }
 }
 
@@ -3082,6 +3092,7 @@ p { margin: 0; }
 
 /* Layout */
 .page {
+  min-height: 100svh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -3092,7 +3103,9 @@ p { margin: 0; }
 
 /* Ensure the home page establishes a definite height so children using height:100% can size correctly */
 .page[data-name="home page"] {
-  height: 100dvh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: auto;
   position: relative;
   isolation: isolate;
 }
@@ -4393,14 +4406,6 @@ p { margin: 0; }
 }
 
 .page[data-name="about page"] .about-process__body + .about-process__body {
-  margin-top: 24px;
-}
-
-.page[data-name="about page"] .about-process__media {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 16px;
   margin-top: 24px;
 }
 
@@ -6422,6 +6427,12 @@ html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
 
 /* Small screens (<=600px): use a single-column square grid on home page */
 @media (max-width: 600px) {
+  .page[data-name="home page"] {
+    min-height: 100svh;
+    min-height: 100dvh;
+    height: auto;
+  }
+
   html,
   body {
     overflow-x: clip;
