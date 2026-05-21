@@ -19,6 +19,15 @@
         const navTransition = document.querySelector('.nav-transition');
 
         try { document.documentElement.classList.remove('preloading'); } catch (_) {}
+        try {
+          document.documentElement.classList.remove(
+            'home-tile-intro-preload',
+            'home-tile-intro-lock',
+            'route-handoff-pending',
+            'ui-exited'
+          );
+        } catch (_) {}
+        try { document.body.classList.remove('home-tile-intro-lock'); } catch (_) {}
 
         if (introOverlay) {
           try {
@@ -42,16 +51,76 @@
           homePage.style.visibility = 'visible';
           homePage.style.opacity = '1';
         } catch (_) {}
+
+        try {
+          const compactHome = !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
+          const isSpecialHomeState =
+            homePage.classList.contains('home-archive-active') ||
+            homePage.classList.contains('home-game-active');
+
+          if (compactHome && !isSpecialHomeState) {
+            homePage.classList.remove('home-tile-intro-active');
+
+            const navs = Array.from(homePage.querySelectorAll('.nav-split > .nav-left, .nav-split > .nav-middle, .nav-split > .nav-right-wrap, .nav-split > .nav-menu, .nav-bar'));
+            navs.forEach((nav) => {
+              try {
+                nav.classList.remove('intro-top-hidden', 'exit-out');
+                nav.classList.add('intro-top-visible');
+              } catch (_) { /* ignore per-nav restore errors */ }
+            });
+
+            Array.from(homePage.querySelectorAll('.home-hero > *')).forEach((section) => {
+              try {
+                section.classList.remove('home-intro-section-hidden');
+                section.classList.add('home-intro-section-visible');
+              } catch (_) { /* ignore per-section restore errors */ }
+            });
+
+            Array.from(homePage.querySelectorAll('.tile-grid .tile')).forEach((tile) => {
+              try {
+                tile.classList.remove('home-tile-intro-card', 'intro-hidden');
+                tile.classList.add('intro-visible');
+                tile.style.removeProperty('--home-tile-column-delay');
+              } catch (_) { /* ignore per-tile restore errors */ }
+            });
+
+            const footer = homePage.querySelector('.site-footer');
+            if (footer) {
+              try {
+                footer.classList.remove('scroll-reveal-hidden');
+                footer.classList.add('scroll-reveal-visible');
+              } catch (_) { /* ignore footer restore errors */ }
+            }
+
+            window.requestAnimationFrame(() => {
+              try { window.scrollTo(window.scrollX || 0, window.scrollY || window.pageYOffset || 0); } catch (_) {}
+            });
+          }
+        } catch (_) { /* ignore compact home restore errors */ }
       } catch (_) {}
     };
 
     // Handle browser back/forward restores for the home page.
     window.addEventListener('popstate', restoreHomePageVisualState);
-    window.addEventListener('pageshow', restoreHomePageVisualState);
-    window.addEventListener('load', restoreHomePageVisualState, { once: true });
+    window.addEventListener('pageshow', (event) => {
+      if (!(event && event.persisted)) return;
+      restoreHomePageVisualState();
+    });
   } catch (_) { /* ignore */ }
   try {
+    const hasManagedInitialScrollTarget = () => {
+      try {
+        const hash = String(window.location.hash || '').toLowerCase();
+        if (hash === '#reviews' || hash === '#process') return true;
+        const params = new URLSearchParams(window.location.search || '');
+        const scroll = String(params.get('scroll') || '').toLowerCase();
+        return scroll === 'reviews' || scroll === 'process';
+      } catch (_) {
+        return false;
+      }
+    };
     const resetScroll = () => {
+      if (hasManagedInitialScrollTarget()) return;
       try { window.scrollTo(0, 0); } catch (_) {}
     };
     // On full load and when restored from bfcache
@@ -147,6 +216,27 @@
       const linkItems = Array.from(linksTrack.querySelectorAll('.home-hero__link-line'));
       if (!linkItems.length) return;
       let overflowWasActive = false;
+      let mobileSectionNavUntil = 0;
+
+      const isCompactHeroLinks = () => {
+        try {
+          return !!(window.matchMedia && window.matchMedia('(max-width: 600px)').matches);
+        } catch (_) {
+          return false;
+        }
+      };
+
+      const navigateToAboutSection = (sectionId) => {
+        const normalized = String(sectionId || '').toLowerCase();
+        if (normalized !== 'process' && normalized !== 'reviews') return;
+        try { window.sessionStorage.setItem('jg_about_scroll_target', normalized); } catch (_) {}
+        mobileSectionNavUntil = performance.now() + 800;
+        try {
+          window.location.href = `./about.html?scroll=${normalized}#${normalized}`;
+        } catch (_) {
+          try { window.location.assign(`./about.html?scroll=${normalized}#${normalized}`); } catch (_) {}
+        }
+      };
 
         const updateStates = () => {
           const maxScrollLeft = Math.max(0, linksScroll.scrollWidth - linksScroll.clientWidth);
@@ -209,6 +299,58 @@
       nextArrow.addEventListener('click', () => {
         if (nextArrow.disabled) return;
         scrollToDirection('next');
+      });
+
+      const aboutSectionLinks = Array.from(
+        linksTrack.querySelectorAll('.home-hero__link[href="./about.html?scroll=process"], .home-hero__link[href="./about.html?scroll=reviews"]')
+      );
+
+      aboutSectionLinks.forEach((link) => {
+        if (!link || link.__mobileAboutSectionBound) return;
+        link.__mobileAboutSectionBound = true;
+
+        const href = String(link.getAttribute('href') || '').toLowerCase();
+        const sectionId = href.includes('scroll=process') ? 'process' : (href.includes('scroll=reviews') ? 'reviews' : '');
+        if (!sectionId) return;
+
+        let touchStart = null;
+
+        link.addEventListener('click', (event) => {
+          if (!isCompactHeroLinks()) return;
+          const now = performance.now();
+          if (now < mobileSectionNavUntil) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          navigateToAboutSection(sectionId);
+        });
+
+        link.addEventListener('touchstart', (event) => {
+          if (!isCompactHeroLinks()) return;
+          const touch = event.touches && event.touches[0];
+          if (!touch) return;
+          touchStart = { x: touch.clientX, y: touch.clientY };
+        }, { passive: true });
+
+        link.addEventListener('touchend', (event) => {
+          if (!isCompactHeroLinks()) return;
+          if (!touchStart) return;
+          const touch = event.changedTouches && event.changedTouches[0];
+          const deltaX = touch ? Math.abs(touch.clientX - touchStart.x) : 0;
+          const deltaY = touch ? Math.abs(touch.clientY - touchStart.y) : 0;
+          touchStart = null;
+          if (deltaX > 10 || deltaY > 10) return;
+          event.preventDefault();
+          event.stopPropagation();
+          navigateToAboutSection(sectionId);
+        });
+
+        link.addEventListener('touchcancel', () => {
+          touchStart = null;
+        }, { passive: true });
       });
 
       linksScroll.addEventListener('scroll', updateStates, { passive: true });
@@ -480,6 +622,61 @@
         return String(text || '').replace('Strategist &', 'Strategist\u00A0&');
       };
 
+      const stabilizeHomeHeroHeadlineBox = (root, finalText) => {
+        try {
+          if (!(root && root.matches && root.matches('.home-hero__headline'))) return;
+          const wrap = root.closest('.home-hero__headline-wrap');
+          if (!wrap) return;
+          const isCompactHome = !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
+          const resolvedFinalText = formatHomeHeroHeadlineText(finalText);
+          if (!resolvedFinalText) return;
+
+          root.style.height = '';
+          root.style.minHeight = '';
+          wrap.style.height = '';
+          wrap.style.minHeight = '';
+
+          const storedNodes = document.createDocumentFragment();
+          while (root.firstChild) storedNodes.appendChild(root.firstChild);
+
+          const probe = document.createElement('span');
+          probe.className = 'text-reveal-scramble';
+          probe.textContent = resolvedFinalText;
+          probe.style.display = 'inline';
+          probe.style.whiteSpace = 'normal';
+          probe.style.visibility = 'hidden';
+          probe.style.pointerEvents = 'none';
+          probe.style.verticalAlign = 'baseline';
+          probe.dataset.noWidthLock = 'true';
+
+          root.appendChild(probe);
+          const nextHeight = Math.ceil(root.getBoundingClientRect().height);
+          root.textContent = '';
+          root.appendChild(storedNodes);
+
+          if (nextHeight > 0) {
+            root.style.minHeight = `${nextHeight}px`;
+            wrap.style.minHeight = `${nextHeight}px`;
+            if (isCompactHome) {
+              wrap.style.height = `${nextHeight}px`;
+            }
+          }
+        } catch (_) { /* ignore headline box stabilization errors */ }
+      };
+
+      const refreshHomeHeroHeadlineBox = () => {
+        try {
+          const root = document.querySelector('.page[data-name="home page"] .home-hero__headline');
+          if (!root) return;
+          const existingSpan = root.querySelector('.text-reveal-scramble');
+          const finalText = formatHomeHeroHeadlineText(
+            String((existingSpan && existingSpan.dataset && existingSpan.dataset.finalText) || root.textContent || '').replace(/\s+/g, ' ').trim()
+          );
+          if (!finalText) return;
+          stabilizeHomeHeroHeadlineBox(root, finalText);
+        } catch (_) { /* ignore home hero headline refresh errors */ }
+      };
+
       const replayHomeHeroHeadlineScramble = () => {
         try {
           const root = document.querySelector('.page[data-name="home page"] .home-hero__headline');
@@ -492,6 +689,7 @@
           if (!finalText) return false;
 
           stopRootScramble(root);
+          stabilizeHomeHeroHeadlineBox(root, finalText);
 
           let span = root.querySelector('.text-reveal-scramble');
           if (!span) {
@@ -516,7 +714,25 @@
 
       try {
         window.__replayHomeHeroHeadlineScramble = replayHomeHeroHeadlineScramble;
+        window.__refreshHomeHeroHeadlineBox = refreshHomeHeroHeadlineBox;
       } catch (_) { /* ignore */ }
+
+      try {
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => {
+            window.requestAnimationFrame(refreshHomeHeroHeadlineBox);
+          }).catch(() => {});
+        }
+      } catch (_) { /* ignore headline font-ready stabilization errors */ }
+      window.addEventListener('resize', () => {
+        window.requestAnimationFrame(refreshHomeHeroHeadlineBox);
+      }, { passive: true });
+      window.addEventListener('orientationchange', () => {
+        window.requestAnimationFrame(refreshHomeHeroHeadlineBox);
+      });
+      window.addEventListener('pageshow', () => {
+        window.requestAnimationFrame(refreshHomeHeroHeadlineBox);
+      });
 
       const run = () => {
         rebuildTargets();
@@ -557,6 +773,7 @@
           if (!resolvedFinalText.trim()) return;
 
           if (wrappingHeadingRoot) processedWrappingHeadingRoots.add(wrappingHeadingRoot);
+          if (isHomeHeroHeadlineText) stabilizeHomeHeroHeadlineBox(wrappingHeadingRoot, resolvedFinalText);
           if (tabClipRoot) tabClipRoot.style.overflow = 'hidden';
 
           const span = document.createElement('span');
@@ -2366,22 +2583,35 @@
         } catch (_) { /* ignore tag injection errors */ }
 
         try {
-          const DESKTOP_COLUMN_STAGGER_QUERY = '(min-width: 1051px)';
+          const FOUR_COLUMN_STAGGER_QUERY = '(min-width: 1596px)';
+          const THREE_COLUMN_STAGGER_QUERY = '(min-width: 1051px) and (max-width: 1595px)';
+          const TWO_COLUMN_STAGGER_QUERY = '(min-width: 601px) and (max-width: 1050px)';
           let columnScrollRaf = 0;
           const clamp01 = (value) => Math.max(0, Math.min(1, value));
           const stagedProgress = (progress, start, span) => clamp01((progress - start) / Math.max(span, 0.0001));
           const COLUMN_SCROLL_DISTANCE = 320;
           const COLUMN_SWAP_SHIFT = 64;
+          const resetHomeColumnScroll = () => {
+            if (!tileGrid) return;
+            tileGrid.style.setProperty('--home-column-scroll-1', '0px');
+            tileGrid.style.setProperty('--home-column-scroll-2', '0px');
+            tileGrid.style.setProperty('--home-column-scroll-3', '0px');
+            tileGrid.style.setProperty('--home-column-scroll-4', '0px');
+          };
 
           const updateHomeColumnScroll = () => {
             columnScrollRaf = 0;
             try {
-              if (!(window.matchMedia && window.matchMedia(DESKTOP_COLUMN_STAGGER_QUERY).matches) || !tileGrid) {
-                if (tileGrid) {
-                  tileGrid.style.setProperty('--home-column-scroll-1', '0px');
-                  tileGrid.style.setProperty('--home-column-scroll-2', '0px');
-                  tileGrid.style.setProperty('--home-column-scroll-3', '0px');
-                }
+              if (!(window.matchMedia && tileGrid)) {
+                resetHomeColumnScroll();
+                return;
+              }
+
+              const isFourColumn = window.matchMedia(FOUR_COLUMN_STAGGER_QUERY).matches;
+              const isThreeColumn = window.matchMedia(THREE_COLUMN_STAGGER_QUERY).matches;
+              const isTwoColumn = window.matchMedia(TWO_COLUMN_STAGGER_QUERY).matches;
+              if (!isFourColumn && !isThreeColumn && !isTwoColumn) {
+                resetHomeColumnScroll();
                 return;
               }
 
@@ -2393,12 +2623,23 @@
 
               const startScrollY = Math.max(0, gridTopOnPage - (viewportHeight * 0.86));
               const overallProgress = clamp01((scrollY - startScrollY) / COLUMN_SCROLL_DISTANCE);
+              if (isTwoColumn) {
+                const columnOneProgress = stagedProgress(overallProgress, 0.00, 0.46);
+                const columnTwoProgress = stagedProgress(overallProgress, 0.20, 0.46);
+                tileGrid.style.setProperty('--home-column-scroll-1', `${Math.round(columnOneProgress * -COLUMN_SWAP_SHIFT)}px`);
+                tileGrid.style.setProperty('--home-column-scroll-2', `${Math.round(columnTwoProgress * COLUMN_SWAP_SHIFT)}px`);
+                tileGrid.style.setProperty('--home-column-scroll-3', '0px');
+                tileGrid.style.setProperty('--home-column-scroll-4', '0px');
+                return;
+              }
+
               const columnOneProgress = stagedProgress(overallProgress, 0.00, 0.42);
               const columnThreeProgress = stagedProgress(overallProgress, 0.28, 0.42);
 
               tileGrid.style.setProperty('--home-column-scroll-1', `${Math.round(columnOneProgress * -COLUMN_SWAP_SHIFT)}px`);
               tileGrid.style.setProperty('--home-column-scroll-2', '0px');
               tileGrid.style.setProperty('--home-column-scroll-3', `${Math.round(columnThreeProgress * COLUMN_SWAP_SHIFT)}px`);
+              tileGrid.style.setProperty('--home-column-scroll-4', '0px');
             } catch (_) { /* ignore home column scroll errors */ }
           };
 
@@ -3423,7 +3664,130 @@
           } catch (_) { /* ignore falling tag setup errors */ }
         };
 
-        replayHomeTileIntro(getHomeHeroIntroDelayForTiles(), { lockScroll: !hasRunInitialHomeTileIntro });
+        let compactHomeIntroStabilizeTimer = 0;
+        let compactHomeTileReturnCleanupTimer = 0;
+        const stabilizeCompactHomeIntro = () => {
+          try {
+            if (!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches)) return;
+            const compactHomeRoot = document.querySelector('.page[data-name="home page"]');
+            if (!compactHomeRoot) return;
+            if (
+              compactHomeRoot.classList.contains('home-archive-active') ||
+              compactHomeRoot.classList.contains('home-game-active')
+            ) {
+              return;
+            }
+
+            try { document.documentElement.classList.remove('home-tile-intro-preload', 'home-tile-intro-lock'); } catch (_) {}
+            try { document.body.classList.remove('home-tile-intro-lock'); } catch (_) {}
+            try { compactHomeRoot.classList.remove('home-tile-intro-active'); } catch (_) {}
+
+            Array.from(compactHomeRoot.querySelectorAll('.home-hero > *')).forEach((section) => {
+              try {
+                section.classList.remove('home-intro-section-hidden');
+                section.classList.add('home-intro-section-visible');
+              } catch (_) { /* ignore compact hero recovery errors */ }
+            });
+
+            Array.from(compactHomeRoot.querySelectorAll('.tile-grid .tile')).forEach((tile) => {
+              try {
+                tile.classList.remove('home-tile-intro-card', 'intro-hidden');
+                tile.classList.add('intro-visible');
+                tile.style.removeProperty('--home-tile-column-delay');
+              } catch (_) { /* ignore compact tile recovery errors */ }
+            });
+
+            const footer = compactHomeRoot.querySelector('.site-footer');
+            if (footer) {
+              try {
+                footer.classList.remove('scroll-reveal-hidden');
+                footer.classList.add('scroll-reveal-visible');
+              } catch (_) { /* ignore compact footer recovery errors */ }
+            }
+          } catch (_) { /* ignore compact intro stabilization errors */ }
+        };
+
+        const scheduleCompactHomeIntroStabilize = (delayMs = 760) => {
+          try {
+            if (compactHomeIntroStabilizeTimer) {
+              window.clearTimeout(compactHomeIntroStabilizeTimer);
+            }
+            compactHomeIntroStabilizeTimer = window.setTimeout(() => {
+              compactHomeIntroStabilizeTimer = 0;
+              window.requestAnimationFrame(stabilizeCompactHomeIntro);
+            }, Math.max(0, Number(delayMs) || 0));
+          } catch (_) { /* ignore compact intro stabilization scheduling errors */ }
+        };
+
+        const animateCompactHomeTilesOnTabReturn = () => {
+          try {
+            if (!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches)) return;
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const compactHomeRoot = document.querySelector('.page[data-name="home page"]');
+            if (!compactHomeRoot) return;
+            if (
+              compactHomeRoot.classList.contains('home-archive-active') ||
+              compactHomeRoot.classList.contains('home-game-active')
+            ) {
+              return;
+            }
+
+            const compactTiles = Array.from(compactHomeRoot.querySelectorAll('.tile-grid .tile'))
+              .filter((tile) => tile && !tile.classList.contains('filtered-out'));
+            if (!compactTiles.length) return;
+
+            if (compactHomeTileReturnCleanupTimer) {
+              try { window.clearTimeout(compactHomeTileReturnCleanupTimer); } catch (_) { /* ignore */ }
+              compactHomeTileReturnCleanupTimer = 0;
+            }
+
+            const introColumnCount = Math.max(1, getHomeTileIntroColumnCount());
+            compactTiles.forEach((tile, tileIndex) => {
+              try {
+                tile.classList.remove('home-tab-switch-in');
+                tile.style.setProperty('--home-tab-switch-delay', `${(tileIndex % introColumnCount) * 70}ms`);
+              } catch (_) { /* ignore per-tile compact tab animation reset errors */ }
+            });
+
+            window.requestAnimationFrame(() => {
+              compactTiles.forEach((tile) => {
+                try {
+                  void tile.offsetWidth;
+                  tile.classList.add('home-tab-switch-in');
+                } catch (_) { /* ignore per-tile compact tab animation start errors */ }
+              });
+            });
+
+            compactHomeTileReturnCleanupTimer = window.setTimeout(() => {
+              compactHomeTileReturnCleanupTimer = 0;
+              compactTiles.forEach((tile) => {
+                try {
+                  tile.classList.remove('home-tab-switch-in');
+                  tile.style.removeProperty('--home-tab-switch-delay');
+                } catch (_) { /* ignore per-tile compact tab animation cleanup errors */ }
+              });
+            }, 700);
+          } catch (_) { /* ignore compact tab return animation errors */ }
+        };
+
+        try {
+          window.__stabilizeCompactHomeIntro = (delayMs = 0) => {
+            const nextDelay = Math.max(0, Number(delayMs) || 0);
+            if (nextDelay > 0) {
+              scheduleCompactHomeIntroStabilize(nextDelay);
+              return;
+            }
+            window.requestAnimationFrame(stabilizeCompactHomeIntro);
+          };
+        } catch (_) { /* ignore compact intro helper export errors */ }
+
+        replayHomeTileIntro(getHomeHeroIntroDelayForTiles(), {
+          lockScroll: !hasRunInitialHomeTileIntro,
+          useGlobalPreload: !(window.matchMedia && window.matchMedia('(max-width: 900px)').matches),
+        });
+        window.addEventListener('pageshow', () => scheduleCompactHomeIntroStabilize(120));
+        window.addEventListener('orientationchange', () => scheduleCompactHomeIntroStabilize(220));
+        window.addEventListener('resize', () => scheduleCompactHomeIntroStabilize(220), { passive: true });
         setupHomeFallingTags(getInitialHomeFallingTagsDelay());
         hasRunInitialHomeTileIntro = true;
         try { window.__homeReplayTileIntro = (startDelayMs = 0, options = {}) => replayHomeTileIntro(startDelayMs, options); } catch (_) { /* ignore */ }
@@ -4946,9 +5310,19 @@
           const tabName = (tab && tab.dataset) ? String(tab.dataset.tab || '').toLowerCase() : 'recent';
           syncArchiveState(tabName === 'archive');
           if (tabName === 'recent' && wasArchiveActive) {
-            try {
-              if (typeof window.__homeReplayTileIntro === 'function') window.__homeReplayTileIntro(0, { useGlobalPreload: false });
-            } catch (_) { /* ignore replay errors on tab switch */ }
+            const isCompactHome = !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
+            if (isCompactHome) {
+              try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (_) {}
+              try {
+                if (typeof window.__stabilizeCompactHomeIntro === 'function') window.__stabilizeCompactHomeIntro(0);
+                else stabilizeCompactHomeIntro();
+              } catch (_) { /* ignore compact featured restore errors on tab switch */ }
+              try { animateCompactHomeTilesOnTabReturn(); } catch (_) { /* ignore compact tile tab animation errors */ }
+            } else {
+              try {
+                if (typeof window.__homeReplayTileIntro === 'function') window.__homeReplayTileIntro(0, { useGlobalPreload: false });
+              } catch (_) { /* ignore replay errors on tab switch */ }
+            }
           }
         };
 
@@ -4990,6 +5364,27 @@
         let current = tabs.findIndex((t) => t.classList.contains('active'));
         if (current < 0) current = 0;
         setActive(current);
+
+        const reconcileHomeFeaturedStateAfterArchiveRestore = () => {
+          try {
+            const activeTab = tabs.find((tab) => tab.classList.contains('active')) || tabs[0];
+            const activeTabName = activeTab && activeTab.dataset
+              ? String(activeTab.dataset.tab || '').toLowerCase()
+              : 'recent';
+            if (activeTabName === 'archive') return;
+            syncArchiveState(false);
+            if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) {
+              stabilizeCompactHomeIntro();
+            }
+          } catch (_) { /* ignore featured restore reconciliation errors */ }
+        };
+
+        window.addEventListener('pageshow', () => {
+          window.requestAnimationFrame(reconcileHomeFeaturedStateAfterArchiveRestore);
+        });
+        window.addEventListener('popstate', () => {
+          window.requestAnimationFrame(reconcileHomeFeaturedStateAfterArchiveRestore);
+        });
 
         // Click activation
         tabs.forEach((t, i) => {

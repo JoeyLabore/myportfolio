@@ -650,6 +650,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   grid-row: 1;
   justify-self: start;
   align-self: start;
+  overflow: clip;
 }
 
 .page[data-name="home page"] .home-hero__headline {
@@ -2658,6 +2659,13 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
     transition: flex-basis 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 360ms ease;
     will-change: flex-basis;
   }
+  .page[data-name="home page"] .tile-grid .tile.home-tile-intro-card {
+    transition-property: flex-basis, box-shadow, transform, translate, opacity;
+    transition-duration: 240ms, 160ms, 420ms, 420ms, 360ms;
+    transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1), ease, cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.16, 1, 0.3, 1), ease;
+    transition-delay: 0ms, 0ms, var(--home-tile-column-delay, 0ms), var(--home-tile-column-delay, 0ms), 0ms;
+    will-change: flex-basis, translate;
+  }
   /* On small screens: use the selected tile as the scroll-following hover state */
   .page[data-name="home page"] .tile-grid .tile.selected {
     --tile-basis: 64px;
@@ -3873,6 +3881,7 @@ p { margin: 0; }
   position: relative;
   z-index: 1;
 }
+.page[data-name="about page"] #process,
 .page[data-name="about page"] #reviews {
   scroll-margin-top: calc(var(--nav-card-height) + (2 * var(--space-s)) + 16px);
 }
@@ -5712,6 +5721,13 @@ p { margin: 0; }
     transition: flex-basis 240ms cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 160ms ease, transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 360ms ease;
     will-change: flex-basis;
   }
+  .page[data-name="home page"] .tile-grid .tile.home-tile-intro-card {
+    transition-property: flex-basis, box-shadow, transform, translate, opacity;
+    transition-duration: 240ms, 160ms, 420ms, 420ms, 360ms;
+    transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1), ease, cubic-bezier(0.2, 0.7, 0.2, 1), cubic-bezier(0.16, 1, 0.3, 1), ease;
+    transition-delay: 0ms, 0ms, var(--home-tile-column-delay, 0ms), var(--home-tile-column-delay, 0ms), 0ms;
+    will-change: flex-basis, translate;
+  }
   /* Neutralize hover widening to avoid fighting flex-basis animation */
   .page[data-name="home page"] .tile-grid .tile:not(.selected):hover,
   .page[data-name="home page"] .tile-grid .tile:not(.selected):focus-visible,
@@ -6050,11 +6066,31 @@ p { margin: 0; }
     transition: none;
   }
 
-  .page[data-name="home page"] .tile-grid .tile.home-tile-intro-card.intro-hidden,
-  .page[data-name="home page"] .tile-grid .tile.home-tile-intro-card.intro-visible,
-  html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
-    --column-intro-y: 0px;
+  .page[data-name="home page"] .tile-grid .tile.home-tile-intro-card.intro-hidden {
     --introOpacity: 1;
+    transform: translateX(var(--slideX)) translateY(calc(var(--introY) + 100svh)) !important;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.home-tile-intro-card.intro-visible {
+    --introOpacity: 1;
+    transform: translateX(var(--slideX)) translateY(var(--introY)) !important;
+  }
+
+  .page[data-name="home page"] .tile-grid .tile.home-tab-switch-in {
+    animation: home-tile-tab-switch-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--home-tab-switch-delay, 0ms);
+    will-change: transform, opacity;
+  }
+}
+
+@keyframes home-tile-tab-switch-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -6430,6 +6466,8 @@ html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
     scroll-padding-left: 0 !important;
     scroll-padding-right: 0 !important;
     width: 100%;
+    --home-column-scroll-1: 0px;
+    --home-column-scroll-2: 0px;
   }
   .page[data-name="home page"] .tile-grid .tile {
     margin: 0 !important;
@@ -6443,6 +6481,11 @@ html.home-tile-intro-preload .page[data-name="home page"] .tile-grid .tile {
 
   .page[data-name="home page"] .tile-grid .tile:nth-child(2n + 1) {
     --column-offset-y: 40px;
+    --column-scroll-y: var(--home-column-scroll-1);
+  }
+
+  .page[data-name="home page"] .tile-grid .tile:nth-child(2n) {
+    --column-scroll-y: var(--home-column-scroll-2);
   }
 
   .page[data-name="home page"] .main .tile-grid {

@@ -14,7 +14,7 @@
     <!-- Material Symbols for MUI Done icon -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
-    <link rel="stylesheet" href="./styles.css?v=295" />
+    <link rel="stylesheet" href="./styles.css?v=306" />
   </head>
   <body class="about-page" style="background-color:#0A0A0A;">
     <div class="page" data-name="about page">
@@ -248,6 +248,8 @@
             const params = new URLSearchParams(window.location.search || '');
             const scroll = String(params.get('scroll') || '').toLowerCase();
             if (scroll === 'reviews' || scroll === 'process') return scroll;
+            const storedScroll = String(window.sessionStorage.getItem('jg_about_scroll_target') || '').toLowerCase();
+            if (storedScroll === 'reviews' || storedScroll === 'process') return storedScroll;
             return '';
           } catch (_) {
             return '';
@@ -314,6 +316,10 @@
         window.addEventListener('hashchange', () => {
           const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
           scrollToSection(prefersReducedMotion ? 'auto' : 'smooth');
+        });
+
+        window.addEventListener('pagehide', () => {
+          try { window.sessionStorage.removeItem('jg_about_scroll_target'); } catch (_) {}
         });
 
         const processTabList = document.querySelector('.about-process__tabs[role="tablist"]');
@@ -548,6 +554,6 @@
         } catch (_) {}
       });
     </script>
-    <script src="./main.js?v=11"></script>
+    <script src="./main.js?v=26"></script>
   </body>
 </html>
