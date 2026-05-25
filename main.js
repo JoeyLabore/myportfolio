@@ -1285,6 +1285,21 @@
     "./assets/ql/9.png",
   ];
 
+  const MEDBRIDGEGO_FILES = [
+    "./assets/medbridgego/1.jpg",
+    "./assets/medbridgego/2.png",
+    "./assets/medbridgego/3.jpg",
+    "./assets/medbridgego/4.png",
+    "./assets/medbridgego/5.jpg",
+    "./assets/medbridgego/6.jpg",
+    "./assets/medbridgego/7.jpg",
+    "./assets/medbridgego/8.png",
+    "./assets/medbridgego/9.jpg",
+    "./assets/medbridgego/10.png",
+    "./assets/medbridgego/11.jpg",
+    "./assets/medbridgego/12.png",
+  ];
+
   function getCaseStudyFiles() {
     try {
       const p = String(location && location.pathname || '').toLowerCase();
@@ -1293,6 +1308,7 @@
       if (p.includes('toyota.html') || t.includes('toyota')) return TRD_FILES;
       if (p.includes('nestbank.html') || t.includes('nestbank')) return NESTBANK_FILES;
       if (p.includes('ql.html') || t.includes('quicken') || t.includes('rocket')) return QL_FILES;
+      if (p.includes('medbridgego.html') || t.includes('medbridgego')) return MEDBRIDGEGO_FILES;
       if (p.includes('relias.html') || p.includes('virelia.html') || t.includes('relias') || t.includes('virelia')) return RELIAS_FILES;
     } catch (_) {}
     return NESTBANK_FILES;
@@ -2333,7 +2349,7 @@
           relias: 'Relias',
           nestbank: 'NestBank',
           orion: 'Rocket',
-          medigo: 'Medigo',
+          medigo: 'MedbridgeGO',
           logofolio: 'Logofolio',
           apendito: 'Aprendito',
           dinobytes: 'DinoBytes',
@@ -2360,9 +2376,9 @@
           kinti: 'Branding, Visual',
           kakaoala: 'Branding, Visual',
         };
-        const OPEN_IN_NEW_PROJECTS = new Set(['medigo', 'apendito', 'kinti', 'dinobytes', 'kakaoala', 'skilldex']);
-        const IN_PROGRESS_PROJECTS = new Set(['medigo']);
-        const NON_CLICKABLE_PROJECTS = new Set(['medigo']);
+        const OPEN_IN_NEW_PROJECTS = new Set(['apendito', 'kinti', 'dinobytes', 'kakaoala', 'skilldex']);
+        const IN_PROGRESS_PROJECTS = new Set([]);
+        const NON_CLICKABLE_PROJECTS = new Set([]);
         // Helper: sort tiles by computed CSS order (fallback to DOM index)
         const sortByCssOrder = (list) => {
           try {
@@ -4114,7 +4130,7 @@
           if (proj === 'toyota') { navigateWithOverlay('./toyota.html'); return; }
           if (proj === 'relias') { navigateWithOverlay('./relias.html'); return; }
           if (proj === 'orion') { navigateWithOverlay('./ql.html'); return; }
-          if (proj === 'medigo') { try { window.open('https://www.behance.net/gallery/179623015/Medigo-Physiotherapy-App-UXUI-Design', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
+          if (proj === 'medigo') { navigateWithOverlay('./medbridgego.html'); return; }
           if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
           if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
           if (proj === 'apendito') { try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
@@ -6181,11 +6197,13 @@
         || /(^|\/)ql\/4\.png$/i.test(srcPath)
         || /(^|\/)ql\/6\.png$/i.test(srcPath)
         || /(^|\/)ql\/9\.png$/i.test(srcPath)
+        || /(^|\/)medbridgego\/2\.png$/i.test(srcPath)
         || (/(^|\/)8\.jpg$/i.test(srcPath) && !/(^|\/)relias\/8\.jpg$/i.test(srcPath))
         // Relias: keep 3,5.png and 10.png original aspect ratio
         || /(^|\/)3,5\.png$/i.test(srcPath)
         || /(^|\/)7\.png$/i.test(srcPath)
-        || /(^|\/)10\.png(?:\?|$)/i.test(srcPath)) {
+        || /(^|\/)10\.png(?:\?|$)/i.test(srcPath)
+        || /(^|\/)medbridgego\/12\.png$/i.test(srcPath)) {
         el.classList.add('keep-contain');
       }
       el.style.opacity = "1";
@@ -6285,6 +6303,9 @@
           } catch (_) { return false; }
         })();
         return { index: 0, progress: isSmallReliasScreen ? 0.6 : 0.19 }; // Use deeper start on <=600px
+      }
+      if (p.includes('medbridgego.html') || t.includes('medbridgego')) {
+        return { index: 0, progress: 0.25 };
       }
     } catch (_) {}
     // Default: show 2nd image with 60% into next (3rd)
@@ -6995,6 +7016,31 @@
                 title
               ));
             }
+        } else {
+          const detailCardTitles = body
+            ? Array.from(body.querySelectorAll('.detail-card .text-label'))
+                .map((item) => (item && item.textContent ? item.textContent.trim() : ''))
+                .filter(Boolean)
+            : [];
+
+          if (detailCardTitles.length) {
+            const existing = openDetails.get(card);
+            if (existing && Array.isArray(existing) && existing.length === detailCardTitles.length) {
+              detailsToOpen = existing;
+              detailsToOpen.forEach((d, i) => {
+                d.classList.remove('open');
+                d.style.marginTop = '';
+                d.style.opacity = '';
+                d.style.pointerEvents = '';
+                const inner = d.querySelector('.paragraph-detail__inner') || d;
+                inner.innerHTML = `<p class="text-label">${detailCardTitles[i] || ''}</p>`;
+              });
+            } else {
+              detailsToOpen = detailCardTitles.map((title) => makeDetail(
+                `<p class="text-label">${title}</p>`,
+                title
+              ));
+            }
           } else {
           // Check which page we're on
           const isToyotaPage = window.location.pathname.includes('toyota.html') || document.title.toLowerCase().includes('toyota');
@@ -7038,6 +7084,7 @@
               `<p class="text-label">${title}</p>`,
               title
             ));
+          }
           }
           }
         }
