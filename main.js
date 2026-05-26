@@ -4124,7 +4124,6 @@
         const isSmallHomeBreakpoint = () => {
           try { return window.matchMedia && window.matchMedia('(max-width: 600px)').matches; } catch (_) { return false; }
         };
-        const TILE_CLICK_ACTION_DELAY_MS = 1000;
 
         const navigateProject = (proj) => {
           if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
@@ -4157,49 +4156,15 @@
           } catch (_) {}
         };
 
-        const triggerThumbnailSpin = (tile, sourceEvent = null, persistUntilUnload = false) => {
-          if (!tile) return;
-          try {
-            tile.classList.remove('is-click-spinning');
-            tile.classList.remove('spin-from-left');
-            tile.classList.remove('spin-from-right');
-            let direction = 1;
-            let originClass = 'spin-from-right';
-            try {
-              if (sourceEvent && typeof sourceEvent.clientX === 'number') {
-                const rect = tile.getBoundingClientRect();
-                const clickX = sourceEvent.clientX - rect.left;
-                const clickedLeftHalf = clickX < (rect.width / 2);
-                direction = clickedLeftHalf ? -1 : 1;
-                originClass = clickedLeftHalf ? 'spin-from-left' : 'spin-from-right';
-              }
-            } catch (_) {}
-            tile.style.setProperty('--tile-click-spin-direction', String(direction));
-            void tile.offsetWidth;
-            tile.classList.add('is-click-spinning');
-            tile.classList.add(originClass);
-            if (!persistUntilUnload) {
-              window.setTimeout(() => {
-                try { tile.classList.remove('is-click-spinning'); } catch (_) {}
-                try { tile.classList.remove('spin-from-left'); } catch (_) {}
-                try { tile.classList.remove('spin-from-right'); } catch (_) {}
-              }, 2000);
-            }
-          } catch (_) {}
-        };
-
-        const handleTileClickNavigation = (tile, proj, sourceEvent = null) => {
+        const handleTileClickNavigation = (tile, proj) => {
           if (NON_CLICKABLE_PROJECTS.has(proj)) {
             triggerBlockedTileShake(tile);
             return;
           }
 
           const isExternalOpen = OPEN_IN_NEW_PROJECTS.has(proj);
-          triggerThumbnailSpin(tile, sourceEvent, !isExternalOpen);
           if (!isSmallHomeBreakpoint() || isExternalOpen) {
-            window.setTimeout(() => {
-              navigateProject(proj);
-            }, TILE_CLICK_ACTION_DELAY_MS);
+            navigateProject(proj);
             return;
           }
 
@@ -4209,20 +4174,20 @@
           }, 120);
           setTimeout(() => {
             navigateProject(proj);
-          }, TILE_CLICK_ACTION_DELAY_MS);
+          }, 240);
         };
 
         tiles.forEach((tile, idx) => {
-          tile.addEventListener('click', (e) => {
+          tile.addEventListener('click', () => {
             const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
-            handleTileClickNavigation(tile, proj, e);
+            handleTileClickNavigation(tile, proj);
           });
 
           tile.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               const proj = (tile && tile.dataset && tile.dataset.project) ? tile.dataset.project.toLowerCase() : '';
-              handleTileClickNavigation(tile, proj, e);
+              handleTileClickNavigation(tile, proj);
             }
           });
         });
@@ -6349,7 +6314,7 @@
             return narrowByWidth || narrowByMedia;
           } catch (_) { return false; }
         })();
-        return { index: 0, progress: isSmallMedbridgeScreen ? 0.72 : 0.25 };
+        return { index: 2, progress: isSmallMedbridgeScreen ? 0.5 : 0.8 };
       }
     } catch (_) {}
     // Default: show 2nd image with 60% into next (3rd)
