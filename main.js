@@ -2360,6 +2360,7 @@
         };
         const PROJECT_DISPLAY_TITLES = {
           toyota: 'Toyota Racing',
+          relias: 'Relias AI Content Studio',
         };
         const PROJECT_THUMBNAIL_TAGS = {
           toyota: 'Systems Design, AI-Driven Development, Product Infrastructure, Creative Direction',
@@ -2403,7 +2404,6 @@
               const progressBadge = tile.querySelector('.tile-progress-badge');
               if (progressBadge) progressBadge.remove();
               const frameMeta = tile.querySelector('.tile-frame-meta');
-              if (frameMeta) frameMeta.remove();
               const proj = (tile.dataset && tile.dataset.project) ? String(tile.dataset.project || '').trim().toLowerCase() : '';
               const title = (tile.dataset && tile.dataset.title) ? String(tile.dataset.title || '').trim() : '';
               const role = (tile.dataset && tile.dataset.role) ? String(tile.dataset.role || '').trim() : '';
@@ -2417,62 +2417,10 @@
                 .map((part) => part.toUpperCase())
                 .join(' + ');
               const secondaryTag = proj === 'logofolio' ? industry : year;
-
-              const metaWrap = document.createElement('div');
-              metaWrap.className = 'tile-frame-meta';
-
-              const topRow = document.createElement('div');
-              topRow.className = 'tile-frame-meta__row tile-frame-meta__row--top';
-              const topLeft = document.createElement('span');
-              topLeft.className = 'tile-frame-meta__text tile-frame-meta__text--client';
-              topLeft.textContent = PROJECT_DISPLAY_TITLES[proj] || title || client || 'Project';
-              if (proj === 'toyota' || proj === 'relias') {
-                const lockIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                lockIcon.setAttribute('class', 'tile-frame-meta__lock-icon');
-                lockIcon.setAttribute('aria-hidden', 'true');
-                lockIcon.setAttribute('viewBox', '0 0 24 24');
-                lockIcon.setAttribute('width', '12');
-                lockIcon.setAttribute('height', '12');
-                lockIcon.setAttribute('fill', 'currentColor');
-                lockIcon.setAttribute('focusable', 'false');
-                const lockPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                lockPath.setAttribute('d', 'M17 9h-1V7c0-2.76-2.24-5-5-5S6 4.24 6 7v2H5c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-9c0-1.1-.9-2-2-2m-6 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-8H7.9V7c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1z');
-                lockIcon.appendChild(lockPath);
-                topLeft.prepend(lockIcon);
-              }
-              const topRight = document.createElement('span');
-              topRight.className = 'tile-frame-meta__text tile-frame-meta__text--title';
-              topRight.textContent = role || categoryLabel || industry || '';
-              topRow.appendChild(topLeft);
-              topRow.appendChild(topRight);
-
-              const bottomRow = document.createElement('div');
-              bottomRow.className = 'tile-frame-meta__row tile-frame-meta__row--bottom';
-              const explicitTagText = PROJECT_THUMBNAIL_TAGS[proj] || '';
-              const explicitTags = explicitTagText
-                ? explicitTagText.split(',').map((part) => part.trim()).filter(Boolean)
-                : [];
-              const bottomLeft = document.createElement('span');
-              bottomLeft.className = 'tile-frame-meta__text tile-frame-meta__text--detail';
-              if (explicitTags.length > 1) {
-                bottomLeft.classList.add('tile-frame-meta__text--tag-group');
-                explicitTags.forEach((tagText) => {
-                  const chip = document.createElement('span');
-                  chip.className = 'tile-frame-meta__text tile-frame-meta__text--tag';
-                  chip.textContent = tagText;
-                  bottomLeft.appendChild(chip);
-                });
-              } else {
-                bottomLeft.classList.add('tile-frame-meta__text--tag');
-                bottomLeft.textContent = explicitTags[0] || categoryLabel || industry || role;
-              }
-              const bottomRight = document.createElement('span');
-              bottomRight.className = 'tile-frame-meta__text tile-frame-meta__text--year';
-              bottomRight.textContent = year || industry || '';
-              bottomRow.appendChild(bottomLeft);
-              bottomRow.appendChild(bottomRight);
-
-              if (bottomLeft.classList.contains('tile-frame-meta__text--tag-group')) {
+              const attachBottomRowWrapState = (bottomRow, bottomLeft) => {
+                if (!(bottomRow && bottomLeft && bottomLeft.classList.contains('tile-frame-meta__text--tag-group'))) return;
+                if (bottomRow.dataset.wrapStateBound === 'true') return;
+                bottomRow.dataset.wrapStateBound = 'true';
                 const syncBottomRowWrapState = () => {
                   try {
                     const firstChip = bottomLeft.firstElementChild;
@@ -2495,11 +2443,73 @@
                 } else {
                   try { window.addEventListener('resize', syncBottomRowWrapState); } catch (_) { /* ignore fallback resize listener */ }
                 }
-              }
+              };
 
-              metaWrap.appendChild(topRow);
-              metaWrap.appendChild(bottomRow);
-              tile.appendChild(metaWrap);
+              if (frameMeta) {
+                const existingBottomRow = frameMeta.querySelector('.tile-frame-meta__row--bottom');
+                const existingBottomLeft = frameMeta.querySelector('.tile-frame-meta__row--bottom .tile-frame-meta__text--detail');
+                attachBottomRowWrapState(existingBottomRow, existingBottomLeft);
+              } else {
+                const metaWrap = document.createElement('div');
+                metaWrap.className = 'tile-frame-meta';
+
+                const topRow = document.createElement('div');
+                topRow.className = 'tile-frame-meta__row tile-frame-meta__row--top';
+                const topLeft = document.createElement('span');
+                topLeft.className = 'tile-frame-meta__text tile-frame-meta__text--client';
+                topLeft.textContent = PROJECT_DISPLAY_TITLES[proj] || title || client || 'Project';
+                if (proj === 'toyota' || proj === 'relias') {
+                  const lockIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                  lockIcon.setAttribute('class', 'tile-frame-meta__lock-icon');
+                  lockIcon.setAttribute('aria-hidden', 'true');
+                  lockIcon.setAttribute('viewBox', '0 0 24 24');
+                  lockIcon.setAttribute('width', '12');
+                  lockIcon.setAttribute('height', '12');
+                  lockIcon.setAttribute('fill', 'currentColor');
+                  lockIcon.setAttribute('focusable', 'false');
+                  const lockPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                  lockPath.setAttribute('d', 'M17 9h-1V7c0-2.76-2.24-5-5-5S6 4.24 6 7v2H5c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-9c0-1.1-.9-2-2-2m-6 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2m3.1-8H7.9V7c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1z');
+                  lockIcon.appendChild(lockPath);
+                  topLeft.prepend(lockIcon);
+                }
+                const topRight = document.createElement('span');
+                topRight.className = 'tile-frame-meta__text tile-frame-meta__text--title';
+                topRight.textContent = role || categoryLabel || industry || '';
+                topRow.appendChild(topLeft);
+                topRow.appendChild(topRight);
+
+                const bottomRow = document.createElement('div');
+                bottomRow.className = 'tile-frame-meta__row tile-frame-meta__row--bottom';
+                const explicitTagText = PROJECT_THUMBNAIL_TAGS[proj] || '';
+                const explicitTags = explicitTagText
+                  ? explicitTagText.split(',').map((part) => part.trim()).filter(Boolean)
+                  : [];
+                const bottomLeft = document.createElement('span');
+                bottomLeft.className = 'tile-frame-meta__text tile-frame-meta__text--detail';
+                if (explicitTags.length > 1) {
+                  bottomLeft.classList.add('tile-frame-meta__text--tag-group');
+                  explicitTags.forEach((tagText) => {
+                    const chip = document.createElement('span');
+                    chip.className = 'tile-frame-meta__text tile-frame-meta__text--tag';
+                    chip.textContent = tagText;
+                    bottomLeft.appendChild(chip);
+                  });
+                } else {
+                  bottomLeft.classList.add('tile-frame-meta__text--tag');
+                  bottomLeft.textContent = explicitTags[0] || categoryLabel || industry || role;
+                }
+                const bottomRight = document.createElement('span');
+                bottomRight.className = 'tile-frame-meta__text tile-frame-meta__text--year';
+                bottomRight.textContent = year || industry || '';
+                bottomRow.appendChild(bottomLeft);
+                bottomRow.appendChild(bottomRight);
+
+                attachBottomRowWrapState(bottomRow, bottomLeft);
+
+                metaWrap.appendChild(topRow);
+                metaWrap.appendChild(bottomRow);
+                tile.appendChild(metaWrap);
+              }
 
               if (role || secondaryTag) {
                 const tagsWrap = document.createElement('div');
@@ -3013,6 +3023,7 @@
         let tileIntroRunId = 0;
         let tileIntroKickoffTimer = 0;
         let tileIntroCleanupTimer = 0;
+        let tileIntroUnlockTimer = 0;
         let hasRunInitialHomeTileIntro = false;
         const tileIntroPendingTimers = new Set();
         const TILE_GRID_INTRO_MS = 520;
@@ -3036,6 +3047,11 @@
             const introTiles = Array.isArray(tiles) ? tiles.filter((tile) => tile && !tile.classList.contains('filtered-out')) : [];
             const introColumnCount = Math.max(1, getHomeTileIntroColumnCount());
             const introStaggerSpan = Math.max(0, introColumnCount - 1) * TILE_COLUMN_STAGGER_MS;
+            const totalIntroMs = kickoffDelay + introStaggerSpan + TILE_GRID_INTRO_MS + 120;
+            const requestedLockDurationMs = Number(options.lockDurationMs);
+            const lockDurationMs = shouldLockScroll
+              ? Math.max(0, Number.isFinite(requestedLockDurationMs) ? requestedLockDurationMs : totalIntroMs)
+              : 0;
             const setScrollLock = (locked) => {
               try {
                 document.documentElement.classList.toggle('home-tile-intro-lock', !!locked);
@@ -3056,6 +3072,10 @@
                 if (homePageRoot) homePageRoot.classList.remove('home-tile-intro-active');
                 if (docEl) docEl.classList.remove('home-tile-intro-preload');
                 setScrollLock(false);
+                if (tileIntroUnlockTimer) {
+                  try { window.clearTimeout(tileIntroUnlockTimer); } catch (_) { /* ignore */ }
+                  tileIntroUnlockTimer = 0;
+                }
               } catch (_) { /* ignore tile intro cleanup errors */ }
             };
             tileIntroRunId += 1;
@@ -3067,6 +3087,10 @@
             if (tileIntroCleanupTimer) {
               try { window.clearTimeout(tileIntroCleanupTimer); } catch (_) { /* ignore */ }
               tileIntroCleanupTimer = 0;
+            }
+            if (tileIntroUnlockTimer) {
+              try { window.clearTimeout(tileIntroUnlockTimer); } catch (_) { /* ignore */ }
+              tileIntroUnlockTimer = 0;
             }
             tileIntroPendingTimers.forEach((timerId) => {
               try { window.clearTimeout(timerId); } catch (_) { /* ignore */ }
@@ -3087,13 +3111,20 @@
               if (shouldLockScroll) {
                 setScrollLock(true);
                 try { window.scrollTo(0, 0); } catch (_) { /* ignore scroll reset errors */ }
+                if (lockDurationMs > 0 && lockDurationMs < totalIntroMs) {
+                  tileIntroUnlockTimer = window.setTimeout(() => {
+                    tileIntroUnlockTimer = 0;
+                    if (runId !== tileIntroRunId) return;
+                    setScrollLock(false);
+                  }, lockDurationMs);
+                }
               }
               if (tileGrid) void tileGrid.offsetWidth;
               tileIntroCleanupTimer = window.setTimeout(() => {
                 tileIntroCleanupTimer = 0;
                 if (runId !== tileIntroRunId) return;
                 clearTileIntroState();
-              }, kickoffDelay + introStaggerSpan + TILE_GRID_INTRO_MS + 120);
+              }, totalIntroMs);
             }
 
             const startIntro = () => {
@@ -3834,8 +3865,10 @@
           };
         } catch (_) { /* ignore compact intro helper export errors */ }
 
-        replayHomeTileIntro(getHomeHeroIntroDelayForTiles(), {
+        const initialHomeTileIntroDelay = getHomeHeroIntroDelayForTiles();
+        replayHomeTileIntro(initialHomeTileIntroDelay, {
           lockScroll: !hasRunInitialHomeTileIntro,
+          lockDurationMs: initialHomeTileIntroDelay + 240,
           useGlobalPreload: !(window.matchMedia && window.matchMedia('(max-width: 900px)').matches),
         });
         window.addEventListener('pageshow', () => scheduleCompactHomeIntroStabilize(120));
@@ -6201,7 +6234,7 @@
         || (/(^|\/)8\.jpg$/i.test(srcPath) && !/(^|\/)relias\/8\.jpg$/i.test(srcPath))
         // Relias: keep 3,5.png and 10.png original aspect ratio
         || /(^|\/)3,5\.png$/i.test(srcPath)
-        || /(^|\/)7\.png$/i.test(srcPath)
+        || /(^|\/)relias\/7\.png$/i.test(srcPath)
         || /(^|\/)10\.png(?:\?|$)/i.test(srcPath)
         || /(^|\/)medbridgego\/12\.png$/i.test(srcPath)) {
         el.classList.add('keep-contain');
