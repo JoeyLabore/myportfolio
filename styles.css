@@ -233,6 +233,9 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item
   font-size: 14px;
   line-height: 160%;
 }
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-insight-item .deep-dive-article__paragraph {
+  color: rgba(255, 255, 255, 0.66);
+}
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-divider {
   margin: 0;
   border: 0;
@@ -326,6 +329,18 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-bloc
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__image-caption--left {
   left: 12px;
   right: auto;
+}
+body.toyota-deep-dive .page[data-name="case study page"] #section-01 .deep-dive-content-block__image--contain,
+body.toyota-deep-dive .page[data-name="case study page"] #section-02 .deep-dive-content-block__image--contain {
+  margin-bottom: 0;
+}
+body.toyota-deep-dive .page[data-name="case study page"] #section-01 .deep-dive-content-block__image-caption,
+body.toyota-deep-dive .page[data-name="case study page"] #section-02 .deep-dive-content-block__image-caption {
+  right: 12px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row {
   display: flex;
@@ -535,7 +550,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   background: rgba(255, 255, 255, 0.04);
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__disclaimer-title {
-  margin: 0 0 8px;
+  margin: 0 0 12px;
   font-family: var(--font-family-manrope);
   font-size: 13px;
   font-weight: 600;
@@ -675,9 +690,9 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   font-family: var(--font-family-manrope);
   font-size: 32px;
   line-height: 1.2;
-  font-weight: var(--font-weight-semiBold);
+  font-weight: 500;
   color: #ffffff;
-  letter-spacing: -0.08em;
+  letter-spacing: -0.05em;
   max-inline-size: none;
   text-wrap: pretty;
 }
@@ -782,16 +797,10 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 }
 
 .page[data-name="home page"] .home-hero__link-text {
-  text-decoration: none;
-  text-transform: lowercase;
-}
-
-.page[data-name="home page"] .home-hero__link-text::before {
-  content: "[";
-}
-
-.page[data-name="home page"] .home-hero__link-text::after {
-  content: "]";
+  text-decoration: underline;
+  text-underline-offset: 16%;
+  text-decoration-thickness: 0.06em;
+  text-transform: none;
 }
 
 .page[data-name="home page"] .home-hero__link-quote {
@@ -813,7 +822,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
 
 .page[data-name="home page"] .home-hero__link:hover .home-hero__link-text,
 .page[data-name="home page"] .home-hero__link:focus-visible .home-hero__link-text {
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 .page[data-name="home page"] .home-hero__more-links {
@@ -821,7 +830,7 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-meta__discla
   flex-direction: column;
   align-items: flex-end;
   flex-wrap: nowrap;
-  gap: 8px;
+  gap: 12px;
   width: fit-content;
   max-width: 100%;
 }
@@ -2842,8 +2851,12 @@ p { margin: 0; }
   flex: 0 0 120px;
   color: #ffffff;
   overflow: hidden;
-  contain: layout paint;
+  contain: layout;
   isolation: isolate;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  animation: site-footer-orbit-spin 20s linear infinite;
+  will-change: transform;
 }
 
 .site-footer__orbit-svg {
@@ -2851,9 +2864,6 @@ p { margin: 0; }
   width: 100%;
   height: 100%;
   overflow: hidden;
-  transform-origin: 50% 50%;
-  animation: site-footer-orbit-spin 20s linear infinite;
-  will-change: transform;
 }
 
 .site-footer__orbit-text {
@@ -3023,6 +3033,12 @@ p { margin: 0; }
 .site-footer__icon:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px rgba(255,255,255,0.3), 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.page[data-name="home page"] .site-footer {
+  opacity: 0;
+  animation: fadeSlideIn 800ms cubic-bezier(.2,.8,.2,1) forwards;
+  animation-delay: 600ms;
 }
 
 .toast {
@@ -6462,7 +6478,7 @@ p { margin: 0; }
 
 @media (min-width: 1051px) and (hover: hover) and (pointer: fine) {
   .page[data-name="home page"] .main {
-    overflow-y: clip;
+    overflow-y: visible;
     overflow-anchor: none;
   }
 }

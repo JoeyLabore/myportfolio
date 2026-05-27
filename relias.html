@@ -71,7 +71,7 @@
                 <br />
                 <ul class="project-overview">
                   <li><strong>Client:</strong> Relias</li>
-                  <li><strong>Type of work:</strong> Enterprise UX</li>
+                  <li><strong>Type of Work:</strong> Enterprise UX</li>
                   <li><strong>Duration:</strong> 2025 - 2026</li>
                   <li><strong>My Role:</strong> Product Design Lead. I led the design of AI-driven content workflows and platform experiences.</li>
                 </ul>
@@ -265,7 +265,7 @@
                     <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="./assets/relias/workshop.jpg" alt="Future-state exploration visual one" />
                     <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow deep-dive-content-block__image-caption--left">Collaborative Workshop Session Board</p>
                   </div>
-                  <p class="deep-dive-article__paragraph">Before moving into interface design, it was essential to align on how the system should function at a structural level. Using insights gathered from workshops and discovery, we developed and iterated on multiple future-state artifacts, including journey maps, user flows, and product diagrams. These helped us visualize how content would move through the system, how responsibilities would shift, and where automation could support each stage.</p>
+                  <p class="deep-dive-article__paragraph">Before moving into interface design, it was essential to align on how the system should function at a structural level. Using insights gathered from workshops and discovery, we developed and iterated on multiple future-state artefacts, including journey maps, user flows, and product diagrams. These helped us visualise how content would move through the system, how responsibilities would shift, and where automation could support each stage.</p>
                   <p class="deep-dive-article__paragraph">In parallel, we explored how user roles themselves would evolve, moving from content creators to editors, validators, and decision-makers within a more system-driven workflow.</p>
                   <div class="deep-dive-image-row__card deep-dive-image-row__card--captioned">
                     <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="./assets/relias/future-state-flow.png" alt="Future-state exploration visual two" />
@@ -291,7 +291,7 @@
                 <h2 class="deep-dive-content-block__title">Testing Beyond the Interface with AI Prototypes</h2>
                 <p class="deep-dive-article__paragraph">Traditional Figma prototypes were not sufficient for testing interactions with a language model. Static screens could not capture how users would actually engage with a system driven by conversation and dynamic responses.</p>
                 <p class="deep-dive-article__paragraph">To address this, I built a production-like prototype by using Figma’s MCP to build the interface with lightweight AI agents integrated into the UI via OpenAI’s API. This allowed us to simulate real interactions between users and the system.</p>
-                <p class="deep-dive-article__paragraph">These prototypes enabled us to go beyond usability testing and observe behavior in context, how users think, how they phrase requests, what they expect from responses, and how they navigate tasks through conversation.</p>
+                <p class="deep-dive-article__paragraph">These prototypes enabled us to go beyond usability testing and observe behaviour in context, how users think, how they phrase requests, what they expect from responses, and how they navigate tasks through conversation.</p>
                 <p class="deep-dive-article__paragraph">This approach also provided valuable insights for the development team, helping inform how AI agents should be structured, orchestrated, and integrated into the product.</p>
                 <div class="deep-dive-content-block__media" aria-label="Section 06 visual">
                   <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain" src="./assets/relias/user-testing.png" alt="Section 06 visual" />
@@ -307,9 +307,9 @@
               <div class="deep-dive-content-divider" aria-hidden="true"></div>
               <article id="section-07" class="deep-dive-content-block">
                 <p class="deep-dive-content-block__label">06 Final Design &amp; Refinement</p>
-                <h2 class="deep-dive-content-block__title">Aligning design with real system behavior</h2>
+                <h2 class="deep-dive-content-block__title">Aligning design with real system behaviour</h2>
                 <p class="deep-dive-article__paragraph">Building on validated insights, we translated learnings from co-creation and testing into the final design. A key focus was aligning design with how the system actually works. The solution relied on specialised agents coordinated by an orchestration layer, shaping how features, interactions, and responsibilities were structured.</p>
-                <p class="deep-dive-article__paragraph">This extended into conversational design, defining how the system responds, guides users, and supports decision-making. By grounding decisions in both user behavior and system capabilities, we created a solution that is intuitive, feasible, and scalable.</p>
+                <p class="deep-dive-article__paragraph">This extended into conversational design, defining how the system responds, guides users, and supports decision-making. By grounding decisions in both user behaviour and system capabilities, we created a solution that is intuitive, feasible, and scalable.</p>
                 <div class="deep-dive-content-block__media">
                   <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain" src="./assets/relias/6.jpg" alt="Final design and refinement visual" />
                 </div>
@@ -415,12 +415,13 @@
       const overviewSection = document.getElementById('overview');
       const deepDiveSection = document.getElementById('deep-dive');
       const deepDiveContent = deepDiveSection ? deepDiveSection.querySelector('.deep-dive-article__content') : null;
-      const revealItems = deepDiveContent ? Array.from(deepDiveContent.querySelectorAll([
-        '.deep-dive-meta__label',
-        '.deep-dive-meta__text',
-        '.deep-dive-meta__disclaimer-title',
-        '.deep-dive-meta__disclaimer-text',
-        '.deep-dive-content-block__label',
+	      const revealItems = deepDiveContent ? Array.from(deepDiveContent.querySelectorAll([
+	        '.deep-dive-meta__label',
+	        '.deep-dive-meta__text',
+	        '.deep-dive-meta__disclaimer',
+	        '.deep-dive-meta__disclaimer-title',
+	        '.deep-dive-meta__disclaimer-text',
+	        '.deep-dive-content-block__label',
         '.deep-dive-content-block__title',
         '.deep-dive-article__paragraph',
         '.deep-dive-content-block__media',

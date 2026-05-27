@@ -87,8 +87,7 @@
             const footer = homePage.querySelector('.site-footer');
             if (footer) {
               try {
-                footer.classList.remove('scroll-reveal-hidden');
-                footer.classList.add('scroll-reveal-visible');
+                footer.classList.remove('scroll-reveal-hidden', 'scroll-reveal-visible');
               } catch (_) { /* ignore footer restore errors */ }
             }
 
@@ -3131,7 +3130,6 @@
               if (runId !== tileIntroRunId) return;
               if (footer) {
                 footer.classList.remove('scroll-reveal-visible', 'scroll-reveal-hidden');
-                footer.classList.add(prefersReduced ? 'scroll-reveal-visible' : 'scroll-reveal-hidden');
               }
               if (!prefersReduced) {
                 if (homePageRoot) homePageRoot.classList.add('home-tile-intro-active');
@@ -3144,22 +3142,10 @@
                     } catch (_) { /* ignore per-tile replay errors */ }
                   });
                 }
-                if (footer) {
-                  const footerRevealTimerId = window.setTimeout(() => {
-                    tileIntroPendingTimers.delete(footerRevealTimerId);
-                    if (runId !== tileIntroRunId) return;
-                    try {
-                      footer.classList.remove('scroll-reveal-hidden');
-                      footer.classList.add('scroll-reveal-visible');
-                    } catch (_) { /* ignore footer intro errors */ }
-                  }, introStaggerSpan + TILE_GRID_INTRO_MS);
-                  tileIntroPendingTimers.add(footerRevealTimerId);
-                }
               } else {
                 clearTileIntroState();
                 if (footer) {
-                  footer.classList.remove('scroll-reveal-hidden');
-                  footer.classList.add('scroll-reveal-visible');
+                  footer.classList.remove('scroll-reveal-hidden', 'scroll-reveal-visible');
                 }
               }
             };
@@ -3784,8 +3770,7 @@
             const footer = compactHomeRoot.querySelector('.site-footer');
             if (footer) {
               try {
-                footer.classList.remove('scroll-reveal-hidden');
-                footer.classList.add('scroll-reveal-visible');
+                footer.classList.remove('scroll-reveal-hidden', 'scroll-reveal-visible');
               } catch (_) { /* ignore compact footer recovery errors */ }
             }
           } catch (_) { /* ignore compact intro stabilization errors */ }
