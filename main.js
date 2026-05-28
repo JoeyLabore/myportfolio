@@ -2363,7 +2363,7 @@
         };
         const PROJECT_THUMBNAIL_TAGS = {
           toyota: 'Systems Design, AI-Driven Development, Product Infrastructure, Creative Direction',
-          relias: 'Agentic UX, Systems Design, AI Prototyping, Creative Direction',
+          relias: 'AI, Product Strategy, Systems Thinking, Leadership',
           nestbank: 'UX Strategy, Creative Direction, Behavioural Design, Trust & Adoption',
           orion: 'UX Strategy, Systems Design, Accessibility, Creative Direction',
           medigo: 'Mobile Product Design, Healthcare UX, Interaction Design, Visual Direction',
