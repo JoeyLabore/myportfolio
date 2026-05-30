@@ -4370,6 +4370,7 @@
         const archiveIntroFullText = archiveIntro ? String(archiveIntro.textContent || '').trim() : '';
         let scheduleArchiveVirtualizationUpdate = () => {};
         let restoreArchiveVirtualizedMedia = () => {};
+        let recomposeArchiveLayout = () => {};
         let archiveLightbox = null;
         let archiveLightboxMediaWrap = null;
         let archiveLightboxCloseTimer = 0;
@@ -4526,10 +4527,12 @@
           121: 100,
         };
         const ARCHIVE_FULL_SOURCE_IDS = new Set([1, 23, 25]);
+        const ARCHIVE_REMOVED_SOURCE_IDS = new Set([20, 59, 69, 84, 100]);
         const ARCHIVE_MEDIA = [];
         for (let id = 1; id <= 121; id += 1) {
           if (ARCHIVE_MISSING_IDS.has(id)) continue;
           const sourceId = ARCHIVE_SOURCE_ID_SWAPS[id] || id;
+          if (ARCHIVE_REMOVED_SOURCE_IDS.has(sourceId)) continue;
           let type = 'image';
           let ext = 'avif';
           if (ARCHIVE_VIDEO_IDS.has(sourceId)) {
@@ -4541,6 +4544,8 @@
           }
           const dimensions = ARCHIVE_MEDIA_DIMENSIONS[sourceId] || null;
           ARCHIVE_MEDIA.push({
+            id,
+            sourceId,
             type,
             src: ARCHIVE_FULL_SOURCE_IDS.has(sourceId) ? `./assets/archive/${sourceId}.${ext}` : `./assets/archive-thumbnails/${sourceId}.${ext}`,
             lightboxSrc: `./assets/archive/${sourceId}.${ext}`,
@@ -4749,6 +4754,7 @@
           let archiveRevealQueueRaf = 0;
           let archiveHydrationObserver = null;
           const archiveRevealQueue = new Set();
+          const archiveItemRecords = [];
 
           const pauseArchiveVideo = (video) => {
             if (!(video instanceof HTMLVideoElement)) return;
@@ -5095,18 +5101,124 @@
             window.addEventListener('orientationchange', requestArchiveWindowing);
           }
 
+          if (archiveViewport && !archiveViewport.__archiveLayoutRecomposeBound) {
+            archiveViewport.__archiveLayoutRecomposeBound = true;
+            window.addEventListener('resize', () => {
+              try { recomposeArchiveLayout(); } catch (_) { /* ignore archive resize layout errors */ }
+            });
+            window.addEventListener('orientationchange', () => {
+              try { recomposeArchiveLayout(); } catch (_) { /* ignore archive orientation layout errors */ }
+            });
+          }
+
           const markArchiveMediaResolved = () => {};
 
-          ARCHIVE_MEDIA.forEach((media, index) => {
+          const getArchiveColumnCount = () => {
+            if (window.matchMedia && window.matchMedia('(min-width: 1500px)').matches) return 4;
+            if (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) return 2;
+            return 3;
+          };
+
+          const getArchiveMediaWeight = (media) => {
+            const width = Number(media && media.width) || 1;
+            const height = Number(media && media.height) || 1;
+            return Math.max(0.35, height / width);
+          };
+
+          const composeArchiveColumns = (mediaItems = ARCHIVE_MEDIA) => {
+            const columnCount = getArchiveColumnCount();
+            const columns = Array.from({ length: columnCount }, () => []);
+            const columnWeights = Array.from({ length: columnCount }, () => 0);
+            const usedSourceIds = new Set();
+            const mediaBySourceId = new Map();
+            const preferredColumns = [
+              [3, 2, 5],
+              [26, 40, 76],
+              [96, 89, 120],
+              [111, 75, 117],
+            ];
+
+            mediaItems.forEach((media) => {
+              if (!mediaBySourceId.has(media.sourceId)) mediaBySourceId.set(media.sourceId, media);
+            });
+
+            preferredColumns.slice(0, columnCount).forEach((preferredIds, columnIndex) => {
+              preferredIds.forEach((sourceId) => {
+                const media = mediaBySourceId.get(sourceId);
+                if (!media || usedSourceIds.has(media.sourceId)) return;
+                columns[columnIndex].push(media);
+                columnWeights[columnIndex] += getArchiveMediaWeight(media);
+                usedSourceIds.add(media.sourceId);
+              });
+            });
+
+            mediaItems.forEach((media) => {
+              if (usedSourceIds.has(media.sourceId)) return;
+              let targetColumnIndex = 0;
+              for (let index = 1; index < columnWeights.length; index += 1) {
+                if (columnWeights[index] < columnWeights[targetColumnIndex]) {
+                  targetColumnIndex = index;
+                }
+              }
+              columns[targetColumnIndex].push(media);
+              columnWeights[targetColumnIndex] += getArchiveMediaWeight(media);
+              usedSourceIds.add(media.sourceId);
+            });
+
+            return columns;
+          };
+
+          const archiveColumns = composeArchiveColumns();
+          let archiveRenderedColumnCount = archiveColumns.length;
+          const archiveRecordsBySourceId = new Map();
+
+          const buildArchiveColumnEl = (columnIndex) => {
+            const column = document.createElement('div');
+            column.className = 'home-archive-stage__column';
+            column.dataset.archiveColumn = String(columnIndex + 1);
+            return column;
+          };
+
+          recomposeArchiveLayout = () => {
+            if (!archiveTrack || !archiveTrack.isConnected) return;
+            const nextColumnCount = getArchiveColumnCount();
+            if (nextColumnCount === archiveRenderedColumnCount) return;
+            const mediaItems = archiveItemRecords.map((record) => record.media);
+            const nextColumns = composeArchiveColumns(mediaItems);
+            const fragment = document.createDocumentFragment();
+            nextColumns.forEach((columnMedia, columnIndex) => {
+              const column = buildArchiveColumnEl(columnIndex);
+              columnMedia.forEach((media) => {
+                const record = archiveRecordsBySourceId.get(media.sourceId);
+                if (record && record.item) column.appendChild(record.item);
+              });
+              fragment.appendChild(column);
+            });
+            archiveTrack.replaceChildren(fragment);
+            archiveRenderedColumnCount = nextColumnCount;
+            requestArchiveRelayout();
+            revealReadyArchiveItems();
+            requestArchiveWindowing();
+          };
+
+          archiveColumns.forEach((columnMedia, columnIndex) => {
+            const column = buildArchiveColumnEl(columnIndex);
+            archiveTrack.appendChild(column);
+
+            columnMedia.forEach((media, index) => {
             const item = document.createElement('div');
             item.className = 'home-archive-stage__item';
             item.dataset.archiveReady = 'false';
             item.dataset.archiveMediaReady = 'false';
             item.dataset.archiveMediaType = media.type;
+            item.dataset.archiveSourceId = String(media.sourceId);
             if (media.width && media.height) {
               item.style.setProperty('--archive-media-aspect-ratio', `${media.width} / ${media.height}`);
             }
             archiveItems.push(item);
+            const archiveItemRecord = { media, item };
+            archiveItemRecords.push(archiveItemRecord);
+            archiveRecordsBySourceId.set(media.sourceId, archiveItemRecord);
             let mediaResolved = false;
 
             const markArchiveMediaResolvedOnce = () => {
@@ -5167,7 +5279,7 @@
               });
               item.__archiveMediaNode = video;
               item.appendChild(video);
-              archiveTrack.appendChild(item);
+              column.appendChild(item);
               registerArchiveVideo(video);
               const ensurePlay = () => {
                 tryPlayArchiveVideo(video);
@@ -5248,7 +5360,7 @@
                 requestArchiveRelayout();
               }, { once: true });
               item.appendChild(img);
-              archiveTrack.appendChild(item);
+              column.appendChild(item);
               item.__archiveHydrate = () => {
                 if (img.dataset.archiveHydrated === 'true') return;
                 img.dataset.archiveHydrated = 'true';
@@ -5266,6 +5378,7 @@
               };
             }
             scheduleArchiveHydration(item, index);
+            });
           });
 
           homePage.classList.add('home-archive-assets-ready');
