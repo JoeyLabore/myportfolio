@@ -4378,7 +4378,8 @@
         let archiveLightboxViewerNode = null;
 
         const ARCHIVE_VIDEO_IDS = new Set([38, 39, 42, 43, 97, 104, 106, 118, 121]);
-        const ARCHIVE_GIF_IDS = new Set([2, 21, 22, 71, 102]);
+        const ARCHIVE_GIF_IDS = new Set([2, 22, 71, 102]);
+        const ARCHIVE_JPG_IDS = new Set([21]);
         const ARCHIVE_MISSING_IDS = new Set([7, 8, 9, 17, 44, 46, 47, 48, 50, 51, 53, 64, 66, 67, 68, 70, 81, 82, 88, 109, 110, 112]);
         const ARCHIVE_MEDIA_DIMENSIONS = {
           1: [1136, 1518],
@@ -4541,6 +4542,8 @@
           } else if (ARCHIVE_GIF_IDS.has(sourceId)) {
             type = 'gif';
             ext = 'gif';
+          } else if (ARCHIVE_JPG_IDS.has(sourceId)) {
+            ext = 'jpg';
           }
           const dimensions = ARCHIVE_MEDIA_DIMENSIONS[sourceId] || null;
           ARCHIVE_MEDIA.push({
