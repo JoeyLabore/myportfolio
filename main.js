@@ -5485,8 +5485,23 @@
           }
         };
 
+        let isApplyingHomeHistoryState = false;
+        const getHomeTabName = (tab) => {
+          try { return String((tab && tab.dataset && tab.dataset.tab) || '').toLowerCase(); } catch (_) { return ''; }
+        };
+        const syncHomeTabHistory = (tabName, previousTabName) => {
+          if (isApplyingHomeHistoryState) return;
+          if (tabName !== 'archive' || previousTabName === 'archive') return;
+          try {
+            if (!window.history || typeof window.history.pushState !== 'function') return;
+            window.history.pushState({ homeTab: 'archive' }, '', window.location.href);
+          } catch (_) { /* ignore archive history errors */ }
+        };
+
         const setActive = (idx) => {
           const wasArchiveActive = homePage.classList.contains('home-archive-active');
+          const previousActiveTab = tabs.find((tab) => tab.classList.contains('active')) || tabs[current] || tabs[0];
+          const previousTabName = getHomeTabName(previousActiveTab);
           tabs.forEach((t, i) => {
             const active = i === idx;
             t.classList.toggle('active', active);
@@ -5494,8 +5509,9 @@
             t.tabIndex = active ? 0 : -1;
           });
           const tab = tabs[idx];
-          const tabName = (tab && tab.dataset) ? String(tab.dataset.tab || '').toLowerCase() : 'recent';
+          const tabName = getHomeTabName(tab) || 'recent';
           syncArchiveState(tabName === 'archive');
+          syncHomeTabHistory(tabName, previousTabName);
           if (tabName === 'recent' && wasArchiveActive) {
             const isCompactHome = !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches);
             if (isCompactHome) {
@@ -5570,7 +5586,15 @@
           window.requestAnimationFrame(reconcileHomeFeaturedStateAfterArchiveRestore);
         });
         window.addEventListener('popstate', () => {
-          window.requestAnimationFrame(reconcileHomeFeaturedStateAfterArchiveRestore);
+          window.requestAnimationFrame(() => {
+            try {
+              const nextTabName = (window.history && window.history.state && window.history.state.homeTab === 'archive') ? 'archive' : 'recent';
+              isApplyingHomeHistoryState = true;
+              setHomeTabByName(nextTabName);
+            } catch (_) { /* ignore home tab history restore errors */ }
+            finally { isApplyingHomeHistoryState = false; }
+            reconcileHomeFeaturedStateAfterArchiveRestore();
+          });
         });
 
         // Click activation
@@ -5682,6 +5706,7 @@
             overlay.classList.add('open');
             try { homePage && homePage.classList.add('mobile-menu-open'); } catch (_) {}
             try { overlay.setAttribute('aria-hidden', 'false'); } catch (_) {}
+            try { menuCard.setAttribute('aria-expanded', 'true'); } catch (_) {}
             // Prevent background scroll while open
             try { document.body.style.overflow = 'hidden'; } catch (_) {}
             try { if (typeof window.__setHomeFallingTagsActive === 'function') window.__setHomeFallingTagsActive(false); } catch (_) {}
@@ -5690,9 +5715,11 @@
             overlay.classList.remove('open');
             try { homePage && homePage.classList.remove('mobile-menu-open'); } catch (_) {}
             try { overlay.setAttribute('aria-hidden', 'true'); } catch (_) {}
+            try { menuCard.setAttribute('aria-expanded', 'false'); } catch (_) {}
             try { document.body.style.overflow = ''; } catch (_) {}
             try { if (typeof window.__setHomeFallingTagsActive === 'function') window.__setHomeFallingTagsActive(true); } catch (_) {}
           };
+          try { menuCard.setAttribute('aria-expanded', 'false'); } catch (_) {}
 
           menuCard.addEventListener('click', (e) => {
             e.preventDefault();
@@ -5738,6 +5765,12 @@
             });
           });
 
+          Array.from(overlay.querySelectorAll('a[href]:not([data-mobile-tab])')).forEach((link) => {
+            link.addEventListener('click', () => {
+              close();
+            });
+          });
+
           // Click outside the panel closes
           overlay.addEventListener('click', (e) => {
             if (!panel) { close(); return; }
@@ -5747,6 +5780,9 @@
           window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && overlay.classList.contains('open')) close();
           });
+          window.addEventListener('pagehide', close);
+          window.addEventListener('pageshow', close);
+          window.addEventListener('popstate', close);
         } catch (_) { /* ignore */ }
       })();
 
