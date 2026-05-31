@@ -4,6 +4,30 @@
 (function () {
   // Profiling toggle: set to true to show live performance stats
   const ENABLE_PROFILING = false;
+  const SITE_ROOT_URL = (() => {
+    try {
+      const scriptUrl = document.currentScript && document.currentScript.src;
+      return scriptUrl ? new URL('.', scriptUrl).href : new URL('./', window.location.href).href;
+    } catch (_) {
+      return './';
+    }
+  })();
+  const sitePath = (path) => {
+    try {
+      if (!path || typeof path !== 'string') return path;
+      if (/^(?:[a-z][a-z0-9+.-]*:|#)/i.test(path)) return path;
+      return new URL(path.replace(/^\.\//, ''), SITE_ROOT_URL).href;
+    } catch (_) {
+      return path;
+    }
+  };
+  const cleanPagePath = (slug) => `./${slug}/`;
+  const homePath = () => './home/';
+  const pathMatchesPage = (pathname, slug, legacyName = `${slug}.html`) => {
+    const p = String(pathname || '').toLowerCase();
+    const cleanSlug = String(slug || '').replace(/^\/+|\/+$/g, '').toLowerCase();
+    return p.includes(String(legacyName || '').toLowerCase()) || p.endsWith(`/${cleanSlug}/`) || p.endsWith(`/${cleanSlug}`);
+  };
   // Force top-left scroll position on refresh/navigation
   try {
     if ('scrollRestoration' in history) {
@@ -231,9 +255,9 @@
         try { window.sessionStorage.setItem('jg_about_scroll_target', normalized); } catch (_) {}
         mobileSectionNavUntil = performance.now() + 800;
         try {
-          window.location.href = `./about.html?scroll=${normalized}#${normalized}`;
+          window.location.href = sitePath(`./about/?scroll=${normalized}#${normalized}`);
         } catch (_) {
-          try { window.location.assign(`./about.html?scroll=${normalized}#${normalized}`); } catch (_) {}
+          try { window.location.assign(sitePath(`./about/?scroll=${normalized}#${normalized}`)); } catch (_) {}
         }
       };
 
@@ -301,7 +325,7 @@
       });
 
       const aboutSectionLinks = Array.from(
-        linksTrack.querySelectorAll('.home-hero__link[href="./about.html?scroll=process"], .home-hero__link[href="./about.html?scroll=reviews"]')
+        linksTrack.querySelectorAll('.home-hero__link[href="./about/?scroll=process"], .home-hero__link[href="./about/?scroll=reviews"]')
       );
 
       aboutSectionLinks.forEach((link) => {
@@ -1105,21 +1129,21 @@
         try {
           const p = String(location && location.pathname || '').toLowerCase();
           const t = String(document && document.title || '').toLowerCase();
-          return p.includes('nestbank.html') || t.includes('nestbank');
+          return pathMatchesPage(p, 'nestbank') || t.includes('nestbank');
         } catch (_) { return false; }
       })();
       const IS_TOM = (() => {
         try {
           const p = String(location && location.pathname || '').toLowerCase();
           const t = String(document && document.title || '').toLowerCase();
-          return p.includes('tom.html') || t.includes('tom');
+          return pathMatchesPage(p, 'tom') || t.includes('tom');
         } catch (_) { return false; }
       })();
       const IS_TOYOTA = (() => {
         try {
           const p = String(location && location.pathname || '').toLowerCase();
           const t = String(document && document.title || '').toLowerCase();
-          return p.includes('toyota.html') || t.includes('toyota');
+          return pathMatchesPage(p, 'toyota') || t.includes('toyota');
         } catch (_) { return false; }
       })();
       const TOTAL_MS = IS_NESTBANK ? 1500 : (IS_TOM ? 1500 : (IS_TOYOTA ? 1800 : 2500));      // total overlay duration (reduced for faster transitions)
@@ -1202,113 +1226,114 @@
   })();
   const DEV_ASSET_BUST = DEV_NOCACHE_ASSETS ? String(Date.now()) : '';
   function withDevAssetBust(src) {
-    if (!DEV_NOCACHE_ASSETS) return src;
     if (!src || typeof src !== 'string') return src;
-    const sep = src.includes('?') ? '&' : '?';
-    return `${src}${sep}v=${DEV_ASSET_BUST}`;
+    const resolved = sitePath(src);
+    if (!DEV_NOCACHE_ASSETS) return resolved;
+    const sep = resolved.includes('?') ? '&' : '?';
+    return `${resolved}${sep}v=${DEV_ASSET_BUST}`;
   }
 
   const NESTBANK_FILES = [
     // Ordered to match assets/nestbank folder including videos
     // Sequence follows numeric filenames, with fractional steps like 4.5, 12.5, 16
-    "./assets/nestbank/1.jpg",
-    "./assets/nestbank/2.jpg",
-    "./assets/nestbank/3.png",
-    "./assets/nestbank/4.5.mp4",
-    "./assets/nestbank/7.png",
-    "./assets/nestbank/5.png",
-    "./assets/nestbank/9.jpg",
-    "./assets/nestbank/11.png",
-    "./assets/nestbank/12.5.mp4",
-    "./assets/nestbank/4.jpg",
-    "./assets/nestbank/6.jpg",
-    "./assets/nestbank/16.mp4",
-    "./assets/nestbank/12.jpg",
-    "./assets/nestbank/17.jpg",
-    "./assets/nestbank/20.mp4",
-    "./assets/nestbank/19.jpg",
-    "./assets/nestbank/8.png",
+    sitePath("./assets/nestbank/1.jpg"),
+    sitePath("./assets/nestbank/2.jpg"),
+    sitePath("./assets/nestbank/3.png"),
+    sitePath("./assets/nestbank/4.5.mp4"),
+    sitePath("./assets/nestbank/7.png"),
+    sitePath("./assets/nestbank/5.png"),
+    sitePath("./assets/nestbank/9.jpg"),
+    sitePath("./assets/nestbank/11.png"),
+    sitePath("./assets/nestbank/12.5.mp4"),
+    sitePath("./assets/nestbank/4.jpg"),
+    sitePath("./assets/nestbank/6.jpg"),
+    sitePath("./assets/nestbank/16.mp4"),
+    sitePath("./assets/nestbank/12.jpg"),
+    sitePath("./assets/nestbank/17.jpg"),
+    sitePath("./assets/nestbank/20.mp4"),
+    sitePath("./assets/nestbank/19.jpg"),
+    sitePath("./assets/nestbank/8.png"),
   ];
 
   const TOM_FILES = [
-    "./assets/tom/1.jpg",
-    "./assets/tom/2.svg",
-    "./assets/tom/4.jpg",
-    "./assets/tom/3.jpg",
-    "./assets/tom/5.jpg",
-    "./assets/tom/6.svg",
-    "./assets/tom/7.jpg",
-    "./assets/tom/8.jpg",
-    "./assets/tom/10.jpg",
-    "./assets/tom/9.jpg",
-    "./assets/tom/11.jpg",
+    sitePath("./assets/tom/1.jpg"),
+    sitePath("./assets/tom/2.svg"),
+    sitePath("./assets/tom/4.jpg"),
+    sitePath("./assets/tom/3.jpg"),
+    sitePath("./assets/tom/5.jpg"),
+    sitePath("./assets/tom/6.svg"),
+    sitePath("./assets/tom/7.jpg"),
+    sitePath("./assets/tom/8.jpg"),
+    sitePath("./assets/tom/10.jpg"),
+    sitePath("./assets/tom/9.jpg"),
+    sitePath("./assets/tom/11.jpg"),
     // Remaining TOM assets after the 1–11 sequence
-    "./assets/tom/12.jpg",
+    sitePath("./assets/tom/12.jpg"),
   ];
 
   const TRD_FILES = [
-    "./assets/trd/1.jpg",
-    "./assets/trd/2.png",
-    "./assets/trd/3.jpg?v=2",
-    "./assets/trd/5.png?v=2",
-    "./assets/trd/3.5.jpg",
-    "./assets/trd/4.jpg?v=4",
-    "./assets/trd/7.jpg?v=2",
-    "./assets/trd/8.png",
-    "./assets/trd/6.jpeg",
+    sitePath("./assets/trd/1.jpg"),
+    sitePath("./assets/trd/2.png"),
+    sitePath("./assets/trd/3.jpg?v=2"),
+    sitePath("./assets/trd/5.png?v=2"),
+    sitePath("./assets/trd/3.5.jpg"),
+    sitePath("./assets/trd/4.jpg?v=4"),
+    sitePath("./assets/trd/7.jpg?v=2"),
+    sitePath("./assets/trd/8.png"),
+    sitePath("./assets/trd/6.jpeg"),
   ];
 
   const RELIAS_FILES = [
-    "./assets/relias/1.jpg",
-    "./assets/relias/2.png",
-    "./assets/relias/3.jpg",
-    "./assets/relias/3,5.png",
-    "./assets/relias/4.jpg",
-    "./assets/relias/5.png",
-    "./assets/relias/6.jpg",
-    "./assets/relias/7.png",
-    "./assets/relias/8.jpg",
-    "./assets/relias/9.jpg",
-    "./assets/relias/10.png?v=2",
+    sitePath("./assets/relias/1.jpg"),
+    sitePath("./assets/relias/2.png"),
+    sitePath("./assets/relias/3.jpg"),
+    sitePath("./assets/relias/3,5.png"),
+    sitePath("./assets/relias/4.jpg"),
+    sitePath("./assets/relias/5.png"),
+    sitePath("./assets/relias/6.jpg"),
+    sitePath("./assets/relias/7.png"),
+    sitePath("./assets/relias/8.jpg"),
+    sitePath("./assets/relias/9.jpg"),
+    sitePath("./assets/relias/10.png?v=2"),
   ];
 
   const QL_FILES = [
-    "./assets/ql/1.jpg",
-    "./assets/ql/2.png",
-    "./assets/ql/3.jpg?v=2",
-    "./assets/ql/4.png",
-    "./assets/ql/5.jpg",
-    "./assets/ql/6.png",
-    "./assets/ql/7.jpg",
-    "./assets/ql/8.jpg",
-    "./assets/ql/9.png",
+    sitePath("./assets/ql/1.jpg"),
+    sitePath("./assets/ql/2.png"),
+    sitePath("./assets/ql/3.jpg?v=2"),
+    sitePath("./assets/ql/4.png"),
+    sitePath("./assets/ql/5.jpg"),
+    sitePath("./assets/ql/6.png"),
+    sitePath("./assets/ql/7.jpg"),
+    sitePath("./assets/ql/8.jpg"),
+    sitePath("./assets/ql/9.png"),
   ];
 
   const MEDBRIDGEGO_FILES = [
-    "./assets/medbridgego/1.jpg",
-    "./assets/medbridgego/2.png",
-    "./assets/medbridgego/3.jpg",
-    "./assets/medbridgego/4.png",
-    "./assets/medbridgego/5.jpg",
-    "./assets/medbridgego/6.jpg",
-    "./assets/medbridgego/7.jpg",
-    "./assets/medbridgego/8.png",
-    "./assets/medbridgego/9.jpg",
-    "./assets/medbridgego/10.png",
-    "./assets/medbridgego/11.jpg",
-    "./assets/medbridgego/12.png",
+    sitePath("./assets/medbridgego/1.jpg"),
+    sitePath("./assets/medbridgego/2.png"),
+    sitePath("./assets/medbridgego/3.jpg"),
+    sitePath("./assets/medbridgego/4.png"),
+    sitePath("./assets/medbridgego/5.jpg"),
+    sitePath("./assets/medbridgego/6.jpg"),
+    sitePath("./assets/medbridgego/7.jpg"),
+    sitePath("./assets/medbridgego/8.png"),
+    sitePath("./assets/medbridgego/9.jpg"),
+    sitePath("./assets/medbridgego/10.png"),
+    sitePath("./assets/medbridgego/11.jpg"),
+    sitePath("./assets/medbridgego/12.png"),
   ];
 
   function getCaseStudyFiles() {
     try {
       const p = String(location && location.pathname || '').toLowerCase();
       const t = String(document && document.title || '').toLowerCase();
-      if (p.includes('tom.html') || t.includes('tom')) return TOM_FILES;
-      if (p.includes('toyota.html') || t.includes('toyota')) return TRD_FILES;
-      if (p.includes('nestbank.html') || t.includes('nestbank')) return NESTBANK_FILES;
-      if (p.includes('ql.html') || t.includes('quicken') || t.includes('rocket')) return QL_FILES;
-      if (p.includes('medbridgego.html') || t.includes('medbridgego')) return MEDBRIDGEGO_FILES;
-      if (p.includes('relias.html') || p.includes('virelia.html') || t.includes('relias') || t.includes('virelia')) return RELIAS_FILES;
+      if (pathMatchesPage(p, 'tom') || t.includes('tom')) return TOM_FILES;
+      if (pathMatchesPage(p, 'toyota') || t.includes('toyota')) return TRD_FILES;
+      if (pathMatchesPage(p, 'nestbank') || t.includes('nestbank')) return NESTBANK_FILES;
+      if (pathMatchesPage(p, 'ql') || t.includes('quicken') || t.includes('rocket')) return QL_FILES;
+      if (pathMatchesPage(p, 'medbridgego') || t.includes('medbridgego')) return MEDBRIDGEGO_FILES;
+      if (pathMatchesPage(p, 'relias') || pathMatchesPage(p, 'virelia') || t.includes('relias') || t.includes('virelia')) return RELIAS_FILES;
     } catch (_) {}
     return NESTBANK_FILES;
   }
@@ -1372,7 +1397,7 @@
           const stage = document.querySelector('.home-game-stage__inner');
           const scoreEl = document.querySelector('.home-game-score');
           const moreInfoPlayLink = document.querySelector('.page[data-name="home page"] .home-hero__link[data-home-game-start="true"]');
-          const moreInfoReviewsLink = document.querySelector('.page[data-name="home page"] .home-hero__link[href="./about.html?scroll=reviews"]');
+          const moreInfoReviewsLink = document.querySelector('.page[data-name="home page"] .home-hero__link[href="./about/?scroll=reviews"]');
           const homePageRoot = document.querySelector('.page[data-name="home page"]');
           const gameOverEl = document.querySelector('.home-game-over');
           const gameOverScoreEl = document.querySelector('.home-game-over__eyebrow');
@@ -1390,7 +1415,7 @@
             moreInfoReviewsLink.addEventListener('click', (e) => {
               e.preventDefault();
               e.stopPropagation();
-              try { window.location.href = './about.html?scroll=reviews'; } catch (_) {}
+              try { window.location.href = sitePath('./about/?scroll=reviews'); } catch (_) {}
             });
           }
           if (!stage || !scoreEl || !gameOverEl || !gameOverScoreEl || !playAgainBtn || !gameOverTalkLink || !asteroidLayer || !rocketWrap || !rocket) return;
@@ -1399,24 +1424,24 @@
 
           const frameSets = {
             idle: [
-              './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png',
-              './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png',
-              './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-03.png',
+              sitePath('./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png'),
+              sitePath('./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png'),
+              sitePath('./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-03.png'),
             ],
             up: [
-              './assets/rocketgame/costumes/rocket/rocket-up/rocket-up-01.png',
-              './assets/rocketgame/costumes/rocket/rocket-up/rocket-up-02.png',
-              './assets/rocketgame/costumes/rocket/rocket-up/rocket-up-03.png',
+              sitePath('./assets/rocketgame/costumes/rocket/rocket-up/rocket-up-01.png'),
+              sitePath('./assets/rocketgame/costumes/rocket/rocket-up/rocket-up-02.png'),
+              sitePath('./assets/rocketgame/costumes/rocket/rocket-up/rocket-up-03.png'),
             ],
             down: [
-              './assets/rocketgame/costumes/rocket/rocket-down/rocket-down-01.png',
-              './assets/rocketgame/costumes/rocket/rocket-down/rocket-down-02.png',
-              './assets/rocketgame/costumes/rocket/rocket-down/rocket-down-03.png',
+              sitePath('./assets/rocketgame/costumes/rocket/rocket-down/rocket-down-01.png'),
+              sitePath('./assets/rocketgame/costumes/rocket/rocket-down/rocket-down-02.png'),
+              sitePath('./assets/rocketgame/costumes/rocket/rocket-down/rocket-down-03.png'),
             ],
           };
           const asteroidSprites = [
-            './assets/rocketgame/costumes/asteroids/asteroid-small.png',
-            './assets/rocketgame/costumes/asteroids/asteroid-medium.png',
+            sitePath('./assets/rocketgame/costumes/asteroids/asteroid-small.png'),
+            sitePath('./assets/rocketgame/costumes/asteroids/asteroid-medium.png'),
           ];
 
           Object.values(frameSets).flat().forEach((src) => {
@@ -2569,7 +2594,7 @@
 
                 const rocket = document.createElement('img');
                 rocket.className = 'tile-tag__rocket';
-                rocket.src = './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png';
+                rocket.src = sitePath('./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png');
                 rocket.alt = '';
                 rocket.setAttribute('aria-hidden', 'true');
 
@@ -2588,9 +2613,9 @@
             const getProgressRockets = () => Array.from(document.querySelectorAll('.tile-progress-badge .tile-tag__rocket, .tile-hover-overlay__title-rocket'));
             if (getProgressRockets().length) {
               const rocketFrames = [
-                './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png',
-                './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png',
-                './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-03.png',
+                sitePath('./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png'),
+                sitePath('./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-02.png'),
+                sitePath('./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-03.png'),
               ];
               if (window.__homeProgressRocketInterval) {
                 window.clearInterval(window.__homeProgressRocketInterval);
@@ -2711,7 +2736,7 @@
               if (IN_PROGRESS_PROJECTS.has(projKey)) {
                 const titleRocket = document.createElement('img');
                 titleRocket.className = 'tile-hover-overlay__title-rocket';
-                titleRocket.src = './assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png';
+                titleRocket.src = sitePath('./assets/rocketgame/costumes/rocket/rocket-idle/rocket-idle-01.png');
                 titleRocket.alt = '';
                 titleRocket.setAttribute('aria-hidden', 'true');
                 h.appendChild(titleRocket);
@@ -2916,12 +2941,12 @@
         try {
           const prewarmed = new Set();
           const projectToUrl = {
-            nestbank: './nestbank.html',
-            toyota: './toyota.html',
-            relias: './relias.html',
-            orion: './ql.html',
-            tom: './tom.html',
-            logofolio: './logofolio.html',
+            nestbank: cleanPagePath('nestbank'),
+            toyota: cleanPagePath('toyota'),
+            relias: cleanPagePath('relias'),
+            orion: cleanPagePath('ql'),
+            tom: cleanPagePath('tom'),
+            logofolio: cleanPagePath('logofolio'),
           };
           const projectToFiles = {
             nestbank: (typeof NESTBANK_FILES !== 'undefined' ? NESTBANK_FILES : null),
@@ -2938,7 +2963,7 @@
             const url = projectToUrl[proj];
             if (url) {
               try {
-                fetch(url, { credentials: 'same-origin' })
+                fetch(sitePath(url), { credentials: 'same-origin' })
                   .then((r) => { try { return r.text(); } catch (_) { return null; } })
                   .catch(() => {});
               } catch (_) {}
@@ -2985,16 +3010,16 @@
             if (aboutPrewarmed) return;
             aboutPrewarmed = true;
             try {
-              fetch('./about.html', { credentials: 'same-origin' })
+              fetch(sitePath('./about/'), { credentials: 'same-origin' })
                 .then((r) => { try { return r.text(); } catch (_) { return null; } })
                 .catch(() => {});
             } catch (_) {}
             try {
               [
-                './assets/me.jpg',
-                './assets/profile-photo.jpg',
-                './assets/brand-logos/toyota.png',
-                './assets/brand-logos/relias.png',
+                sitePath('./assets/me.jpg'),
+                sitePath('./assets/profile-photo.jpg'),
+                sitePath('./assets/brand-logos/toyota.png'),
+                sitePath('./assets/brand-logos/relias.png'),
               ].forEach((src) => {
                 try {
                   const img = new Image();
@@ -3010,7 +3035,7 @@
               else setTimeout(prewarmAbout, 0);
             } catch (_) {}
           };
-          const aboutLinks = Array.from(document.querySelectorAll('a[href*="about.html"]'));
+          const aboutLinks = Array.from(document.querySelectorAll('a[href*="about"]'));
           aboutLinks.forEach((a) => {
             try { a.addEventListener('mouseenter', scheduleAbout); } catch (_) {}
             try { a.addEventListener('focusin', scheduleAbout); } catch (_) {}
@@ -3868,7 +3893,7 @@
           const t = getTileByProject('nestbank');
           if (!t) return;
           const v = document.createElement('video');
-          v.src = './assets/thumbnails/nestbank-thumbnail-video.mp4';
+          v.src = sitePath('./assets/thumbnails/nestbank-thumbnail-video.mp4');
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
@@ -3898,7 +3923,7 @@
           const t = getTileByProject('logofolio');
           if (!t) return;
           const v = document.createElement('video');
-          v.src = './assets/thumbnails/logofolio-video.mp4';
+          v.src = sitePath('./assets/thumbnails/logofolio-video.mp4');
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
@@ -3931,7 +3956,7 @@
           const t = getTileByProject('kinti');
           if (!t) return;
           const v = document.createElement('video');
-          v.src = './assets/thumbnails/kinti.mp4';
+          v.src = sitePath('./assets/thumbnails/kinti.mp4');
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
@@ -3959,7 +3984,7 @@
           const t = getTileByProject('skilldex');
           if (!t) return;
           const v = document.createElement('video');
-          v.src = './assets/thumbnails/skilldex.mp4';
+          v.src = sitePath('./assets/thumbnails/skilldex.mp4');
           v.muted = true;
           v.loop = true;
           v.playsInline = true;
@@ -4120,13 +4145,13 @@
         function navigateWithOverlay(url) {
           try { sessionStorage.setItem('nb_from_home', '1'); } catch (_) {}
           const overlay = document.querySelector('.intro-overlay');
-          if (!overlay) { window.location.href = url; return; }
+          if (!overlay) { window.location.href = sitePath(url); return; }
           // start slide-in
           try { overlay.classList.add('enter'); } catch (_) {}
           let navigated = false;
           const go = () => {
             if (navigated) return; navigated = true;
-            window.location.href = url;
+            window.location.href = sitePath(url);
           };
           // prefer transition end
           const onEnd = (e) => {
@@ -4144,19 +4169,19 @@
         };
 
         const navigateProject = (proj) => {
-          if (proj === 'nestbank') { navigateWithOverlay('./nestbank.html'); return; }
-          if (proj === 'toyota') { navigateWithOverlay('./toyota.html'); return; }
-          if (proj === 'relias') { navigateWithOverlay('./relias.html'); return; }
-          if (proj === 'orion') { navigateWithOverlay('./ql.html'); return; }
-          if (proj === 'medigo') { navigateWithOverlay('./medbridgego.html'); return; }
-          if (proj === 'logofolio') { window.location.href = './logofolio.html'; return; }
-          if (proj === 'tom') { navigateWithOverlay('./tom.html'); return; }
+          if (proj === 'nestbank') { navigateWithOverlay(cleanPagePath('nestbank')); return; }
+          if (proj === 'toyota') { navigateWithOverlay(cleanPagePath('toyota')); return; }
+          if (proj === 'relias') { navigateWithOverlay(cleanPagePath('relias')); return; }
+          if (proj === 'orion') { navigateWithOverlay(cleanPagePath('ql')); return; }
+          if (proj === 'medigo') { navigateWithOverlay(cleanPagePath('medbridgego')); return; }
+          if (proj === 'logofolio') { window.location.href = sitePath(cleanPagePath('logofolio')); return; }
+          if (proj === 'tom') { navigateWithOverlay(cleanPagePath('tom')); return; }
           if (proj === 'apendito') { try { window.open('https://www.behance.net/gallery/227407301/Aprendito-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
           if (proj === 'kinti') { try { window.open('https://www.behance.net/gallery/107789813/Kinti-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
           if (proj === 'dinobytes') { try { window.open('https://www.behance.net/gallery/227240103/DinoBytes-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
           if (proj === 'kakaoala') { try { window.open('https://www.behance.net/gallery/108371211/Kakaoala-Brand-Identity', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
           if (proj === 'skilldex') { try { window.open('https://www.behance.net/gallery/120932085/Skilldex-UIUX-Branding', '_blank', 'noopener,noreferrer'); } catch (_) {} return; }
-          window.location.href = './password.html';
+          window.location.href = sitePath('./password.html');
         };
 
         const triggerBlockedTileShake = (tile) => {
@@ -4550,8 +4575,8 @@
             id,
             sourceId,
             type,
-            src: ARCHIVE_FULL_SOURCE_IDS.has(sourceId) ? `./assets/archive/${sourceId}.${ext}` : `./assets/archive-thumbnails/${sourceId}.${ext}`,
-            lightboxSrc: `./assets/archive/${sourceId}.${ext}`,
+            src: sitePath(ARCHIVE_FULL_SOURCE_IDS.has(sourceId) ? `./assets/archive/${sourceId}.${ext}` : `./assets/archive-thumbnails/${sourceId}.${ext}`),
+            lightboxSrc: sitePath(`./assets/archive/${sourceId}.${ext}`),
             width: dimensions ? dimensions[0] : null,
             height: dimensions ? dimensions[1] : null,
           });
@@ -5671,8 +5696,8 @@
           if (left) {
             left.setAttribute('tabindex', '0');
             left.setAttribute('role', 'link');
-            left.addEventListener('click', () => { window.location.href = './index.html'; });
-            left.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = './index.html'; } });
+            left.addEventListener('click', () => { window.location.href = sitePath(homePath()); });
+            left.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = sitePath(homePath()); } });
           }
           rights.forEach((right) => {
             // If there are explicit anchor links inside, do not bind a container-level click that would override them.
@@ -5809,55 +5834,55 @@
 
           // Manifest of logo assets (from ./assets/logofolio/)
           const LOGOS = [
-            "./assets/logofolio/Union.svg",
-            "./assets/logofolio/air-show-entertainment-icon.svg",
-            "./assets/logofolio/aprendito-logo-2.svg",
-            "./assets/logofolio/aprendito-logo-3.svg",
-            "./assets/logofolio/aprendito-logo.svg",
-            "./assets/logofolio/beez-kneez-icon.svg",
-            "./assets/logofolio/bird-icon.svg",
-            "./assets/logofolio/book-icon.svg",
-            "./assets/logofolio/credence-designs-icon.svg",
-            "./assets/logofolio/dinobytes-logo-2.svg",
-            "./assets/logofolio/dinobytes-logo-3.svg",
-            "./assets/logofolio/dinobytes-logo.svg",
-            "./assets/logofolio/equa-icon.svg",
-            "./assets/logofolio/familes-set-free-icon.svg",
-            "./assets/logofolio/familes-set-free-secondary.svg",
-            "./assets/logofolio/hanks-icon.svg",
-            "./assets/logofolio/hanks-secondary.svg",
-            "./assets/logofolio/jj-icon.svg",
-            "./assets/logofolio/jj-secondary.svg",
-            "./assets/logofolio/kakaoala-logo-2.svg",
-            "./assets/logofolio/kakaoala-logo-3.svg",
-            "./assets/logofolio/kakaoala-logo.svg",
-            "./assets/logofolio/kinti-logo-2.svg",
-            "./assets/logofolio/kinti-logo-3.svg",
-            "./assets/logofolio/kinti-logo.svg",
-            "./assets/logofolio/logo-svg-2.svg",
-            "./assets/logofolio/logo-svg-3.svg",
-            "./assets/logofolio/logo-svg.svg",
-            "./assets/logofolio/medigo-icon.svg",
-            "./assets/logofolio/mountbatten.svg",
-            "./assets/logofolio/peacock.svg",
-            "./assets/logofolio/queenfisher-farm-full.svg",
-            "./assets/logofolio/queenfisher-farm-icon.svg",
-            "./assets/logofolio/queenfisher-farm-secondary.svg",
-            "./assets/logofolio/skilldex-icon.svg",
-            "./assets/logofolio/squirrel-icon.svg",
-            "./assets/logofolio/starwars.svg",
-            "./assets/logofolio/swyndlr-icon.svg",
-            "./assets/logofolio/tom-logo-2.svg",
-            "./assets/logofolio/tom-logo-3.svg",
-            "./assets/logofolio/tom-logo-4.svg",
-            "./assets/logofolio/tom-logo-5.svg",
-            "./assets/logofolio/tom-logo-6.svg",
-            "./assets/logofolio/tom-logo.svg",
-            "./assets/logofolio/version-1.svg",
-            "./assets/logofolio/version-3.svg",
-            "./assets/logofolio/wema-logo-2.svg",
-            "./assets/logofolio/wema-logo-3.svg",
-            "./assets/logofolio/wema-logo.svg",
+            sitePath("./assets/logofolio/Union.svg"),
+            sitePath("./assets/logofolio/air-show-entertainment-icon.svg"),
+            sitePath("./assets/logofolio/aprendito-logo-2.svg"),
+            sitePath("./assets/logofolio/aprendito-logo-3.svg"),
+            sitePath("./assets/logofolio/aprendito-logo.svg"),
+            sitePath("./assets/logofolio/beez-kneez-icon.svg"),
+            sitePath("./assets/logofolio/bird-icon.svg"),
+            sitePath("./assets/logofolio/book-icon.svg"),
+            sitePath("./assets/logofolio/credence-designs-icon.svg"),
+            sitePath("./assets/logofolio/dinobytes-logo-2.svg"),
+            sitePath("./assets/logofolio/dinobytes-logo-3.svg"),
+            sitePath("./assets/logofolio/dinobytes-logo.svg"),
+            sitePath("./assets/logofolio/equa-icon.svg"),
+            sitePath("./assets/logofolio/familes-set-free-icon.svg"),
+            sitePath("./assets/logofolio/familes-set-free-secondary.svg"),
+            sitePath("./assets/logofolio/hanks-icon.svg"),
+            sitePath("./assets/logofolio/hanks-secondary.svg"),
+            sitePath("./assets/logofolio/jj-icon.svg"),
+            sitePath("./assets/logofolio/jj-secondary.svg"),
+            sitePath("./assets/logofolio/kakaoala-logo-2.svg"),
+            sitePath("./assets/logofolio/kakaoala-logo-3.svg"),
+            sitePath("./assets/logofolio/kakaoala-logo.svg"),
+            sitePath("./assets/logofolio/kinti-logo-2.svg"),
+            sitePath("./assets/logofolio/kinti-logo-3.svg"),
+            sitePath("./assets/logofolio/kinti-logo.svg"),
+            sitePath("./assets/logofolio/logo-svg-2.svg"),
+            sitePath("./assets/logofolio/logo-svg-3.svg"),
+            sitePath("./assets/logofolio/logo-svg.svg"),
+            sitePath("./assets/logofolio/medigo-icon.svg"),
+            sitePath("./assets/logofolio/mountbatten.svg"),
+            sitePath("./assets/logofolio/peacock.svg"),
+            sitePath("./assets/logofolio/queenfisher-farm-full.svg"),
+            sitePath("./assets/logofolio/queenfisher-farm-icon.svg"),
+            sitePath("./assets/logofolio/queenfisher-farm-secondary.svg"),
+            sitePath("./assets/logofolio/skilldex-icon.svg"),
+            sitePath("./assets/logofolio/squirrel-icon.svg"),
+            sitePath("./assets/logofolio/starwars.svg"),
+            sitePath("./assets/logofolio/swyndlr-icon.svg"),
+            sitePath("./assets/logofolio/tom-logo-2.svg"),
+            sitePath("./assets/logofolio/tom-logo-3.svg"),
+            sitePath("./assets/logofolio/tom-logo-4.svg"),
+            sitePath("./assets/logofolio/tom-logo-5.svg"),
+            sitePath("./assets/logofolio/tom-logo-6.svg"),
+            sitePath("./assets/logofolio/tom-logo.svg"),
+            sitePath("./assets/logofolio/version-1.svg"),
+            sitePath("./assets/logofolio/version-3.svg"),
+            sitePath("./assets/logofolio/wema-logo-2.svg"),
+            sitePath("./assets/logofolio/wema-logo-3.svg"),
+            sitePath("./assets/logofolio/wema-logo.svg"),
           ];
 
           function loadImage(src) {
@@ -6226,12 +6251,12 @@
         left.setAttribute('tabindex', '0');
         left.setAttribute('role', 'link');
         left.addEventListener('click', () => {
-          window.location.href = './index.html';
+          window.location.href = sitePath(homePath());
         });
         left.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            window.location.href = './index.html';
+            window.location.href = sitePath(homePath());
           }
         });
       }
@@ -6433,12 +6458,12 @@
     try {
       const p = String(location && location.pathname || '').toLowerCase();
       const t = String(document && document.title || '').toLowerCase();
-      if (p.includes('tom.html') || t.includes('tom')) {
+      if (pathMatchesPage(p, 'tom') || t.includes('tom')) {
         // Tom: start with 1.jpg fully visible, and 2.svg partially progressed
         // timeline is idx + progress, where idx=0 => first frame.
         return { index: 0, progress: 0.35 };
       }
-      if (p.includes('toyota.html') || t.includes('toyota')) {
+      if (pathMatchesPage(p, 'toyota') || t.includes('toyota')) {
         const isSmallToyotaScreen = (() => {
           try {
             const w1 = Number(window && window.innerWidth) || Infinity;
@@ -6450,7 +6475,7 @@
         })();
         return { index: 0, progress: isSmallToyotaScreen ? 0.5 : 0.25 }; // Start higher on small screens so logo appears larger
       }
-      if (p.includes('ql.html') || t.includes('quicken') || t.includes('rocket')) {
+      if (pathMatchesPage(p, 'ql') || t.includes('quicken') || t.includes('rocket')) {
         const isSmallQlScreen = (() => {
           try {
             const w1 = Number(window && window.innerWidth) || Infinity;
@@ -6462,7 +6487,7 @@
         })();
         return { index: 0, progress: isSmallQlScreen ? 0.5 : 0.3 }; // Start higher on small screens so logo appears larger
       }
-      if (p.includes('relias.html') || p.includes('virelia.html') || t.includes('relias') || t.includes('virelia')) {
+      if (pathMatchesPage(p, 'relias') || pathMatchesPage(p, 'virelia') || t.includes('relias') || t.includes('virelia')) {
         const isSmallReliasScreen = (() => {
           try {
             const w1 = Number(window && window.innerWidth) || Infinity;
@@ -6474,7 +6499,7 @@
         })();
         return { index: 0, progress: isSmallReliasScreen ? 0.6 : 0.19 }; // Use deeper start on <=600px
       }
-      if (p.includes('medbridgego.html') || t.includes('medbridgego')) {
+      if (pathMatchesPage(p, 'medbridgego') || t.includes('medbridgego')) {
         const isSmallMedbridgeScreen = (() => {
           try {
             const w1 = Number(window && window.innerWidth) || Infinity;
@@ -7222,8 +7247,8 @@
             }
           } else {
           // Check which page we're on
-          const isToyotaPage = window.location.pathname.includes('toyota.html') || document.title.toLowerCase().includes('toyota');
-          const isReliasPage = window.location.pathname.includes('relias.html') || window.location.pathname.includes('virelia.html') || document.title.toLowerCase().includes('relias') || document.title.toLowerCase().includes('virelia');
+          const isToyotaPage = pathMatchesPage(window.location.pathname, 'toyota') || document.title.toLowerCase().includes('toyota');
+          const isReliasPage = pathMatchesPage(window.location.pathname, 'relias') || pathMatchesPage(window.location.pathname, 'virelia') || document.title.toLowerCase().includes('relias') || document.title.toLowerCase().includes('virelia');
 
           // Use different titles based on the page
           const titles = isReliasPage ? [
@@ -7580,7 +7605,7 @@
         if (openCards.size === 0 && !insideNav) {
           // Disable hide-on-background-click for the NestBank page
           try {
-            if (/nestbank\.html$/i.test(window.location.pathname)) {
+            if (pathMatchesPage(window.location.pathname, 'nestbank')) {
               const introOverlayStillPresent = !!document.querySelector('.intro-overlay');
               if (introOverlayStillPresent) return;
             }
