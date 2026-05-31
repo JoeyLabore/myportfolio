@@ -4528,7 +4528,7 @@
           121: 100,
         };
         const ARCHIVE_FULL_SOURCE_IDS = new Set([1, 23, 25]);
-        const ARCHIVE_REMOVED_SOURCE_IDS = new Set([20, 59, 69, 84, 100]);
+        const ARCHIVE_REMOVED_SOURCE_IDS = new Set([20, 57, 59, 69, 84, 100]);
         const ARCHIVE_MEDIA = [];
         for (let id = 1; id <= 121; id += 1) {
           if (ARCHIVE_MISSING_IDS.has(id)) continue;
