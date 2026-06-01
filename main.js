@@ -1281,6 +1281,7 @@
     sitePath("./assets/trd/7.jpg?v=2"),
     sitePath("./assets/trd/8.png"),
     sitePath("./assets/trd/6.jpeg"),
+    sitePath("./assets/trd/9.png"),
   ];
 
   const RELIAS_FILES = [
@@ -6387,6 +6388,7 @@
         // Removed 3.jpg to match behavior of images 1, 4, and 5
         || /(^|\/)6\.svg$/i.test(srcPath)
         || /(^|\/)trd\/2\.png$/i.test(srcPath)
+        || /(^|\/)trd\/9\.png$/i.test(srcPath)
         || /(^|\/)relias\/2\.png$/i.test(srcPath)
         || /(^|\/)ql\/2\.png$/i.test(srcPath)
         || /(^|\/)ql\/4\.png$/i.test(srcPath)
