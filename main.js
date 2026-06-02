@@ -1283,6 +1283,8 @@
     sitePath("./assets/trd/6.jpeg"),
     sitePath("./assets/trd/9.png"),
     sitePath("./assets/trd/10.jpg"),
+    sitePath("./assets/trd/11.png"),
+    sitePath("./assets/trd/12.jpg"),
   ];
 
   const RELIAS_FILES = [
