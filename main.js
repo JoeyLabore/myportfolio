@@ -1283,6 +1283,7 @@
     sitePath("./assets/trd/9.png"),
     sitePath("./assets/trd/10.jpg"),
     sitePath("./assets/trd/12.jpg"),
+    sitePath("./assets/trd/13.png"),
   ];
 
   const RELIAS_FILES = [
@@ -6390,6 +6391,7 @@
         || /(^|\/)6\.svg$/i.test(srcPath)
         || /(^|\/)trd\/2\.png$/i.test(srcPath)
         || /(^|\/)trd\/9\.png$/i.test(srcPath)
+        || /(^|\/)trd\/13\.png$/i.test(srcPath)
         || /(^|\/)relias\/2\.png$/i.test(srcPath)
         || /(^|\/)ql\/2\.png$/i.test(srcPath)
         || /(^|\/)ql\/4\.png$/i.test(srcPath)
