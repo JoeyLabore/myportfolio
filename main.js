@@ -1310,6 +1310,7 @@
     sitePath("./assets/ql/7.jpg"),
     sitePath("./assets/ql/8.jpg"),
     sitePath("./assets/ql/9.png"),
+    sitePath("./assets/ql/10.jpg"),
   ];
 
   const MEDBRIDGEGO_FILES = [
