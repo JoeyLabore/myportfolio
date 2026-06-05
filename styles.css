@@ -293,6 +293,8 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-bloc
   max-height: none;
   object-fit: contain;
   object-position: center;
+  border-radius: 16px;
+  overflow: hidden;
 }
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-content-block__media {
   position: relative;
@@ -410,6 +412,44 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__c
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--two .deep-dive-image-row__card {
   flex: 0 1 calc((100% - 24px) / 2);
 }
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--equal-media {
+  align-items: stretch;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--equal-media .deep-dive-image-row__card {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--equal-media .deep-dive-content-block__image,
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--equal-media .deep-dive-content-block__video {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--brand-evolution {
+  --brand-evolution-media-height: clamp(338px, 44vw, 494px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--brand-evolution .deep-dive-image-row__stack {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  min-width: 0;
+  height: var(--brand-evolution-media-height);
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--brand-evolution .deep-dive-content-block__image,
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--brand-evolution .deep-dive-content-block__video {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  object-fit: cover;
+}
+body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--brand-evolution .deep-dive-content-block__video--home-page {
+  height: var(--brand-evolution-media-height);
+}
 body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--stacked {
   flex-direction: column;
 }
@@ -479,6 +519,11 @@ body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row__t
 
   body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row[aria-label="Handoff visuals"] .deep-dive-image-row__card {
     flex: 1 1 100%;
+  }
+
+  body.toyota-deep-dive .page[data-name="case study page"] .deep-dive-image-row--brand-evolution {
+    --brand-evolution-media-height: clamp(260px, 52vw, 420px);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 @media (max-width: 600px) {
