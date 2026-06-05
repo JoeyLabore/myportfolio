@@ -30,21 +30,20 @@
       } catch (_) {}
     </script>
     <link rel="icon" href="../assets/favicon.png" type="image/png" />
-    <!-- Manrope font to match Figma token font/family/manrope -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../styles.css?v=326" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" />
+    <link rel="stylesheet" href="../styles.css?v=333" />
   </head>
   <body>
-    <!-- Intro overlay (case study intro; hidden after 10s). No text, keep black overlay only. -->
     <div class="intro-overlay" aria-hidden="true">
       <div class="intro-overlay__inner"></div>
     </div>
-    <!-- Fixed, full-viewport background sequence (behind content) -->
     <div id="bg-sequence" aria-hidden="true"></div>
+
     <div class="page" data-name="case study page" data-node-id="816:11957">
-      <!-- Nav Bar -->
       <div class="nav-split" data-name="nav-split" data-node-id="816:15487">
         <header class="nav-bar nav-left" data-name="nav-left" aria-label="Logo">
           <div class="nav-logo" data-name="logo-svg" data-node-id="490:8809">
@@ -52,6 +51,15 @@
               <img alt="" src="../assets/logo.svg" />
             </a>
           </div>
+        </header>
+        <header class="nav-bar nav-middle nav-view-switch" aria-label="Case study view switch">
+          <nav class="tabs" role="tablist" aria-label="NestBank case study views">
+            <a href="#overview" class="nav-item active" role="tab" aria-selected="true" tabindex="0" data-view="overview">Overview</a>
+            <a href="#deep-dive" class="nav-item nav-item--with-icon" role="tab" aria-selected="false" tabindex="-1" data-view="deep-dive">
+              <span class="nav-item__label-full">Deep Dive</span>
+              <span class="nav-item__label-compact">Process</span>
+            </a>
+          </nav>
         </header>
         <header class="nav-bar nav-right" data-name="nav-right" aria-label="Email">
           <a class="nav-item" href="mailto:joey.greenwood1997@gmail.com">
@@ -63,9 +71,8 @@
         </header>
       </div>
 
-      <!-- Main content -->
       <main class="main" data-name="main" data-node-id="816:15570">
-        <section class="paragraph-containers" data-name="paragraph-containers" data-node-id="816:15617">
+        <section id="overview" class="paragraph-containers" data-name="paragraph-containers" data-node-id="816:15617">
           <div class="paragraph-col">
             <div class="paragraph" data-name="text-container" data-node-id="816:15618">
               <p class="text-label" data-node-id="816:15619">Project Background</p>
@@ -75,7 +82,7 @@
                 <ul class="project-overview">
                   <li><strong>Client:</strong> NestBank</li>
                   <li><strong>Type of Work:</strong> Mobile Product Design</li>
-                  <li><strong>Duration:</strong> 2022–2023</li>
+                  <li><strong>Duration:</strong> 2022-2023</li>
                   <li><strong>My Role:</strong> Senior Product Designer</li>
                 </ul>
               </div>
@@ -83,7 +90,7 @@
           </div>
           <div class="paragraph-col">
             <div class="paragraph" data-name="text-container" data-node-id="816:15621">
-              <p class="text-label" data-node-id="816:15622">Problem & Solution</p>
+              <p class="text-label" data-node-id="816:15622">Problem &amp; Solution</p>
               <div class="text-body emphasize" data-node-id="816:15623">
                 <p class="text-label">Problem</p>
                 <p>NestBank’s loan management process relied heavily on in-person interactions and manual systems, limiting accessibility and scalability as membership grew across multiple states.</p>
@@ -105,7 +112,7 @@
                   <li style="margin-bottom: 12px;"><strong>Digital workflow design</strong></li>
                 </ul>
                 <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 24px;">
-                  <img src="../assets/nestbank/6.jpg" alt="NestBank mobile interface" style="width: 100%; border-radius: 8px;">
+                  <img src="../assets/nestbank/6.jpg" alt="NestBank mobile interface" style="width: 100%; border-radius: 8px;" />
                 </div>
               </div>
             </div>
@@ -125,14 +132,14 @@
                   </div>
                   <div class="detail-card">
                     <p class="text-label">97% of invited members registered</p>
-                    <p class="text-body">Highlights inclusivity and accessibility — nearly every woman invited is engaging with the platform, proving strong product-market fit.</p>
+                    <p class="text-body">Highlights inclusivity and accessibility - nearly every woman invited is engaging with the platform, proving strong product-market fit.</p>
                   </div>
                   <div class="detail-card">
-                    <p class="text-label">4.9★ average app store rating</p>
+                    <p class="text-label">4.9 average app store rating</p>
                     <p class="text-body">Reflects strong member satisfaction and trust in the product experience, especially for users transitioning from in-person to digital banking.</p>
                   </div>
                   <div class="detail-card">
-                    <p class="text-label">65% of loans created and approved directly within the app</p>
+                    <p class="text-label">85% of loans created and approved directly within the app</p>
                     <p class="text-body">Shows a meaningful shift from manual, staff-supported processes to self-serve digital adoption, reducing operational overhead while improving access.</p>
                   </div>
                 </div>
@@ -140,8 +147,583 @@
             </div>
           </div>
         </section>
+
+        <section id="deep-dive" class="deep-dive-article" aria-label="NestBank deep dive article">
+          <nav class="deep-dive-toc" aria-label="Table of contents">
+            <p class="deep-dive-toc__title">Contents</p>
+            <a class="deep-dive-toc__link" href="#section-overview">Overview</a>
+            <a class="deep-dive-toc__link" href="#section-06">Impact</a>
+            <a class="deep-dive-toc__link" href="#section-01">Discovery &amp; Research</a>
+            <a class="deep-dive-toc__link" href="#section-07">Key Insights</a>
+            <a class="deep-dive-toc__link" href="#section-03">Future State</a>
+            <a class="deep-dive-toc__link" href="#section-04">Prioritisation</a>
+            <a class="deep-dive-toc__link" href="#section-05">Exploring and Validating</a>
+            <a class="deep-dive-toc__link" href="#section-08">Brand Evolution</a>
+            <a class="deep-dive-toc__link" href="#section-09">Final Design</a>
+            <a class="deep-dive-toc__link" href="#section-10">Post-Launch</a>
+          </nav>
+
+          <article class="deep-dive-article__content">
+            <section class="deep-dive-section deep-dive-section--intro" aria-label="Article title and tags">
+              <p class="deep-dive-article__eyebrow"><span>NestBank</span><span>Mobile Product Design</span><span>2022 - 2023</span></p>
+              <h1 class="deep-dive-article__title">Empowering 111,000+ entrepreneurs through digital finance and community.</h1>
+            </section>
+
+            <section class="deep-dive-section deep-dive-section--hero-image" aria-label="Lead image">
+              <img class="deep-dive-article__image" src="../assets/nestbank/1.jpg" alt="NestBank placeholder visual" />
+            </section>
+
+            <section class="deep-dive-section deep-dive-section--project-meta" aria-label="Project metadata">
+              <div class="deep-dive-meta">
+                <div class="deep-dive-meta__item">
+                  <h2 class="deep-dive-meta__label">Role</h2>
+                  <p class="deep-dive-meta__text">Senior Product Designer</p>
+                </div>
+                <div class="deep-dive-meta__item">
+                  <h2 class="deep-dive-meta__label">Team</h2>
+                  <p class="deep-dive-meta__text">Product Designers (2)<br />UX Researcher (1)<br />Project Manager (1)<br />Delivery Manager (1)<br />Dev Lead (1)<br />QA Engineers (2)<br />Front-End Devs (3)<br />Backend Devs (2)</p>
+                </div>
+                <div class="deep-dive-meta__item">
+                  <h2 class="deep-dive-meta__label">Responsibilities</h2>
+                  <p class="deep-dive-meta__text">Product Design<br />Product Strategy<br />UX Research &amp; Synthesis<br />Journey Redesign<br />Visual &amp; UI Design<br />Brand Evolution<br />Design System<br />Prototyping &amp; Validation<br />Usability Testing<br />Cross-functional Collaboration<br />Stakeholder Alignment</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="deep-dive-section deep-dive-section--content" aria-label="Article content sections">
+              <div id="section-overview">
+                <article class="deep-dive-content-block">
+                  <p class="deep-dive-content-block__label">Problem</p>
+                  <h2 class="deep-dive-content-block__title">Scaling a Community Built on Trust</h2>
+                  <p class="deep-dive-article__paragraph">NestBank’s lending model was built around centre meetings, peer accountability, and personal relationships rather than technology. This approach helped members access financial opportunities often unavailable through traditional institutions.</p>
+                  <p class="deep-dive-article__paragraph">As the organisation expanded, critical processes such as loan applications, repayments, approvals, and member support became increasingly reliant on manual administration and staff intervention. The challenge wasn’t simply digitisation. It was scaling the programme without compromising the trust, accountability, and community that made it successful.</p>
+                </article>
+                <article class="deep-dive-content-block">
+                  <p class="deep-dive-content-block__label">Solution</p>
+                  <h2 class="deep-dive-content-block__title">Digitising the NestBank Experience</h2>
+                  <p class="deep-dive-article__paragraph">We transformed NestBank’s lending and account management processes into a self-service mobile experience. Members could independently manage loans, make payments, track balances, review approvals, and access key account information, reducing reliance on representatives for routine tasks.</p>
+                  <p class="deep-dive-article__paragraph">The experience was designed to preserve the trust, transparency, and sense of community at the heart of the NestBank programme while giving members greater control over their financial journey.</p>
+                </article>
+              </div>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
+              <article id="section-06" class="deep-dive-content-block deep-dive-content-block--insights">
+                <h2 class="deep-dive-content-block__title">Impact</h2>
+                <div class="deep-dive-insights-list">
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">01. Adoption</p>
+                    <p class="deep-dive-article__paragraph">97% member registration rate. Nearly all invited members successfully adopted the platform.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">02. Engagement</p>
+                    <p class="deep-dive-article__paragraph">111,000+ active users. Members continued using the platform to manage their financial activities independently.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">03. Digital-First Loan Management</p>
+                    <p class="deep-dive-article__paragraph">85% of loan activity processed &amp; approved digitally. A significant shift away from manual and staff-supported workflows.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">04. Scale</p>
+                    <p class="deep-dive-article__paragraph">1.16M+ loans disbursed digitally. Demonstrating the platform’s ability to support sustained organisational growth.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">05. User Satification</p>
+                    <p class="deep-dive-article__paragraph">4.9★ average App Store rating. User feedback consistently reflected confidence in the platform’s usability, accessibility, and ability to simplify previously manual financial processes.</p>
+                  </div>
+                </div>
+              </article>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
+              <article id="section-01" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">01. DISCOVERY &amp; RESEARCH</p>
+                <h2 class="deep-dive-content-block__title">Understanding the NestBank Community</h2>
+                <p class="deep-dive-article__paragraph">Before defining features or interfaces, we needed to understand how NestBank operated as a community-driven lending programme and the people it was built to support.</p>
+                <p class="deep-dive-article__paragraph">Unlike traditional financial institutions, lending decisions, repayments, attendance, and member support were deeply connected to centre meetings, peer accountability, and representative oversight. To understand this ecosystem, we mapped existing member journeys, operational workflows, and service interactions across the programme.</p>
+                <p class="deep-dive-article__paragraph">We also conducted interviews with classic members, elevate members, and centre managers to understand not only their tasks, but also their motivations, fears, behaviours, trust barriers, and the role NestBank played in their lives.</p>
+                <div class="deep-dive-image-row deep-dive-image-row--stacked" aria-label="Member research visuals">
+                  <div class="deep-dive-image-row__card deep-dive-image-row__card--captioned">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="../assets/nestbank/empathy-maps.jpg" alt="NestBank empathy maps" />
+                    <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Empathy Maps</p>
+                  </div>
+                  <p class="deep-dive-article__paragraph">Research findings were synthesised through affinity mapping, empathy mapping, and persona development. Across interviews and journey analysis, several consistent themes emerged around trust, community, financial independence, digital confidence, and accountability.</p>
+                  <p class="deep-dive-article__paragraph">These insights became the foundation for product strategy, experience design, and feature prioritisation throughout the project.</p>
+                  <div class="deep-dive-image-row__card deep-dive-image-row__card--captioned">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="../assets/nestbank/user-personas.jpg" alt="NestBank user personas" />
+                    <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">User Personas</p>
+                  </div>
+                </div>
+              </article>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
+              <article id="section-07" class="deep-dive-content-block deep-dive-content-block--insights">
+                <h2 class="deep-dive-content-block__title">Key Insights</h2>
+                <div class="deep-dive-insights-list">
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">01. Community Was Part of the Product</p>
+                    <p class="deep-dive-article__paragraph">Members didn’t view NestBank as a lender. They viewed it as a support network. Weekly centre meetings created accountability, encouragement, and belonging. Any digital solution needed to strengthen these relationships rather than replace them.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">02. Trust Mattered More Than Efficiency</p>
+                    <p class="deep-dive-article__paragraph">Many members had limited experience with digital financial products. Confidence and reassurance were often more important than speed. Clear communication, transparency, and supportive interactions would be critical for adoption.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">03. Financial Independence Was the Primary Motivation</p>
+                    <p class="deep-dive-article__paragraph">Members joined NestBank to improve financial stability and create opportunities for themselves and their families. The platform needed to reinforce progress, achievement, and empowerment.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">04. Digital Confidence Varied Widely</p>
+                    <p class="deep-dive-article__paragraph">While many members used smartphones daily, comfort with financial technology varied significantly. The experience needed to accommodate both highly confident and first-time digital users.</p>
+                  </div>
+                  <div class="deep-dive-insight-item">
+                    <p class="deep-dive-content-block__label">05. THE BRAND EXPERIENCE WAS INCONSISTENT</p>
+                    <p class="deep-dive-article__paragraph">Members described NestBank as empowering, supportive, and community-driven. At the same time, some associated the organisation with aggressive repayment practices, poor communication, and operational inconsistency. The product needed to strengthen positive perceptions while addressing the interactions that undermined trust.</p>
+                  </div>
+                </div>
+              </article>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
+              <article id="section-03" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">03 Future State Exploration</p>
+                <h2 class="deep-dive-content-block__title">From Research to Future State</h2>
+                <p class="deep-dive-article__paragraph">The research phase revealed what members valued, where operational friction existed, and which parts of the experience could benefit from digitisation. Using these insights, we worked with stakeholders to explore future-state journeys, workflows, and product concepts.</p>
+                <p class="deep-dive-article__paragraph">Several opportunities quickly emerged. Members wanted greater visibility into their loans, repayments, approvals, and account status without relying on representatives for routine updates. At the same time, many expressed a desire for stronger connections with other members, including ways to discover businesses within their community and support one another beyond weekly centre meetings.</p>
+                <div class="deep-dive-content-block__media">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain" src="../assets/nestbank/future-state-product-diagram.jpg" alt="NestBank future state product diagram" />
+                  <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Future State Product Diagram</p>
+                </div>
+                <p class="deep-dive-article__paragraph">By mapping the experience end-to-end, we explored how these needs could be translated into a digital product while preserving the trust, accountability, and community-driven nature of the programme. These future-state product diagrams became the foundation for prioritisation, concept development, and the product strategy that followed.</p>
+              </article>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
+              <article id="section-04" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">04 Prioritising What to Build</p>
+                <h2 class="deep-dive-content-block__title">Prioritising for Maximum Impact</h2>
+                <p class="deep-dive-article__paragraph">Not every opportunity could be addressed in the first release. Working with stakeholders, we evaluated ideas based on user value, organisational impact, technical effort, and delivery constraints.</p>
+                <p class="deep-dive-article__paragraph">This process allowed us to focus on features that would create the greatest benefit for members while supporting NestBank’s long-term goals.</p>
+                <div class="deep-dive-content-block__media">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-content-block__image--contain" src="../assets/nestbank/prioritisation-matrix.jpg" alt="NestBank prioritisation matrix" />
+                  <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Prioritisation Matrix</p>
+                </div>
+              </article>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
+              <article id="section-05" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">05 Exploring and Validating</p>
+                <h2 class="deep-dive-content-block__title">From Insight to Concept</h2>
+                <p class="deep-dive-article__paragraph">Before committing to high-fidelity design, we tested key assumptions through low-fidelity concepts and prototypes.</p>
+                <p class="deep-dive-article__paragraph">The goal was to validate loan management, payments, approvals, attendance, and navigation. By testing flows early, we identified areas of confusion and reduced implementation risk before development began.</p>
+                <div class="deep-dive-content-block__media">
+                  <video class="deep-dive-content-block__video" src="../assets/nestbank/wireframes.mp4" autoplay muted loop playsinline preload="metadata" aria-label="NestBank wireframes prototype video"></video>
+                  <p class="deep-dive-content-block__image-caption deep-dive-content-block__image-caption--wow">Low-Fidelity Wireframes</p>
+                </div>
+                <p class="deep-dive-article__paragraph">One key validation was motivation through recognition, not shame.</p>
+                <p class="deep-dive-article__paragraph">Early stakeholder discussions proposed making attendance more visible by highlighting members with the lowest participation rates. The intention was to increase accountability and encourage attendance through social pressure.</p>
+                <p class="deep-dive-article__paragraph">Research and testing suggested the opposite. Publicly exposing low attendance risked creating feelings of embarrassment, judgement, and exclusion, outcomes that directly conflicted with NestBank’s community-driven model. For members already facing financial challenges, negative reinforcement could reduce engagement rather than improve it.</p>
+                <div class="deep-dive-image-row deep-dive-image-row--two" aria-label="Testing visuals">
+                  <div class="deep-dive-image-row__card">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item" src="../assets/nestbank/testing-01.jpg" alt="NestBank testing session visual" />
+                  </div>
+                  <div class="deep-dive-image-row__card">
+                    <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item" src="../assets/nestbank/testing-02.jpg" alt="NestBank testing feedback visual" />
+                  </div>
+                </div>
+                <p class="deep-dive-article__paragraph">We shifted the experience towards positive reinforcement. Members could track their attendance progress, earn recognition for consistency, and unlock opportunities such as Star Member status and larger loan amounts over time.</p>
+                <p class="deep-dive-article__paragraph">By celebrating positive behaviours rather than penalising poor ones, the experience reinforced trust, encouraged participation, and aligned more closely with NestBank’s mission of empowerment and community support.</p>
+              </article>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
+              <article id="section-08" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">06 Designing for Trust and Community</p>
+                <h2 class="deep-dive-content-block__title">Creating a Brand Members Could Identify With</h2>
+                <p class="deep-dive-article__paragraph">Research revealed that members viewed NestBank very differently from traditional financial institutions. The organisation was described as supportive, community-driven, encouraging, and trustworthy.</p>
+                <p class="deep-dive-article__paragraph">At the same time, many members described existing financial experiences as intimidating, transactional, and difficult to navigate. This tension became a key design opportunity.</p>
+                <div class="deep-dive-image-row deep-dive-image-row--brand-evolution" aria-label="Trust and community visuals">
+                  <div class="deep-dive-image-row__stack">
+                    <img class="deep-dive-article__image deep-dive-content-block__image" src="../assets/nestbank/18.jpg" alt="NestBank trust and community interface visual" />
+                    <video class="deep-dive-content-block__video" src="../assets/nestbank/10.mp4" autoplay muted loop playsinline preload="metadata" aria-label="NestBank trust and community prototype video"></video>
+                  </div>
+                  <video class="deep-dive-content-block__video deep-dive-content-block__video--home-page" src="../assets/nestbank/home-page.mp4" autoplay muted loop playsinline preload="metadata" aria-label="NestBank home page prototype video"></video>
+                </div>
+                <p class="deep-dive-article__paragraph">Rather than replicating conventional banking patterns, we explored how visual design, messaging, and interaction design could reinforce the values members already associated with the NestBank community. Because the majority of members were women entrepreneurs from Latin American and African American communities, representation, accessibility, and emotional connection became important considerations throughout the design process.</p>
+                <p class="deep-dive-article__paragraph">We intentionally moved away from the green, blue, and/or white visual language commonly associated with traditional banking products. Instead, we developed a visual system centred around purple, paired with a darker interface, to create a sense of confidence, optimism, empowerment, and distinction. Custom illustrations were used throughout the experience to increase representation, make complex financial topics feel more approachable, and reinforce a sense of community.</p>
+                <p class="deep-dive-article__paragraph">The goal wasn’t simply to create a banking application. It was to create a space where members felt welcomed, supported, and empowered as they worked towards their financial goals.</p>
+              </article>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
+              <article id="section-09" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">07 FINAL PRODUCT EXPERIENCE</p>
+                <h2 class="deep-dive-content-block__title">Bringing the Member Experience Together</h2>
+                <p class="deep-dive-article__paragraph">The final product transformed NestBank’s lending and account management processes into a self-service mobile experience while preserving the trust, accountability, and sense of community that defined the programme.</p>
+                <p class="deep-dive-article__paragraph">Members could independently manage loans, make payments, review approvals, track balances, access financial resources, and stay informed without relying on representatives for routine tasks. At the same time, the experience was intentionally designed to reinforce the values members associated with NestBank: support, transparency, encouragement, and financial empowerment.</p>
+                <div class="deep-dive-content-block__media">
+                  <video class="deep-dive-content-block__video" src="../assets/nestbank/20.mp4" autoplay muted loop playsinline preload="metadata" aria-label="NestBank final product experience video"></video>
+                </div>
+                <p class="deep-dive-article__paragraph">To ensure consistency across the growing platform, we created a UI kit from scratch, establishing reusable components, interaction patterns, visual styles, and accessibility standards. This provided a scalable foundation for future features while enabling designers and developers to work more efficiently throughout implementation.</p>
+                <p class="deep-dive-article__paragraph">The result was a cohesive product experience that simplified complex financial processes without losing the human qualities that made NestBank different from traditional financial institutions.</p>
+              </article>
+
+              <div class="deep-dive-content-divider" aria-hidden="true"></div>
+
+              <article id="section-10" class="deep-dive-content-block">
+                <p class="deep-dive-content-block__label">08 IMPACT &amp; FUTURE OPPORTUNITIES</p>
+                <h2 class="deep-dive-content-block__title">How Members Responded</h2>
+                <p class="deep-dive-article__paragraph">Following launch, feedback from members and centre leaders was overwhelmingly positive. Members highlighted the convenience of managing loans, payments, approvals, and account information in a single place, while representatives reported improved visibility into member activity and progress.</p>
+                <div class="deep-dive-content-block__media">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="../assets/nestbank/article-02.png" alt="NestBank post-launch article feature visual" />
+                </div>
+                <p class="deep-dive-article__paragraph">The research validated many of the principles that guided the design process. Members responded positively to the platform’s transparency, supportive communication, and simplified financial workflows. The experience successfully balanced operational efficiency with the trust and sense of community that had always been central to the NestBank model.</p>
+                <div class="deep-dive-content-block__media">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="../assets/nestbank/article-01.jpg" alt="NestBank post-launch article visual" />
+                </div>
+                <p class="deep-dive-article__paragraph">While the platform solved many of the challenges identified during discovery, post-launch feedback also revealed opportunities for future growth. Members expressed interest in stronger community features that would help them discover other businesses, connect with fellow entrepreneurs, and support one another beyond weekly centre meetings.</p>
+                <div class="deep-dive-content-block__media">
+                  <img class="deep-dive-article__image deep-dive-content-block__image deep-dive-image-row__item deep-dive-image-row__item--natural" src="../assets/nestbank/reviews-01.png" alt="NestBank member reviews visual" />
+                </div>
+                <p class="deep-dive-article__paragraph">As NestBank continues to evolve, the opportunity extends beyond digitising financial services. The next chapter is creating a connected ecosystem where women can access capital, share knowledge, support local businesses, and strengthen the community that makes the programme unique.</p>
+              </article>
+            </section>
+          </article>
+        </section>
       </main>
+      <footer class="site-footer" aria-label="Footer">
+        <div class="site-footer__orbit" aria-label="Joseph Greenwood * 2019 / 2026">
+          <span class="site-footer__sr">Joseph Greenwood * 2019 / 2026</span>
+          <svg class="site-footer__orbit-svg" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <defs>
+              <path id="footer-circle-path" d="M 60,60 m -24,0 a 24,24 0 1,1 48,0 a 24,24 0 1,1 -48,0" />
+            </defs>
+            <text class="site-footer__orbit-text">
+              <textPath href="#footer-circle-path">JOSEPH GREENWOOD * 2019 / 2026 *</textPath>
+            </text>
+          </svg>
+        </div>
+        <div class="site-footer__icons" aria-label="Links">
+          <a class="site-footer__icon" href="https://www.linkedin.com/in/josephgreenwood/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn (opens in new tab)">
+            <i class="ph ph-linkedin-logo" aria-hidden="true"></i>
+          </a>
+          <a class="site-footer__icon" href="https://medium.com/@joseph.s.greenwood" target="_blank" rel="noopener noreferrer" aria-label="Medium (opens in new tab)">
+            <i class="ph ph-medium-logo" aria-hidden="true"></i>
+          </a>
+          <a class="site-footer__icon" href="https://www.instagram.com/joey.s.greenwood/" target="_blank" rel="noopener noreferrer" aria-label="Instagram (opens in new tab)">
+            <i class="ph ph-instagram-logo" aria-hidden="true"></i>
+          </a>
+          <a class="site-footer__icon" href="mailto:joey.greenwood1997@gmail.com" aria-label="Email">
+            <i class="ph ph-envelope" aria-hidden="true"></i>
+          </a>
+        </div>
+      </footer>
     </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const viewTabs = Array.from(document.querySelectorAll('.nav-view-switch .nav-item[data-view]'));
+        const tocLinks = Array.from(document.querySelectorAll('.deep-dive-toc__link[href^="#"]'));
+        if (!viewTabs.length) return;
+
+        const mainEl = document.querySelector('.page[data-name="case study page"] .main');
+        const footerEl = document.querySelector('.page[data-name="case study page"] .site-footer');
+        const tocEl = document.querySelector('.deep-dive-toc');
+        const navViewSwitch = document.querySelector('.nav-view-switch');
+        const overviewSection = document.getElementById('overview');
+        const deepDiveSection = document.getElementById('deep-dive');
+        const deepDiveContent = deepDiveSection ? deepDiveSection.querySelector('.deep-dive-article__content') : null;
+        const revealItems = deepDiveContent ? Array.from(deepDiveContent.querySelectorAll([
+          '.deep-dive-meta__label',
+          '.deep-dive-meta__text',
+          '.deep-dive-content-block__label',
+          '.deep-dive-content-block__title',
+          '.deep-dive-article__paragraph',
+          '.deep-dive-content-block__media',
+          '.deep-dive-image-row',
+          '.deep-dive-image-row__card',
+          '.deep-dive-content-divider',
+        ].join(','))) : [];
+
+        const syncActiveTab = (mode) => {
+          viewTabs.forEach((tab) => {
+            const active = tab.dataset.view === mode;
+            tab.classList.toggle('active', active);
+            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+            tab.tabIndex = active ? 0 : -1;
+            if (active) tab.setAttribute('aria-current', 'page');
+            else tab.removeAttribute('aria-current');
+          });
+        };
+
+        const resetTocActiveToFirst = () => {
+          if (!tocLinks.length) return;
+          const firstTargetId = (tocLinks[0].getAttribute('href') || '').trim();
+          tocLinks.forEach((link) => {
+            const targetId = (link.getAttribute('href') || '').trim();
+            const isActive = targetId === firstTargetId;
+            link.classList.toggle('is-active', isActive);
+            if (isActive) link.setAttribute('aria-current', 'location');
+            else link.removeAttribute('aria-current');
+          });
+        };
+
+        const isDeepDiveActive = () => document.body.classList.contains('toyota-deep-dive');
+        let revealObserver = null;
+
+        const syncTocPosition = () => {
+          if (!tocEl || !deepDiveSection || !isDeepDiveActive()) return;
+          const sectionTop = deepDiveSection.getBoundingClientRect().top - 8;
+          const navBottom = navViewSwitch ? navViewSwitch.getBoundingClientRect().bottom : 0;
+          const stickyTop = navBottom + 16;
+          tocEl.style.top = `${Math.round(Math.max(stickyTop, sectionTop))}px`;
+        };
+
+        const setupContentReveal = () => {
+          if (!revealItems.length || !deepDiveContent) return;
+          const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (revealObserver) {
+            revealObserver.disconnect();
+            revealObserver = null;
+          }
+          if (!isDeepDiveActive() || reducedMotion || !('IntersectionObserver' in window)) {
+            document.body.classList.remove('deep-dive-reveal-ready');
+            revealItems.forEach((item) => {
+              item.classList.add('deep-dive-reveal-item', 'is-revealed');
+            });
+            return;
+          }
+          document.body.classList.add('deep-dive-reveal-ready');
+          revealItems.forEach((item) => {
+            item.classList.add('deep-dive-reveal-item');
+            item.classList.remove('is-revealed');
+          });
+          revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add('is-revealed');
+              revealObserver.unobserve(entry.target);
+            });
+          }, {
+            root: null,
+            rootMargin: '0px 0px -10% 0px',
+            threshold: 0.12,
+          });
+          revealItems.forEach((item) => revealObserver.observe(item));
+        };
+
+        const setViewMode = (mode) => {
+          const deepDive = mode === 'deep-dive';
+          document.body.classList.toggle('toyota-deep-dive', deepDive);
+          if (!deepDive) document.body.classList.remove('deep-dive-intro-visible');
+          document.documentElement.classList.remove('ui-exited');
+
+          if (mainEl) {
+            if (deepDive) {
+              mainEl.style.display = 'block';
+              mainEl.style.alignItems = 'initial';
+              mainEl.style.justifyContent = 'flex-start';
+              mainEl.style.paddingTop = 'calc(var(--nav-card-height) + (2 * var(--space-s)) + 64px)';
+              mainEl.style.gap = '0';
+            } else {
+              mainEl.style.display = '';
+              mainEl.style.alignItems = '';
+              mainEl.style.justifyContent = '';
+              mainEl.style.paddingTop = '';
+              mainEl.style.gap = '';
+            }
+          }
+
+          if (overviewSection) {
+            overviewSection.hidden = deepDive;
+            overviewSection.style.display = deepDive ? 'none' : '';
+            overviewSection.style.height = deepDive ? '0' : '';
+            overviewSection.style.minHeight = deepDive ? '0' : '';
+            overviewSection.style.margin = deepDive ? '0' : '';
+            overviewSection.style.padding = deepDive ? '0' : '';
+            overviewSection.style.overflow = deepDive ? 'hidden' : '';
+            overviewSection.setAttribute('aria-hidden', deepDive ? 'true' : 'false');
+          }
+
+          if (deepDiveSection) {
+            deepDiveSection.hidden = !deepDive;
+            deepDiveSection.style.display = deepDive ? 'block' : 'none';
+            deepDiveSection.style.width = deepDive ? '100%' : '';
+            deepDiveSection.style.margin = deepDive ? '0' : '';
+            deepDiveSection.style.padding = deepDive ? '0 0 32px' : '';
+            deepDiveSection.style.position = deepDive ? 'relative' : '';
+            deepDiveSection.setAttribute('aria-hidden', deepDive ? 'false' : 'true');
+          }
+
+          if (deepDiveContent) {
+            deepDiveContent.style.width = deepDive ? 'min(760px, 100%)' : '';
+            deepDiveContent.style.margin = deepDive ? '0 auto' : '';
+            deepDiveContent.style.textAlign = deepDive ? 'left' : '';
+          }
+
+          if (footerEl) {
+            footerEl.style.display = deepDive ? '' : 'none';
+            footerEl.setAttribute('aria-hidden', deepDive ? 'false' : 'true');
+          }
+
+          syncActiveTab(deepDive ? 'deep-dive' : 'overview');
+          try {
+            const hash = deepDive ? '#deep-dive' : '#overview';
+            if (window.location.hash !== hash) window.history.replaceState(null, '', hash);
+            window.scrollTo({ top: 0, behavior: 'auto' });
+          } catch (_) {}
+
+          if (deepDive) {
+            window.requestAnimationFrame(() => {
+              try {
+                if (typeof window.__refreshFooterOrbitFit === 'function') {
+                  window.__refreshFooterOrbitFit();
+                  window.requestAnimationFrame(() => window.__refreshFooterOrbitFit());
+                }
+              } catch (_) {}
+            });
+            resetTocActiveToFirst();
+            document.body.classList.remove('deep-dive-intro-visible');
+            window.requestAnimationFrame(() => {
+              document.body.classList.add('deep-dive-intro-visible');
+            });
+            window.requestAnimationFrame(syncTocPosition);
+            window.requestAnimationFrame(setupContentReveal);
+          } else {
+            setupContentReveal();
+          }
+        };
+
+        const initialHash = String(window.location.hash || '').toLowerCase();
+        setViewMode(initialHash === '#deep-dive' ? 'deep-dive' : 'overview');
+        window.addEventListener('scroll', syncTocPosition, { passive: true });
+        window.addEventListener('resize', syncTocPosition);
+
+        viewTabs.forEach((tab) => {
+          tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const mode = (tab.dataset && tab.dataset.view) ? tab.dataset.view : 'overview';
+            setViewMode(mode);
+            tab.focus();
+          });
+        });
+
+        tocLinks.forEach((link) => {
+          link.addEventListener('click', (e) => {
+            const targetId = (link.getAttribute('href') || '').trim();
+            if (!targetId || !targetId.startsWith('#')) return;
+            const targetEl = document.querySelector(targetId);
+            if (!targetEl) return;
+            e.preventDefault();
+            try {
+              targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (_) {
+              targetEl.scrollIntoView();
+            }
+            try {
+              if (window.location.hash !== targetId) window.history.replaceState(null, '', targetId);
+            } catch (_) {}
+          });
+        });
+
+        const tocTargets = tocLinks
+          .map((link) => {
+            const targetId = (link.getAttribute('href') || '').trim();
+            if (!targetId || !targetId.startsWith('#')) return null;
+            const targetEl = document.querySelector(targetId);
+            if (!targetEl) return null;
+            return { link, targetEl, targetId };
+          })
+          .filter(Boolean);
+
+        const setActiveTocLink = (activeId) => {
+          tocTargets.forEach(({ link, targetId }) => {
+            const isActive = targetId === activeId;
+            link.classList.toggle('is-active', isActive);
+            if (isActive) link.setAttribute('aria-current', 'location');
+            else link.removeAttribute('aria-current');
+          });
+        };
+
+        if (tocTargets.length) {
+          setActiveTocLink(tocTargets[0].targetId);
+          if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+              const visible = entries
+                .filter((entry) => entry.isIntersecting)
+                .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+              if (!visible.length) return;
+              setActiveTocLink(`#${visible[0].target.id}`);
+            }, {
+              root: null,
+              rootMargin: '-26% 0px -58% 0px',
+              threshold: 0,
+            });
+            tocTargets.forEach(({ targetEl }) => observer.observe(targetEl));
+          }
+        }
+
+        const tabList = document.querySelector('.nav-view-switch [role="tablist"]');
+        if (tabList) {
+          tabList.addEventListener('keydown', (e) => {
+            const key = e.key;
+            if (key !== 'ArrowRight' && key !== 'ArrowLeft' && key !== 'Home' && key !== 'End') return;
+            e.preventDefault();
+            const currentIdx = viewTabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
+            const last = viewTabs.length - 1;
+            let next = currentIdx < 0 ? 0 : currentIdx;
+            if (key === 'ArrowRight') next = currentIdx >= last ? 0 : currentIdx + 1;
+            if (key === 'ArrowLeft') next = currentIdx <= 0 ? last : currentIdx - 1;
+            if (key === 'Home') next = 0;
+            if (key === 'End') next = last;
+            const nextTab = viewTabs[next] || viewTabs[0];
+            const mode = (nextTab && nextTab.dataset && nextTab.dataset.view) ? nextTab.dataset.view : 'overview';
+            setViewMode(mode);
+            try { nextTab.focus(); } catch (_) {}
+          });
+        }
+
+        const bypassTimelineWhenDeepDive = (event) => {
+          if (!isDeepDiveActive()) return;
+          event.stopImmediatePropagation();
+        };
+
+        window.addEventListener('wheel', bypassTimelineWhenDeepDive, { capture: true, passive: false });
+        window.addEventListener('touchstart', bypassTimelineWhenDeepDive, { capture: true, passive: true });
+        window.addEventListener('touchmove', bypassTimelineWhenDeepDive, { capture: true, passive: false });
+        window.addEventListener('touchend', bypassTimelineWhenDeepDive, { capture: true, passive: true });
+        window.addEventListener('keydown', (event) => {
+          if (!isDeepDiveActive()) return;
+          const key = event.key;
+          if (key === 'ArrowDown' || key === 'ArrowUp' || key === 'PageDown' || key === 'PageUp' || key === ' ') {
+            event.stopImmediatePropagation();
+          }
+        }, { capture: true });
+
+        document.addEventListener('click', (event) => {
+          if (!isDeepDiveActive()) return;
+          if (!event.target || !event.target.closest) return;
+          if (!event.target.closest('.paragraph')) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }, true);
+
+        document.addEventListener('contextmenu', (event) => {
+          if (!event.target || !event.target.closest) return;
+          if (!event.target.closest('#deep-dive img, #deep-dive video')) return;
+          event.preventDefault();
+        });
+
+        document.addEventListener('dragstart', (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLImageElement || target instanceof HTMLVideoElement)) return;
+          if (!target.closest('#deep-dive')) return;
+          event.preventDefault();
+        });
+      });
+    </script>
+    <script src="../main.js?v=65"></script>
   </body>
-  <script src="../main.js?v=326"></script>
 </html>
